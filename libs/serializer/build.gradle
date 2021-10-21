@@ -1,0 +1,94 @@
+/*
+ * Copyright 2019-2021 Cyface GmbH
+ *
+ * This file is part of the Cyface Serialization.
+ *
+ *  The Cyface Serialization is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  The Cyface Serialization is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with the Cyface Serialization.  If not, see <http://www.gnu.org/licenses/>.
+ */
+/*
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+plugins {
+  id 'com.google.protobuf' version '0.8.16'
+  // To download the `measurement.proto` file and to generate `java-lite` files required here
+  //noinspection SpellCheckingInspection
+  id 'de.undercouch.download' version '4.1.1'
+}
+
+dependencies {
+  api project(':libs:model')
+
+  // Protocol Buffer: generate java files
+  api "com.google.protobuf:protobuf-javalite:$protobufVersion"  // api to import protobuf classes
+}
+
+sourceSets {
+  // To add the `measurement.proto` file (downloadAndUnzipProto task) to the sourceSet
+  main {
+    proto {
+      // In addition to the default 'src/main/proto'
+      srcDir "build/protos-${cyfaceProtosVersion}/src/main/proto"
+    }
+    // This should not be necessary automatically with the Protobuf Gradle Plugin but for some reason is
+    java {
+      srcDir "build/generated/source/proto/main/java"
+    }
+  }
+  test {
+    proto {
+      srcDir "build/protos-${cyfaceProtosVersion}/src/main/proto"
+    }
+  }
+}
+
+// Gradle Protocol Buffer Plugin: https://github.com/google/protobuf-gradle-plugin
+protobuf {
+  protoc {
+    artifact = "com.google.protobuf:protoc:$protobufVersion"
+  }
+  generateProtoTasks {
+    //noinspection GroovyAssignabilityCheck
+    all().each { task ->
+      // Explicit dependency or else Gradle 7 shows a warning (implicit dependency)
+      task.dependsOn downloadAndUnzipProto
+      task.builtins {
+        java {
+          option "lite"
+        }
+      }
+    }
+  }
+}
+
+// Download the `measurement.proto` file to compile the `java-lite` proto classes
+// Instead of dependency: `protobuf "de.cyface:protos:$rootProject.ext.cyfaceProtosVersion"`
+// - `protobuf` loads our proto *and* the google proto -> collision w/dependency of java-lite
+// - `implementation` also loads the java classes, which we don't want
+// - `protobuf` instead of `implementation` as we want to re-compile the proto files
+// - issue: https://github.com/google/protobuf-gradle-plugin/issues/503
+// - Thus, we download the zip, extract the proto file of ours and include the sourceSets for now
+tasks.register("downloadProto", Download) {
+  src "https://github.com/cyface-de/protos/archive/refs/tags/${cyfaceProtosVersion}.zip"
+  dest "$buildDir/protos-${cyfaceProtosVersion}.zip"
+  overwrite false // only download if not existent
+}
+tasks.register("downloadAndUnzipProto", Copy) {
+  dependsOn "downloadProto"
+  from zipTree(downloadProto.dest)
+  into buildDir
+}
+// preBuild does not exist: preBuild.dependsOn downloadAndUnzipProto
+assemble.dependsOn downloadAndUnzipProto

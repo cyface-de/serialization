@@ -1,0 +1,188 @@
+/*
+ * Copyright 2020-2021 Cyface GmbH
+ *
+ * This file is part of the Cyface Serialization.
+ *
+ *  The Cyface Serialization is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  The Cyface Serialization is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with the Cyface Serialization.  If not, see <http://www.gnu.org/licenses/>.
+ */
+/**
+ * The build gradle file for the Cyface Serialization.
+ *
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'net.sf.proguard:proguard-gradle:6.2.2'
+    classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.5"
+  }
+}
+
+plugins {
+  id 'eclipse'
+  id 'idea'
+  //noinspection SpellCheckingInspection
+  id 'com.github.johnrengelman.shadow' version '6.1.0' apply false
+  id "com.github.spotbugs" version "4.7.5" apply false
+  // Plugin to display the Gradle task graph
+  //noinspection SpellCheckingInspection
+  id 'org.barfuin.gradle.taskinfo' version '1.0.5'
+}
+
+allprojects {
+  repositories {
+    mavenCentral()
+  }
+}
+
+subprojects {
+  apply plugin: 'maven-publish'
+  apply plugin: 'com.github.spotbugs'
+  apply plugin: 'jacoco'
+  apply plugin: 'checkstyle'
+  apply plugin: 'pmd'
+  apply plugin: 'java'
+
+  group = 'de.cyface'
+  version = '0.0.1'
+
+  tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
+    checkstyle {
+      toolVersion = '8.31'
+      // use one common config file for all subprojects
+      configFile = project(':').file("config/checkstyle/checkstyle.xml")
+      //noinspection SpellCheckingInspection
+      configProperties = ["suppressionFile": project(':').file("config/checkstyle/suppressions.xml")]
+      ignoreFailures = true
+      showViolations = true
+    }
+  }
+
+  ext {
+    vertxVersion = '4.1.2'
+    slf4jVersion = '1.7.29'
+    commonsLangVersion = '3.12.0'
+    sqliteDriverVersion = '3.34.0'
+    gradleWrapperVersion = '6.9'
+    protobufVersion = '3.17.3'
+    cyfaceProtosVersion = '0.0.3'
+
+    // Versions of testing dependencies
+    junitVersion = '5.7.2'
+    mockitoVersion = '3.3.3'
+    hamcrestVersion = '2.2'
+    flapdoodleVersion = '3.0.0'
+
+    jacocoVersion = '0.8.5'
+    spotBugsPluginVersion = '1.10.1'
+  }
+
+  wrapper {
+    gradleVersion = "$gradleWrapperVersion"
+  }
+
+  dependencies {
+    // Testing Dependencies
+    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
+    testImplementation "org.junit.jupiter:junit-jupiter-params"  // Required for parameterized tests
+    testImplementation "org.hamcrest:hamcrest:$hamcrestVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+
+    spotbugsPlugins "com.h3xstream.findsecbugs:findsecbugs-plugin:$spotBugsPluginVersion"
+  }
+
+  test {
+    useJUnitPlatform()
+    testLogging {
+      events "passed", "skipped", "failed"
+
+      // Also show assert message (e.g. on the CI) when tests fail to identify cause
+      showExceptions true
+      exceptionFormat "full"
+      showCauses false // not working with vertx fail() so we disable this
+      showStackTraces false
+      showStandardStreams = false
+    }
+  }
+
+  jacoco {
+    toolVersion = "$jacocoVersion"
+    reportsDir = file("$buildDir/reports/jacoco")
+  }
+
+  jacocoTestReport {
+    reports {
+      xml.enabled true
+      csv.enabled true
+      html.destination file("${buildDir}/reports/jacocoHtml")
+    }
+  }
+
+  spotbugs {
+    toolVersion = '4.4.1'
+    ignoreFailures = true
+    excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
+  }
+
+  // After hours of trying to fix local `./gradlew check` execution only this helped [DAT-803]
+  // (https://github.com/spotbugs/spotbugs-gradle-plugin/issues/32#issuecomment-779661275)
+  gradle.taskGraph.beforeTask { task ->
+    if (task.name.toLowerCase().contains('spotbugs')) {
+      task.reports {
+        xml.enabled = false
+        html.enabled = true
+      }
+    }
+  }
+
+  pmd {
+    toolVersion = '6.22.0'
+    incrementalAnalysis = true
+    ruleSetFiles = project(':').files('config/pmd.xml')
+    rulePriority = 4
+    ruleSets = []
+    // There are so many violations and currently it is not really important in this application.
+    ignoreFailures = true
+  }
+
+  // Definitions for the maven-publish Plugin
+  publishing {
+    // The following repositories are used to publish artifacts to.
+    repositories {
+      maven {
+        name = 'github'
+        url = uri("https://maven.pkg.github.com/cyface-de/serialization")
+        credentials {
+          username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+          password = project.findProperty("gpr.key") ?: System.getenv("PASSWORD")
+        }
+      }
+      maven {
+        name = 'local'
+        url = "file://${rootProject.buildDir}/repo"
+      }
+    }
+  }
+}
