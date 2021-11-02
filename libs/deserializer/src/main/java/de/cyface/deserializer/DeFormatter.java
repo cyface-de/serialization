@@ -52,7 +52,7 @@ public class DeFormatter {
      * Converts the number from the format expected by the Cyface ProtoBuf serializer.
      *
      * @param formatted the formatted number, e.g. 11_00 cm/s
-     * @return the speed in m/s, e.g.: 11.0m/s
+     * @return the speed in m/s, e.g.: 11.0 m/s
      */
     private static double speed(int formatted) {
         return formatted / 100.0;
@@ -62,7 +62,7 @@ public class DeFormatter {
      * Converts the number from the format expected by the Cyface ProtoBuf serializer.
      *
      * @param formatted the formatted number, e.g. 3_00 cm
-     * @return the speed in m, e.g.: 3.0m
+     * @return the speed in m, e.g.: 3.0 m
      */
     private static double accuracy(int formatted) {
         return formatted / 100.0;
@@ -75,7 +75,12 @@ public class DeFormatter {
      * @return the formatted number, e.g. 9_810 mm/s^2
      */
     private static float acceleration(int formatted) {
-        return formatted / 1_000.0f;
+        // Make sure the absolute numbers from the offset batches are not accumulated as in [DAT-825]
+        final var deFormatted = formatted / 1_000.0f;
+        // FIXME: Why do we have diffs up to +107 m/s^2 ?!
+        // AHHHH its because if the 16-bit half-precision floats encoded as "floats"
+        //Validate.isTrue(deFormatted >= -32f && deFormatted <= 32f); // max diff +-16 m/s^2 are expected
+        return deFormatted;
     }
 
     /**
@@ -105,10 +110,12 @@ public class DeFormatter {
      * @return the parsed location
      */
     public static GeoLocation deFormat(Formatter.Location location) {
-        final double latitude = DeFormatter.coordinate(location.getLatitude());
-        final double longitude = DeFormatter.coordinate(location.getLongitude());
-        final double speed = DeFormatter.speed(location.getSpeed());
-        final double accuracy = DeFormatter.accuracy(location.getAccuracy());
+        final var timestamp = location.getTimestamp();
+        Validate.isTrue(timestamp >= 0 && timestamp <= 4102441200_000L); // 1970-2099
+        final var latitude = DeFormatter.coordinate(location.getLatitude());
+        final var longitude = DeFormatter.coordinate(location.getLongitude());
+        final var speed = DeFormatter.speed(location.getSpeed());
+        final var accuracy = DeFormatter.accuracy(location.getAccuracy());
         return new GeoLocation(latitude, longitude, location.getTimestamp(), speed, accuracy);
     }
 
@@ -121,11 +128,11 @@ public class DeFormatter {
      */
     public static Point3DImpl deFormat(Point3DType type, Formatter.Point3D point) {
         Validate.isTrue(type.equals(ACCELERATION) || type.equals(ROTATION) || type.equals(DIRECTION));
-        final float x = type == ACCELERATION ? acceleration(point.getX())
+        final var x = type == ACCELERATION ? acceleration(point.getX())
                 : type == ROTATION ? rotation(point.getX()) : direction(point.getX());
-        final float y = type == ACCELERATION ? acceleration(point.getY())
+        final var y = type == ACCELERATION ? acceleration(point.getY())
                 : type == ROTATION ? rotation(point.getY()) : direction(point.getY());
-        final float z = type == ACCELERATION ? acceleration(point.getZ())
+        final var z = type == ACCELERATION ? acceleration(point.getZ())
                 : type == ROTATION ? rotation(point.getZ()) : direction(point.getZ());
         return new Point3DImpl(x, y, z, point.getTimestamp());
     }

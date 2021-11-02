@@ -18,8 +18,12 @@
  */
 package de.cyface.deserializer;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -85,6 +89,7 @@ public class BinaryFormatDeserializer implements Deserializer {
     @Override
     public Measurement read() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion {
         try (InflaterInputStream uncompressedInput = new InflaterInputStream(compressedData, new Inflater(NOWRAP))) {
+
             final var version = BinaryFormatParser.readShort(uncompressedInput);
             if (version != TRANSFER_FILE_FORMAT_VERSION) {
                 throw new UnsupportedFileVersion(
@@ -96,6 +101,11 @@ public class BinaryFormatDeserializer implements Deserializer {
             final var locations = LocationDeserializer.deserialize(measurement.getLocationRecords());
             final var accelerations = Point3DDeserializer
                     .accelerations(measurement.getAccelerationsFile().getAccelerationsList());
+
+            // FIXME
+            System.out.println("Deserialized 1st accel: " + accelerations.get(0));
+            System.out.println("Deserialized last accel: " + accelerations.get(accelerations.size()-1));
+
             final var rotations = Point3DDeserializer.rotations(measurement.getRotationsFile().getRotationsList());
             final var directions = Point3DDeserializer.directions(measurement.getDirectionsFile().getDirectionsList());
             final var builder = new TrackBuilder();

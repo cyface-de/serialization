@@ -46,7 +46,7 @@ import de.cyface.model.MeasurementIdentifier;
  */
 public class UnzippedPhoneDataDeserializerTest {
 
-    @Test
+    //@Test
     @DisplayName("Test on some unzipped example data")
     void test_unzipped() throws InvalidLifecycleEvents, URISyntaxException, NoSuchMeasurement {
         // Arrange
@@ -78,7 +78,7 @@ public class UnzippedPhoneDataDeserializerTest {
         assertThat(result.getTracks().get(1), hasProperty("rotations", is(not(empty()))));
     }
 
-    @Test
+    //@Test
     @DisplayName("Test on some zipped example data")
     void test_zipped() throws URISyntaxException, InvalidLifecycleEvents, IOException, NoSuchMeasurement {
         // Arrange
