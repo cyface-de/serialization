@@ -24,12 +24,12 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 
-import de.cyface.model.Point3D;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.cyface.model.Event;
+import de.cyface.model.Point3D;
 import de.cyface.model.RawRecord;
 import de.cyface.protos.model.Measurement;
 
@@ -70,38 +70,39 @@ public final class DataSerializable {
     /**
      * The accelerations to write
      */
-    private final List<? extends Point3D> accelerations;
+    private final List<List<? extends Point3D>> accelerationBatches;
     /**
      * The rotations to write
      */
-    private final List<? extends Point3D> rotations;
+    private final List<List<? extends Point3D>> rotationBatches;
     /**
      * The directions to write
      */
-    private final List<? extends Point3D> directions;
+    private final List<List<? extends Point3D>> directionBatches;
 
     /**
      * Creates a new completely initialized object of this class.
      *
      * @param events The events to write
      * @param geoLocations The locations to write
-     * @param accelerations The accelerations to write
-     * @param rotations The rotations to write
-     * @param directions The directions to write
+     * @param accelerationBatches The accelerations to write
+     * @param rotationBatches The rotations to write
+     * @param directionBatches The directions to write
      */
     public DataSerializable(final List<Event> events, final List<RawRecord> geoLocations,
-                            final List<? extends Point3D> accelerations, final List<? extends Point3D> rotations, final List<? extends Point3D> directions) {
+            final List<List<? extends Point3D>> accelerationBatches,
+            final List<List<? extends Point3D>> rotationBatches, final List<List<? extends Point3D>> directionBatches) {
         Validate.notNull(events);
         Validate.notNull(geoLocations);
-        Validate.notNull(accelerations);
-        Validate.notNull(rotations);
-        Validate.notNull(directions);
+        Validate.notNull(accelerationBatches);
+        Validate.notNull(rotationBatches);
+        Validate.notNull(directionBatches);
 
         this.events = events;
         this.geoLocations = geoLocations;
-        this.accelerations = accelerations;
-        this.rotations = rotations;
-        this.directions = directions;
+        this.accelerationBatches = accelerationBatches;
+        this.rotationBatches = rotationBatches;
+        this.directionBatches = directionBatches;
     }
 
     /**
@@ -127,20 +128,20 @@ public final class DataSerializable {
                 .addAllEvents(protoEvents)
                 .setLocationRecords(locationRecords);
 
-        if (accelerations.size() > 0) {
-            LOGGER.trace(String.format("Serializing %s accelerations for synchronization.",
-                    humanReadableSize(accelerations.size(), true)));
-            builder.setAccelerations(Point3DSerializer.accelerations(accelerations));
+        if (accelerationBatches.size() > 0) {
+            LOGGER.trace(String.format("Serializing %s acceleration batches.", accelerationBatches.size()));
+            accelerationBatches.forEach(
+                    accelerations -> builder.addAccelerations(Point3DSerializer.accelerations(accelerations)));
         }
-        if (rotations.size() > 0) {
-            LOGGER.trace(String.format("Serializing %s rotations for synchronization.",
-                    humanReadableSize(rotations.size(), true)));
-            builder.setRotations(Point3DSerializer.rotations(rotations));
+        if (rotationBatches.size() > 0) {
+            LOGGER.trace(String.format("Serializing %s rotation batches.", rotationBatches.size()));
+            rotationBatches.forEach(
+                    rotations -> builder.addRotations(Point3DSerializer.rotations(rotations)));
         }
-        if (directions.size() > 0) {
-            LOGGER.trace(String.format("Serializing %s directions for synchronization.",
-                    humanReadableSize(directions.size(), true)));
-            builder.setDirections(Point3DSerializer.directions(directions));
+        if (directionBatches.size() > 0) {
+            LOGGER.trace(String.format("Serializing %s direction batches.", directionBatches.size()));
+            directionBatches.forEach(
+                    directions -> builder.addDirections(Point3DSerializer.directions(directions)));
         }
 
         // Currently, loading the whole measurement into memory (~ 5 MB / hour serialized).

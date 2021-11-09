@@ -28,7 +28,6 @@ import de.cyface.protos.model.Directions;
 import de.cyface.protos.model.Rotations;
 import de.cyface.serializer.DataSerializable;
 import de.cyface.serializer.Formatter;
-import de.cyface.serializer.GeoLocation;
 import de.cyface.serializer.model.Point3DType;
 
 /**
@@ -46,83 +45,99 @@ public class Point3DDeserializer {
     /**
      * Deserializes acceleration data from the {@link DataSerializable#TRANSFER_FILE_FORMAT_VERSION}.
      * <p>
-     * Takes care of de-offsetting and converting the data to the default {@code Java} types used by {@link Point3DImpl}.
+     * Takes care of de-offsetting and converting the data to the default {@code Java} types used by
+     * {@link Point3DImpl}.
      *
-     * @param entries the data to deserialize
+     * @param batches the data to deserialize
      * @return the deserialized entries
      */
     @SuppressWarnings("unused") // API
-    public static List<Point3DImpl> deserialize(Accelerations entries) {
+    public static List<Point3DImpl> accelerations(List<Accelerations> batches) {
 
-        final List<Formatter.Point3D> list = new ArrayList<>();
-        for (int i = 0; i < entries.getTimestampCount(); i++) {
-            final Formatter.Point3D entry = new Formatter.Point3D(entries.getTimestamp(i), entries.getX(i),
-                    entries.getY(i),
-                    entries.getZ(i));
-            list.add(entry);
-        }
+        final var lists = new ArrayList<List<Formatter.Point3D>>();
+        batches.forEach(batch -> {
+            final List<Formatter.Point3D> list = new ArrayList<>();
+            for (var i = 0; i < batch.getTimestampCount(); i++) {
+                final var entry = new Formatter.Point3D(batch.getTimestamp(i), batch.getX(i), batch.getY(i),
+                        batch.getZ(i));
+                list.add(entry);
+            }
+            lists.add(list);
+        });
 
-        return deserialize(list, Point3DType.ACCELERATION);
+        return deserialize(lists, Point3DType.ACCELERATION);
     }
 
     /**
      * Deserializes rotation data from the {@link DataSerializable#TRANSFER_FILE_FORMAT_VERSION}.
      * <p>
-     * Takes care of de-offsetting and converting the data to the default {@code Java} types used by {@link Point3DImpl}.
+     * Takes care of de-offsetting and converting the data to the default {@code Java} types used by
+     * {@link Point3DImpl}.
      *
-     * @param entries the data to deserialize
+     * @param batches the data to deserialize
      * @return the deserialized entries
      */
     @SuppressWarnings("unused") // API
-    public static List<Point3DImpl> deserialize(Rotations entries) {
+    public static List<Point3DImpl> rotations(List<Rotations> batches) {
 
-        final List<Formatter.Point3D> list = new ArrayList<>();
-        for (int i = 0; i < entries.getTimestampCount(); i++) {
-            final Formatter.Point3D entry = new Formatter.Point3D(entries.getTimestamp(i), entries.getX(i),
-                    entries.getY(i),
-                    entries.getZ(i));
-            list.add(entry);
-        }
+        final var lists = new ArrayList<List<Formatter.Point3D>>();
+        batches.forEach(batch -> {
+            final List<Formatter.Point3D> list = new ArrayList<>();
+            for (var i = 0; i < batch.getTimestampCount(); i++) {
+                final var entry = new Formatter.Point3D(batch.getTimestamp(i), batch.getX(i), batch.getY(i),
+                        batch.getZ(i));
+                list.add(entry);
+            }
+            lists.add(list);
+        });
 
-        return deserialize(list, Point3DType.ROTATION);
+        return deserialize(lists, Point3DType.ROTATION);
     }
 
     /**
      * Deserializes direction data from the {@link DataSerializable#TRANSFER_FILE_FORMAT_VERSION}.
      * <p>
-     * Takes care of de-offsetting and converting the data to the default {@code Java} types used by {@link Point3DImpl}.
+     * Takes care of de-offsetting and converting the data to the default {@code Java} types used by
+     * {@link Point3DImpl}.
      *
-     * @param entries the data to deserialize
+     * @param batches the data to deserialize
      * @return the deserialized entries
      */
     @SuppressWarnings("unused") // API
-    public static List<Point3DImpl> deserialize(Directions entries) {
+    public static List<Point3DImpl> directions(List<Directions> batches) {
 
-        final List<Formatter.Point3D> list = new ArrayList<>();
-        for (int i = 0; i < entries.getTimestampCount(); i++) {
-            final Formatter.Point3D entry = new Formatter.Point3D(entries.getTimestamp(i), entries.getX(i),
-                    entries.getY(i),
-                    entries.getZ(i));
-            list.add(entry);
-        }
+        final var lists = new ArrayList<List<Formatter.Point3D>>();
+        batches.forEach(batch -> {
+            final List<Formatter.Point3D> list = new ArrayList<>();
+            for (var i = 0; i < batch.getTimestampCount(); i++) {
+                final var entry = new Formatter.Point3D(batch.getTimestamp(i), batch.getX(i), batch.getY(i),
+                        batch.getZ(i));
+                list.add(entry);
+            }
+            lists.add(list);
+        });
 
-        return deserialize(list, Point3DType.DIRECTION);
+        return deserialize(lists, Point3DType.DIRECTION);
     }
 
-    private static List<Point3DImpl> deserialize(List<Formatter.Point3D> entries, Point3DType type) {
+    private static List<Point3DImpl> deserialize(List<List<Formatter.Point3D>> lists, Point3DType type) {
 
-        // The de-offsetter must be initialized once for each location
-        final Point3DDeOffsetter deOffsetter = new Point3DDeOffsetter();
+        final var ret = new ArrayList<Point3DImpl>();
+        lists.forEach(list -> {
 
-        return entries.stream().map(entry -> {
+            // The de-offsetter must be initialized once for each location
+            final var deOffsetter = new Point3DDeOffsetter();
+            final var deFormatted = list.stream().map(entry -> {
 
-            // The proto serialized comes in a different format and in offset-format
-            final Formatter.Point3D offsets = new Formatter.Point3D(entry.getTimestamp(), entry.getX(), entry.getY(),
-                    entry.getZ());
-            final Formatter.Point3D absolutes = deOffsetter.absolute(offsets);
+                // The proto serialized comes in a different format and in offset-format
+                final var offsets = new Formatter.Point3D(entry.getTimestamp(), entry.getX(), entry.getY(),
+                        entry.getZ());
+                final var absolutes = deOffsetter.absolute(offsets);
 
-            return DeFormatter.deFormat(type, absolutes);
-
-        }).collect(Collectors.toList());
+                return DeFormatter.deFormat(type, absolutes);
+            }).collect(Collectors.toList());
+            ret.addAll(deFormatted);
+        });
+        return ret;
     }
 }

@@ -27,8 +27,6 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.cyface.model.Measurement;
 import de.cyface.model.MeasurementIdentifier;
@@ -49,10 +47,6 @@ public class BinaryFormatDeserializer implements Deserializer {
      * Used to serialize objects of this class. Only change this if this classes attribute set has changed.
      */
     private static final long serialVersionUID = -706300845329533657L;
-    /**
-     * Logger used to log messages from objects of this class. Configure it using <tt>/src/main/resources</tt>.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Deserializer.class);
     /**
      * The default value for the parameter "nowrap" used in the Cyface Binary Format. This parameter needs to be passed
      * to the Inflater's constructor to decompress the compressed bytes.
@@ -101,9 +95,9 @@ public class BinaryFormatDeserializer implements Deserializer {
             final var measurement = de.cyface.protos.model.Measurement.parseFrom(uncompressedInput);
             final var events = EventDeserializer.deserialize(measurement.getEventsList());
             final var locations = LocationDeserializer.deserialize(measurement.getLocationRecords());
-            final var accelerations = Point3DDeserializer.deserialize(measurement.getAccelerations());
-            final var rotations = Point3DDeserializer.deserialize(measurement.getRotations());
-            final var directions = Point3DDeserializer.deserialize(measurement.getDirections());
+            final var accelerations = Point3DDeserializer.accelerations(measurement.getAccelerationsList());
+            final var rotations = Point3DDeserializer.rotations(measurement.getRotationsList());
+            final var directions = Point3DDeserializer.directions(measurement.getDirectionsList());
             final var builder = new TrackBuilder();
             final var tracks = builder.build(locations, events, accelerations, rotations, directions,
                     metaData.getIdentifier());
