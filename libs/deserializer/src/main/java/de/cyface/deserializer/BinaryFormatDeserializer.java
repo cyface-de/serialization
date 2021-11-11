@@ -27,7 +27,6 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
-
 import de.cyface.model.Measurement;
 import de.cyface.model.MeasurementIdentifier;
 import de.cyface.model.MetaData;
@@ -95,9 +94,10 @@ public class BinaryFormatDeserializer implements Deserializer {
             final var measurement = de.cyface.protos.model.Measurement.parseFrom(uncompressedInput);
             final var events = EventDeserializer.deserialize(measurement.getEventsList());
             final var locations = LocationDeserializer.deserialize(measurement.getLocationRecords());
-            final var accelerations = Point3DDeserializer.accelerations(measurement.getAccelerationsList());
-            final var rotations = Point3DDeserializer.rotations(measurement.getRotationsList());
-            final var directions = Point3DDeserializer.directions(measurement.getDirectionsList());
+            final var accelerations = Point3DDeserializer
+                    .accelerations(measurement.getAccelerationsFile().getAccelerationsList());
+            final var rotations = Point3DDeserializer.rotations(measurement.getRotationsFile().getRotationsList());
+            final var directions = Point3DDeserializer.directions(measurement.getDirectionsFile().getDirectionsList());
             final var builder = new TrackBuilder();
             final var tracks = builder.build(locations, events, accelerations, rotations, directions,
                     metaData.getIdentifier());

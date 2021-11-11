@@ -292,11 +292,13 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
 
                         switch (type) {
                             case ACCELERATION:
-                                return Point3DDeserializer.accelerations(measurement.getAccelerationsList());
+                                return Point3DDeserializer
+                                        .accelerations(measurement.getAccelerationsFile().getAccelerationsList());
                             case ROTATION:
-                                return Point3DDeserializer.rotations(measurement.getRotationsList());
+                                return Point3DDeserializer.rotations(measurement.getRotationsFile().getRotationsList());
                             case DIRECTION:
-                                return Point3DDeserializer.directions(measurement.getDirectionsList());
+                                return Point3DDeserializer
+                                        .directions(measurement.getDirectionsFile().getDirectionsList());
                             default:
                                 throw new IllegalArgumentException(String.format("Unknown type: %s", type));
                         }

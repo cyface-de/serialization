@@ -31,7 +31,10 @@ import org.slf4j.LoggerFactory;
 import de.cyface.model.Event;
 import de.cyface.model.Point3D;
 import de.cyface.model.RawRecord;
+import de.cyface.protos.model.AccelerationsFile;
+import de.cyface.protos.model.DirectionsFile;
 import de.cyface.protos.model.Measurement;
+import de.cyface.protos.model.RotationsFile;
 
 /**
  * An instance of this class contains the serialization functionality, adapted from the implementation used within the
@@ -130,18 +133,25 @@ public final class DataSerializable {
 
         if (accelerationBatches.size() > 0) {
             LOGGER.trace(String.format("Serializing %s acceleration batches.", accelerationBatches.size()));
+            final var accelerationsFile = AccelerationsFile.newBuilder();
             accelerationBatches.forEach(
-                    accelerations -> builder.addAccelerations(Point3DSerializer.accelerations(accelerations)));
+                    accelerations -> accelerationsFile
+                            .addAccelerations(Point3DSerializer.accelerations(accelerations)));
+            builder.setAccelerationsFile(accelerationsFile);
         }
         if (rotationBatches.size() > 0) {
             LOGGER.trace(String.format("Serializing %s rotation batches.", rotationBatches.size()));
+            final var rotationsFile = RotationsFile.newBuilder();
             rotationBatches.forEach(
-                    rotations -> builder.addRotations(Point3DSerializer.rotations(rotations)));
+                    rotations -> rotationsFile.addRotations(Point3DSerializer.rotations(rotations)));
+            builder.setRotationsFile(rotationsFile);
         }
         if (directionBatches.size() > 0) {
             LOGGER.trace(String.format("Serializing %s direction batches.", directionBatches.size()));
+            final var directionsFile = DirectionsFile.newBuilder();
             directionBatches.forEach(
-                    directions -> builder.addDirections(Point3DSerializer.directions(directions)));
+                    directions -> directionsFile.addDirections(Point3DSerializer.directions(directions)));
+            builder.setDirectionsFile(directionsFile);
         }
 
         // Currently, loading the whole measurement into memory (~ 5 MB / hour serialized).

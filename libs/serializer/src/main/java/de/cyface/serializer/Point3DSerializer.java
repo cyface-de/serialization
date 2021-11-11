@@ -18,22 +18,27 @@
  */
 package de.cyface.serializer;
 
-import de.cyface.model.Point3D;
-import de.cyface.protos.model.Accelerations;
-import de.cyface.protos.model.Directions;
-import de.cyface.protos.model.Rotations;
-import de.cyface.serializer.model.Point3DType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
 import static de.cyface.serializer.model.Point3DType.ACCELERATION;
 import static de.cyface.serializer.model.Point3DType.DIRECTION;
 import static de.cyface.serializer.model.Point3DType.ROTATION;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.cyface.model.Point3D;
+import de.cyface.protos.model.Accelerations;
+import de.cyface.protos.model.AccelerationsFile;
+import de.cyface.protos.model.Directions;
+import de.cyface.protos.model.DirectionsFile;
+import de.cyface.protos.model.Rotations;
+import de.cyface.protos.model.RotationsFile;
+import de.cyface.serializer.model.Point3DType;
+
 /**
- * Serializer wrapper for {@code Point3D}s which takes care of offsetting and lossy compression applied before serializing.
+ * Serializer wrapper for {@code Point3D}s which takes care of offsetting and lossy compression applied before
+ * serializing.
  *
  * @author Armin Schnabel
  * @version 1.0.0
@@ -48,6 +53,8 @@ public class Point3DSerializer {
 
     /**
      * Serializes the provided {@link Formatter.Point3D} points.
+     * <p>
+     * Also writes the Header field to separate this batch from the next when written to a file.
      *
      * @param data The {@code Point3d} points to serialize.
      * @param type The sensor data type of the {@code Point3d} data.
@@ -58,11 +65,17 @@ public class Point3DSerializer {
 
         switch (type) {
             case ACCELERATION:
-                return accelerations(data).build().toByteArray();
+                final var aBatch = accelerations(data).build();
+                // Ensure the `Accelerations` Header is also written to separate this batch from the next
+                return AccelerationsFile.newBuilder().addAccelerations(aBatch).build().toByteArray();
             case ROTATION:
-                return rotations(data).build().toByteArray();
+                final var rBatch = rotations(data).build();
+                // Ensure the `Rotations` Header is also written to separate this batch from the next
+                return RotationsFile.newBuilder().addRotations(rBatch).build().toByteArray();
             case DIRECTION:
-                return directions(data).build().toByteArray();
+                final var dBatch = directions(data).build();
+                // Ensure the `Directions` Header is also written to separate this batch from the next
+                return DirectionsFile.newBuilder().addDirections(dBatch).build().toByteArray();
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }
@@ -150,7 +163,8 @@ public class Point3DSerializer {
      * @param offsetter the {@link Point3DOffsetter} to use for applying off-setting
      * @return the converted point
      */
-    private static Formatter.Point3D convert(final Point3D point, final Point3DType type, final Point3DOffsetter offsetter) {
+    private static Formatter.Point3D convert(final Point3D point, final Point3DType type,
+            final Point3DOffsetter offsetter) {
 
         // The proto serializer expects some fields in a different format and in offset-format
         final var formatted = new Formatter.Point3D(type, point.getTimestamp(), point.getX(),
