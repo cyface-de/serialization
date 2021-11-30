@@ -134,9 +134,8 @@ public class Measurement implements Serializable {
         var totalDistance = 0.0;
         var modalityTypeTravelTime = 0L;
         var totalTravelTime = 0L;
-        for (var i = 0; i < tracks.size(); i++) {
-            final var trackId = i + 1; // the data receiver probably counts from 1 on not from 0
-            final var track = tracks.get(i);
+        for (var trackId = 0; trackId < tracks.size(); trackId++) {
+            final var track = tracks.get(trackId);
 
             // Iterate through locations
             RawRecord lastLocation = null;
@@ -212,7 +211,13 @@ public class Measurement implements Serializable {
         handler.accept(",");
 
         handler.accept("\"tracks\":[");
-        tracks.forEach(track -> handler.accept(featureCollection(track).stringValue));
+        for (int i = 0; i < tracks.size(); i++) {
+            final var track = tracks.get(i);
+            handler.accept(featureCollection(track).stringValue);
+            if (i != tracks.size()-1) {
+                handler.accept(",");
+            }
+        }
         handler.accept("]");
 
         handler.accept("}");
