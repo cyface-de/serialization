@@ -114,7 +114,7 @@ public final class DataSerializable {
      * <p>
      * We assemble the data using a buffer to avoid OOM exceptions.
      * <p>
-     * <b>ATTENTION:</b> The caller must make sure the {@param bufferedOutputStream} is closed when no longer needed
+     * <b>ATTENTION:</b> The caller must make sure the {@code bufferedOutputStream} is closed when no longer needed
      * or the app crashes.
      *
      * @param bufferedOutputStream The {@link OutputStream} to which the serialized data should be written. Injecting

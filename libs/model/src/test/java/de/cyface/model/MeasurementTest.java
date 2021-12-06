@@ -93,11 +93,11 @@ public class MeasurementTest {
         final var measurement = new Measurement(metaData, tracks);
         final var expectedOutput = "username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,speed [m/s],accuracy [m],modalityType,modalityTypeDistance [km],distance [km],modalityTypeTravelTime [ms],travelTime [ms]\r\n"
                 +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,1000," + latitude(1)
+                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",0,1000," + latitude(1)
                 + ","
                 + longitude(1) + "," + speed(1) + "," + accuracy(1) + "," + UNKNOWN.getDatabaseIdentifier()
                 + ",0.0,0.0,0,0\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",2,3000," + latitude(3)
+                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,3000," + latitude(3)
                 + ","
                 + longitude(3) + "," + speed(3) + "," + accuracy(3) + "," + UNKNOWN.getDatabaseIdentifier()
                 + ",0.0,0.0,0,0\r\n";
@@ -142,19 +142,19 @@ public class MeasurementTest {
         final var csvOutput = new StringBuilder();
         final var expectedOutput = "username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,speed [m/s],accuracy [m],modalityType,modalityTypeDistance [km],distance [km],modalityTypeTravelTime [ms],travelTime [ms]\r\n"
                 +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,1000," + latitude(1)
+                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",0,1000," + latitude(1)
                 + ","
                 + longitude(1) + "," + speed(1) + "," + accuracy(1) + "," + WALKING.getDatabaseIdentifier()
                 + ",0.0,0.0,0,0\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,1500," + latitude(2)
+                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",0,1500," + latitude(2)
                 + ","
                 + longitude(2) + "," + speed(2) + "," + accuracy(2) + "," + WALKING.getDatabaseIdentifier()
                 + ",13.12610864737932,13.12610864737932,500,500\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",2,3000," + latitude(3)
+                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,3000," + latitude(3)
                 + ","
                 + longitude(3) + "," + speed(3) + "," + accuracy(3) + "," + BICYCLE.getDatabaseIdentifier()
                 + ",0.0,13.12610864737932,0,500\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",2,4000," + latitude(4)
+                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,4000," + latitude(4)
                 + ","
                 + longitude(4) + "," + speed(4) + "," + accuracy(4) + "," + BICYCLE.getDatabaseIdentifier()
                 + ",13.110048189675535,26.236156837054857,1000,1500\r\n";
