@@ -51,7 +51,7 @@ public class UnzippedPhoneDataDeserializerTest {
     void test_unzipped() throws InvalidLifecycleEvents, URISyntaxException, NoSuchMeasurement {
         // Arrange
         final var folder = "/phone-data-export/unzipped/";
-        final var mid = 1;
+        final var mid = 6;
         final var databaseLocation = path(folder + "measures");
         final var accelerationsLocation = path(folder + mid + ".cyfa");
         final var directionsLocation = path(folder + mid + ".cyfd");
@@ -66,13 +66,13 @@ public class UnzippedPhoneDataDeserializerTest {
 
         // Assert
         assertThat(result, hasProperty("metaData", hasProperty("identifier",
-                is(equalTo(new MeasurementIdentifier("fb2a0f46-9479-4500-bb33-3b0625c73a38", mid))))));
+                is(equalTo(new MeasurementIdentifier("65a6f5dc-459d-4634-a759-197e224f76cf", mid))))));
         assertThat(result, hasProperty("tracks", hasSize(2)));
-        assertThat(result.getTracks().get(0), hasProperty("locationRecords", hasSize(29)));
+        assertThat(result.getTracks().get(0), hasProperty("locationRecords", hasSize(4)));
         assertThat(result.getTracks().get(0), hasProperty("accelerations", is(not(empty()))));
         assertThat(result.getTracks().get(0), hasProperty("directions", is(not(empty()))));
         assertThat(result.getTracks().get(0), hasProperty("rotations", is(not(empty()))));
-        assertThat(result.getTracks().get(1), hasProperty("locationRecords", hasSize(17)));
+        assertThat(result.getTracks().get(1), hasProperty("locationRecords", hasSize(5)));
         assertThat(result.getTracks().get(1), hasProperty("accelerations", is(not(empty()))));
         assertThat(result.getTracks().get(1), hasProperty("directions", is(not(empty()))));
         assertThat(result.getTracks().get(1), hasProperty("rotations", is(not(empty()))));
@@ -83,8 +83,8 @@ public class UnzippedPhoneDataDeserializerTest {
     void test_zipped() throws URISyntaxException, InvalidLifecycleEvents, IOException, NoSuchMeasurement {
         // Arrange
         final var folder = "/phone-data-export/zipped/";
-        final var mid = 1;
-        final var suffix = "_2021-09-22_16-22_4a2e09da-f526-44af-b3aa-ee6299784543.zip";
+        final var mid = 6;
+        final var suffix = "_2021-12-06_14-38_60b01824-302a-41b4-8f93-b5b9a9fcb6ba.zip";
         final var databaseLocation = path(folder + "cyface-databases" + suffix);
         final var accelerations = path(folder + "cyface-accelerations" + suffix);
         final var directions = path(folder + "cyface-directions" + suffix);
