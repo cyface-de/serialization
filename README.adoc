@@ -91,8 +91,6 @@ To publish a new version of an artifact you need to:
 2. Call `./gradlew publish`
 
 This will upload a new artifact to GitHub packages with the new version.
-The artifact will be minified, optimized and obfuscated using link:https://www.guardsquare.com/en/products/proguard[Proguard].
-You need to always increase the version of the new artifact.
 GitHub Packages will not accept to overwrite an existing version or to upload a lower version.
 This project uses link:https://semver.org/[semantic versioning].
 

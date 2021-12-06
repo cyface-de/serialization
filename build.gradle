@@ -28,7 +28,6 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'net.sf.proguard:proguard-gradle:6.2.2'
     classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.5"
   }
 }
