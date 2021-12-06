@@ -1,0 +1,115 @@
+= Serialization
+
+image:https://img.shields.io/badge/vert.x-4.1.2-purple.svg[link="https://vertx.io"]
+image:https://github.com/cyface-de/serialization/workflows/Cyface%20Serialization/badge.svg[link="https://github.com/cyface-de/serialization/actions"]
+
+This application represents the https://cyface.de[Cyface] serialization software.
+
+It is used to de-/serialize the Cyface Binary Format which contains traffic data from Cyface measurement devices, such as our sensor box or our smartphone application.
+
+Our smartphone SDK is available as GPL application for https://github.com/cyface-de/android-backend[Android] and https://github.com/cyface-de/ios-backend[iOS] (or as https://github.com/cyface-de/ios-podspecs[Podspec]) as well.
+
+If you require this software under a closed source license for you own projects, please https://www.cyface.de/#kontakt[contact us].
+
+Changes between versions are found in the link:https://github.com/cyface-de/serialization/releases[Release Section].
+
+The project uses link:https://gradle.org/[Gradle] as the build system.
+It is set up as a Gradle multi project build.
+There are two general categories of sub-projects.
+One are executable programs fulfilling a certain task of the Cyface backend.
+Others are libraries shared by several Cyface executables.
+The executables are grouped in the sub-project `executables` while the libraries are grouped in `libs`.
+The following sections provide an overview about those projects.
+
+== Overview
+
+.link:#_libraries[Libraries]
+* link:#_model[Model]
+* link:#_serializer[Serializer]
+
+.General information
+* link:#_release_a_new_version[Release a new Version]
+* link:#_publishing_artifacts_to_github_packages_manually[Publishing Artifacts to GitHub Packages manually]
+* link:#_licensing[Licensing]
+
+
+== Libraries
+
+[#_model]
+=== Model
+
+Model classes shared between multiple projects.
+
+[#_serializer]
+=== Serializer
+
+Serialization wrappers for the Cyface Binary Format.
+
+
+[#_release_a_new_version]
+== Release a new Version
+
+To release a new version:
+
+1. *Create a new release branch* following the format `release-x.y.z`.
+a. `x.y.z` is the number of the new version following link:http://semver.org[Semantic Versioning].
+b. *Hotfixes could be branched from the already existing release-branch*
+A. Merge the hotfix into the `main` and `release` branch, create pull requests and pass reviewing.
+B. No new features are allowed on a release-branch, only fixes and minor changes.
+
+2. *Increase version numbers* in root `build.gradle`,
+a. and optional in any associated `docker-compose.yml` or OpenAPI documentation (usually located in `src/main/resources/webroot/openapi.yml`).
+b. If you need to version sub-projects differently, create a version attribute in the corresponding `build.gradle`.
+
+3. *Commit version bump and push branch* to GitHub.
+a. Wait until the continuous integration system passes.
+b. Create Pull Requests from your `release-x.y.z` branch to `release` and `main`.
+c. Get those Pull Requests accepted and merge them to both branches
+
+4. *Tag the new release on the release branch*.
+a. Ensure you are on the correct branch and commit.
+b. Follow the guidelines from link:https://keepachangelog.com["Keep a Changelog"] in your tag description.
+
+5. *Push the release tag to GitHub*.
+a. The docker image and GitHub packages are automatically published when a new version is tagged and pushed by our
+link:https://github.com/cyface-de/backend/actions[GitHub Actions] to the
+link:https://github.com/cyface-de/backend/packages[GitHub Registry].
+
+6. *Mark the released version as 'new Release' on link:https://github.com/cyface-de/backend/releases[GitHub]*.
+
+
+[#_publishing_artifacts_to_github_packages_manually]
+== Publishing artifacts to GitHub Packages manually
+
+The artifacts produced by this project are distributed via link:https://github.com/features/packages[GitHubPackages].
+Before you can publish artifacts you need to rename `gradle.properties.template` to `gradle.properties` and enter your GitHub credentials.
+How to obtain these credentials is described link:https://help.github.com/en/github/managing-packages-with-github-packages/about-github-packages#about-tokens[here].
+
+To publish a new version of an artifact you need to:
+
+1. Increase the version number of the sub-project within the `build.gradle` file
+2. Call `./gradlew publish`
+
+This will upload a new artifact to GitHub packages with the new version.
+GitHub Packages will not accept to overwrite an existing version or to upload a lower version.
+This project uses link:https://semver.org/[semantic versioning].
+
+
+[#_licensing]
+== Licensing
+Copyright 2018-2021 Cyface GmbH
+
+This file is part of the Cyface Serialization.
+
+The Cyface Serialization is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The Cyface Serialization is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the Cyface Serialization.  If not, see http://www.gnu.org/licenses/.
