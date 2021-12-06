@@ -141,7 +141,7 @@ public class Measurement implements Serializable {
             RawRecord lastLocation = null;
             for (final var locationRecord : track.getLocationRecords()) {
                 if (lastLocation != null) {
-                    final var newDistance = lastLocation.distanceTo(locationRecord);
+                    final var newDistance = lastLocation.distanceTo(locationRecord) / 1000.;
                     modalityTypeDistance += newDistance;
                     totalDistance += newDistance;
                     final var timeTraveled = locationRecord.getTimestamp()
@@ -382,7 +382,7 @@ public class Measurement implements Serializable {
                 "trackId",
                 "timestamp [ms]", "latitude", "longitude", "speed [m/s]",
                 "accuracy [m]",
-                "modalityType", "modalityTypeDistance [km]", "distance [km]",
+                "modalityType", "modalityTypeDistance [m]", "distance [m]",
                 "modalityTypeTravelTime [ms]", "travelTime [ms]");
         handler.accept(csvHeaderRow);
     }
