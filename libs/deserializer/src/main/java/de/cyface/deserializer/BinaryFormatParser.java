@@ -99,13 +99,13 @@ class BinaryFormatParser {
         final var builder = MeasurementBytes.newBuilder();
         switch (type) {
             case ACCELERATION:
-                builder.setAccelerationsFile(ByteString.readFrom(input));
+                builder.setAccelerationsBinary(ByteString.readFrom(input));
                 break;
             case ROTATION:
-                builder.setRotationsFile(ByteString.readFrom(input));
+                builder.setRotationsBinary(ByteString.readFrom(input));
                 break;
             case DIRECTION:
-                builder.setDirectionsFile(ByteString.readFrom(input));
+                builder.setDirectionsBinary(ByteString.readFrom(input));
                 break;
             default:
                 throw new IllegalArgumentException(String.format("Unknown type: %s", type));
