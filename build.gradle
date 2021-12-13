@@ -58,7 +58,7 @@ subprojects {
   apply plugin: 'java'
 
   group = 'de.cyface'
-  version = '1.0.1'
+  version = '1.0.2'
 
   tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -84,7 +84,7 @@ subprojects {
     sqliteDriverVersion = '3.34.0'
     gradleWrapperVersion = '6.9'
     protobufVersion = '3.17.3'
-    cyfaceProtosVersion = '0.2.0'
+    cyfaceProtosVersion = '1.0.0'
 
     // Versions of testing dependencies
     junitVersion = '5.7.2'

@@ -24,16 +24,16 @@ import static de.cyface.serializer.model.Point3DType.ROTATION;
 
 import java.util.List;
 
+import de.cyface.protos.model.AccelerationsBinary;
+import de.cyface.protos.model.DirectionsBinary;
+import de.cyface.protos.model.RotationsBinary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.cyface.model.Point3D;
 import de.cyface.protos.model.Accelerations;
-import de.cyface.protos.model.AccelerationsFile;
 import de.cyface.protos.model.Directions;
-import de.cyface.protos.model.DirectionsFile;
 import de.cyface.protos.model.Rotations;
-import de.cyface.protos.model.RotationsFile;
 import de.cyface.serializer.model.Point3DType;
 
 /**
@@ -67,15 +67,15 @@ public class Point3DSerializer {
             case ACCELERATION:
                 final var aBatch = accelerations(data).build();
                 // Ensure the `Accelerations` Header is also written to separate this batch from the next
-                return AccelerationsFile.newBuilder().addAccelerations(aBatch).build().toByteArray();
+                return AccelerationsBinary.newBuilder().addAccelerations(aBatch).build().toByteArray();
             case ROTATION:
                 final var rBatch = rotations(data).build();
                 // Ensure the `Rotations` Header is also written to separate this batch from the next
-                return RotationsFile.newBuilder().addRotations(rBatch).build().toByteArray();
+                return RotationsBinary.newBuilder().addRotations(rBatch).build().toByteArray();
             case DIRECTION:
                 final var dBatch = directions(data).build();
                 // Ensure the `Directions` Header is also written to separate this batch from the next
-                return DirectionsFile.newBuilder().addDirections(dBatch).build().toByteArray();
+                return DirectionsBinary.newBuilder().addDirections(dBatch).build().toByteArray();
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }

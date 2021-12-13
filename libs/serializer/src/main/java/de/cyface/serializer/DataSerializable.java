@@ -24,6 +24,9 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 
+import de.cyface.protos.model.AccelerationsBinary;
+import de.cyface.protos.model.DirectionsBinary;
+import de.cyface.protos.model.RotationsBinary;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +34,7 @@ import org.slf4j.LoggerFactory;
 import de.cyface.model.Event;
 import de.cyface.model.Point3D;
 import de.cyface.model.RawRecord;
-import de.cyface.protos.model.AccelerationsFile;
-import de.cyface.protos.model.DirectionsFile;
 import de.cyface.protos.model.Measurement;
-import de.cyface.protos.model.RotationsFile;
 
 /**
  * An instance of this class contains the serialization functionality, adapted from the implementation used within the
@@ -133,25 +133,25 @@ public final class DataSerializable {
 
         if (accelerationBatches.size() > 0) {
             LOGGER.trace(String.format("Serializing %s acceleration batches.", accelerationBatches.size()));
-            final var accelerationsFile = AccelerationsFile.newBuilder();
+            final var accelerationsBinary = AccelerationsBinary.newBuilder();
             accelerationBatches.forEach(
-                    accelerations -> accelerationsFile
+                    accelerations -> accelerationsBinary
                             .addAccelerations(Point3DSerializer.accelerations(accelerations)));
-            builder.setAccelerationsFile(accelerationsFile);
+            builder.setAccelerationsBinary(accelerationsBinary);
         }
         if (rotationBatches.size() > 0) {
             LOGGER.trace(String.format("Serializing %s rotation batches.", rotationBatches.size()));
-            final var rotationsFile = RotationsFile.newBuilder();
+            final var rotationsBinary = RotationsBinary.newBuilder();
             rotationBatches.forEach(
-                    rotations -> rotationsFile.addRotations(Point3DSerializer.rotations(rotations)));
-            builder.setRotationsFile(rotationsFile);
+                    rotations -> rotationsBinary.addRotations(Point3DSerializer.rotations(rotations)));
+            builder.setRotationsBinary(rotationsBinary);
         }
         if (directionBatches.size() > 0) {
             LOGGER.trace(String.format("Serializing %s direction batches.", directionBatches.size()));
-            final var directionsFile = DirectionsFile.newBuilder();
+            final var directionsBinary = DirectionsBinary.newBuilder();
             directionBatches.forEach(
-                    directions -> directionsFile.addDirections(Point3DSerializer.directions(directions)));
-            builder.setDirectionsFile(directionsFile);
+                    directions -> directionsBinary.addDirections(Point3DSerializer.directions(directions)));
+            builder.setDirectionsBinary(directionsBinary);
         }
 
         // Currently, loading the whole measurement into memory (~ 5 MB / hour serialized).
