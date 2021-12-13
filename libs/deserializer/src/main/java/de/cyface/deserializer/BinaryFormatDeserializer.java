@@ -95,9 +95,9 @@ public class BinaryFormatDeserializer implements Deserializer {
             final var events = EventDeserializer.deserialize(measurement.getEventsList());
             final var locations = LocationDeserializer.deserialize(measurement.getLocationRecords());
             final var accelerations = Point3DDeserializer
-                    .accelerations(measurement.getAccelerationsFile().getAccelerationsList());
-            final var rotations = Point3DDeserializer.rotations(measurement.getRotationsFile().getRotationsList());
-            final var directions = Point3DDeserializer.directions(measurement.getDirectionsFile().getDirectionsList());
+                    .accelerations(measurement.getAccelerationsBinary().getAccelerationsList());
+            final var rotations = Point3DDeserializer.rotations(measurement.getRotationsBinary().getRotationsList());
+            final var directions = Point3DDeserializer.directions(measurement.getDirectionsBinary().getDirectionsList());
             final var builder = new TrackBuilder();
             final var tracks = builder.build(locations, events, accelerations, rotations, directions,
                     metaData.getIdentifier());
