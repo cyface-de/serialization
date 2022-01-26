@@ -28,6 +28,12 @@ import java.util.Arrays;
  */
 public class Json {
 
+    /**
+     * Creates a {@link JsonArray} with the supplied {@code objects}.
+     *
+     * @param objects the objects to assemble as {@code JsonArray}, e.g. ["lon", "lat"]
+     * @return the {@code JsonArray}
+     */
     public static JsonArray jsonArray(final String... objects) {
         final var builder = new StringBuilder("[");
         Arrays.stream(objects).forEach(p -> builder.append(p).append(","));
@@ -36,6 +42,12 @@ public class Json {
         return new JsonArray(builder.toString());
     }
 
+    /**
+     * Creates a {@link JsonObject} with the supplies {@code keyValuePairs}.
+     *
+     * @param keyValuePairs The key-value pairs to be injected into the object
+     * @return the created {@code JsonObject}
+     */
     public static JsonObject jsonObject(final KeyValuePair... keyValuePairs) {
         final var builder = new StringBuilder("{");
         Arrays.stream(keyValuePairs).forEach(p -> builder.append(p.stringValue).append(","));
@@ -44,62 +56,159 @@ public class Json {
         return new JsonObject(builder.toString());
     }
 
-    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key, final JsonArray value) {
-        return new KeyValuePair("\"" + key + "\":" + value.stringValue);
-    }
-
+    /**
+     * Creates a {@link KeyValuePair} from the supplied key and value.
+     *
+     * @param key the name of the key to be used
+     * @param value the value as {@link JsonArray}
+     * @return the created {@code KeyValuePair}
+     */
     public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
-                                      final JsonObject value) {
+            final JsonArray value) {
         return new KeyValuePair("\"" + key + "\":" + value.stringValue);
     }
 
-    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key, final long value) {
+    /**
+     * Creates a {@link KeyValuePair} from the supplied key and value.
+     *
+     * @param key the name of the key to be used
+     * @param value the value as {@link JsonObject}
+     * @return the created {@code KeyValuePair}
+     */
+    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
+            final JsonObject value) {
+        return new KeyValuePair("\"" + key + "\":" + value.stringValue);
+    }
+
+    /**
+     * Creates a {@link KeyValuePair} from the supplied key and value.
+     *
+     * @param key the name of the key to be used
+     * @param value the value as {@code Long}
+     * @return the created {@code KeyValuePair}
+     */
+    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
+            final long value) {
         return new KeyValuePair("\"" + key + "\":" + value);
     }
 
-    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key, final boolean value) {
+    /**
+     * Creates a {@link KeyValuePair} from the supplied key and value.
+     *
+     * @param key the name of the key to be used
+     * @param value the value as {@code Boolean}
+     * @return the created {@code KeyValuePair}
+     */
+    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
+            final boolean value) {
         return new KeyValuePair("\"" + key + "\":" + value);
     }
 
-    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key, final double value) {
+    /**
+     * Creates a {@link KeyValuePair} from the supplied key and value.
+     *
+     * @param key the name of the key to be used
+     * @param value the value as {@code Double}
+     * @return the created {@code KeyValuePair}
+     */
+    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
+            final double value) {
         return new KeyValuePair("\"" + key + "\":" + value);
     }
 
+    /**
+     * Creates a {@link KeyValuePair} from the supplied key and value.
+     *
+     * @param key the name of the key to be used
+     * @param value the value as {@code String}
+     * @return the created {@code KeyValuePair}
+     */
     public static KeyValuePair jsonKeyValue(final String key, final String value) {
         return new KeyValuePair("\"" + key + "\":\"" + value + "\"");
     }
 
+    /**
+     * This class represents the typical key-value format of a JSON object.
+     *
+     * @author Armin Schnabel
+     * @since 1.1.0
+     */
     public static class KeyValuePair {
+        /**
+         * The {@code String} representation of the {@link KeyValuePair}.
+         */
         private final String stringValue;
 
+        /**
+         * Creates a fully initialized instance of this class.
+         *
+         * @param stringValue the {@code String} representation of the {@link KeyValuePair}
+         */
         public KeyValuePair(String stringValue) {
             this.stringValue = stringValue;
         }
 
+        /**
+         * @return the {@code String} representation of the {@link KeyValuePair}
+         */
         public String getStringValue() {
             return stringValue;
         }
     }
 
+    /**
+     * This class represents the typical format of a JSON object.
+     *
+     * @author Armin Schnabel
+     * @since 1.1.0
+     */
     public static class JsonObject {
+        /**
+         * The {@code String} representation of the {@link JsonObject}.
+         */
         private final String stringValue;
 
+        /**
+         * Creates a fully initialized instance of this class.
+         *
+         * @param stringValue the {@code String} representation of the {@link JsonObject}
+         */
         public JsonObject(String stringValue) {
             this.stringValue = stringValue;
         }
 
+        /**
+         * @return The {@code String} representation of the {@link JsonObject}.
+         */
         public String getStringValue() {
             return stringValue;
         }
     }
 
+    /**
+     * This class represents the typical format of an JSON array.
+     *
+     * @author Armin Schnabel
+     * @since 1.1.0
+     */
     public static class JsonArray {
+        /**
+         * The {@code String} representation of the {@link JsonArray}.
+         */
         private final String stringValue;
 
+        /**
+         * Creates a fully initialized instance of this class.
+         *
+         * @param stringValue the {@code String} representation of the {@link JsonArray}
+         */
         public JsonArray(String stringValue) {
             this.stringValue = stringValue;
         }
 
+        /**
+         * @return The {@code String} representation of the {@link JsonArray}.
+         */
         public String getStringValue() {
             return stringValue;
         }
