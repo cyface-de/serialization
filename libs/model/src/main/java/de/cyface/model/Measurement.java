@@ -21,7 +21,6 @@ package de.cyface.model;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +30,10 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static de.cyface.model.Json.jsonArray;
+import static de.cyface.model.Json.jsonKeyValue;
+import static de.cyface.model.Json.jsonObject;
 
 /**
  * A single measurement captured by a Cyface measurement device.
@@ -103,6 +106,7 @@ public class Measurement implements Serializable {
      *
      * @param metaData The context of this {@code Measurement}.
      */
+    @SuppressWarnings("unused") // Required by Apache Flink.
     public void setMetaData(final MetaData metaData) {
         this.metaData = metaData;
     }
@@ -112,6 +116,7 @@ public class Measurement implements Serializable {
      *
      * @param tracks The data collected for this {@code Measurement} in {@code Track}-slices, ordered by timestamp.
      */
+    @SuppressWarnings("unused") // Required by Apache Flink.
     public void setTracks(final List<Track> tracks) {
         this.tracks = new ArrayList<>(tracks);
     }
@@ -176,12 +181,12 @@ public class Measurement implements Serializable {
 
         // measurement = geoJson "feature"
         handler.accept("{");
-        handler.accept(jsonKeyValue("type", "Feature").stringValue);
+        handler.accept(jsonKeyValue("type", "Feature").getStringValue());
         handler.accept(",");
 
         // All tracks = geometry (MultiLineString)
         handler.accept("\"geometry\":{");
-        handler.accept(jsonKeyValue("type", "MultiLineString").stringValue);
+        handler.accept(jsonKeyValue("type", "MultiLineString").getStringValue());
         handler.accept(",");
         handler.accept("\"coordinates\":");
         final var tracksCoordinates = convertToLineStringCoordinates(getTracks());
@@ -193,7 +198,7 @@ public class Measurement implements Serializable {
                 getMetaData().getIdentifier().getMeasurementIdentifier());
         final var length = jsonKeyValue("length", getMetaData().getLength());
         final var properties = jsonObject(deviceId, measurementId, length);
-        handler.accept(jsonKeyValue("properties", properties).stringValue);
+        handler.accept(jsonKeyValue("properties", properties).getStringValue());
 
         handler.accept("}");
     }
@@ -207,13 +212,13 @@ public class Measurement implements Serializable {
         // We decided to generate a String instead of using a JSON library to avoid dependencies in the model library
         handler.accept("{");
 
-        handler.accept(jsonKeyValue("metaData", asJson(metaData)).stringValue);
+        handler.accept(jsonKeyValue("metaData", asJson(metaData)).getStringValue());
         handler.accept(",");
 
         handler.accept("\"tracks\":[");
         for (int i = 0; i < tracks.size(); i++) {
             final var track = tracks.get(i);
-            handler.accept(featureCollection(track).stringValue);
+            handler.accept(featureCollection(track).getStringValue());
             if (i != tracks.size()-1) {
                 handler.accept(",");
             }
@@ -223,7 +228,7 @@ public class Measurement implements Serializable {
         handler.accept("}");
     }
 
-    private JsonObject asJson(final MetaData metaData) {
+    private Json.JsonObject asJson(final MetaData metaData) {
         return jsonObject(jsonKeyValue("username", metaData.getUsername()),
                 jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()),
                 jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()),
@@ -236,18 +241,18 @@ public class Measurement implements Serializable {
      * @param track the {@code Track} to convert
      * @return the converted {@code Track}
      */
-    private JsonObject featureCollection(final Track track) {
+    private Json.JsonObject featureCollection(final Track track) {
         final var points = geoJsonPointFeatures(track.getLocationRecords());
         final var type = jsonKeyValue("type", "FeatureCollection");
         final var features = jsonKeyValue("features", points);
         return jsonObject(type, features);
     }
 
-    private JsonArray geoJsonPointFeatures(final List<RawRecord> list) {
-        return jsonArray(list.stream().map(l -> geoJsonPointFeature(l).stringValue).toArray(String[]::new));
+    private Json.JsonArray geoJsonPointFeatures(final List<RawRecord> list) {
+        return jsonArray(list.stream().map(l -> geoJsonPointFeature(l).getStringValue()).toArray(String[]::new));
     }
 
-    private JsonObject geoJsonPointFeature(final RawRecord record) {
+    private Json.JsonObject geoJsonPointFeature(final RawRecord record) {
         final var type = jsonKeyValue("type", "Feature");
 
         final var geometryType = jsonKeyValue("type", "Point");
@@ -265,43 +270,6 @@ public class Measurement implements Serializable {
         return jsonObject(type, geometry, properties);
     }
 
-    private JsonArray jsonArray(final String... objects) {
-        final var builder = new StringBuilder("[");
-        Arrays.stream(objects).forEach(p -> builder.append(p).append(","));
-        builder.deleteCharAt(builder.length() - 1); // remove trailing comma
-        builder.append("]");
-        return new JsonArray(builder.toString());
-    }
-
-    private JsonObject jsonObject(final KeyValuePair... keyValuePairs) {
-        final var builder = new StringBuilder("{");
-        Arrays.stream(keyValuePairs).forEach(p -> builder.append(p.stringValue).append(","));
-        builder.deleteCharAt(builder.length() - 1); // remove trailing comma
-        builder.append("}");
-        return new JsonObject(builder.toString());
-    }
-
-    private KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key, final JsonArray value) {
-        return new KeyValuePair("\"" + key + "\":" + value.stringValue);
-    }
-
-    private KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
-            final JsonObject value) {
-        return new KeyValuePair("\"" + key + "\":" + value.stringValue);
-    }
-
-    private KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key, final long value) {
-        return new KeyValuePair("\"" + key + "\":" + value);
-    }
-
-    private KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key, final double value) {
-        return new KeyValuePair("\"" + key + "\":" + value);
-    }
-
-    private KeyValuePair jsonKeyValue(final String key, final String value) {
-        return new KeyValuePair("\"" + key + "\":\"" + value + "\"");
-    }
-
     /**
      * Clears the data within this measurement starting at the provided <code>timestamp</code> in milliseconds since the
      * 01.01.1970 (UNIX Epoch).
@@ -312,6 +280,7 @@ public class Measurement implements Serializable {
      * @return This cleared <code>Measurement</code>
      * @throws TimestampNotFound If the timestamp is not within the timeframe of this measurement
      */
+    @SuppressWarnings("unused") // Part of the API
     public Measurement clearAfter(final long timestamp) throws TimestampNotFound {
         final var trackIndex = getIndexOfTrackContaining(timestamp);
         while (tracks.size() - 1 > trackIndex) {
@@ -388,7 +357,7 @@ public class Measurement implements Serializable {
     }
 
     /**
-     * Converts one location entry annotated with meta data to a CSV row.
+     * Converts one location entry annotated with metadata to a CSV row.
      *
      * @param metaData the {@code Measurement} of the {@param location}
      * @param locationRecord the {@code GeoLocationRecord} to be processed
@@ -427,9 +396,9 @@ public class Measurement implements Serializable {
         // Each track is a LineString
         tracks.forEach(track -> {
             final var points = jsonArray(
-                    track.getLocationRecords().stream().map(l -> geoJsonCoordinates(l).stringValue)
+                    track.getLocationRecords().stream().map(l -> geoJsonCoordinates(l).getStringValue())
                             .toArray(String[]::new));
-            builder.append(points.stringValue);
+            builder.append(points.getStringValue());
             builder.append(",");
         });
         builder.deleteCharAt(builder.length() - 1); // delete last ","
@@ -438,7 +407,7 @@ public class Measurement implements Serializable {
         return builder.toString();
     }
 
-    private JsonArray geoJsonCoordinates(final RawRecord record) {
+    private Json.JsonArray geoJsonCoordinates(final RawRecord record) {
         return jsonArray(String.valueOf(record.getLongitude()), String.valueOf(record.getLatitude()));
     }
 
@@ -464,41 +433,5 @@ public class Measurement implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(metaData, tracks);
-    }
-
-    private static class KeyValuePair {
-        private final String stringValue;
-
-        public KeyValuePair(String stringValue) {
-            this.stringValue = stringValue;
-        }
-
-        public String getStringValue() {
-            return stringValue;
-        }
-    }
-
-    private static class JsonObject {
-        private final String stringValue;
-
-        public JsonObject(String stringValue) {
-            this.stringValue = stringValue;
-        }
-
-        public String getStringValue() {
-            return stringValue;
-        }
-    }
-
-    private static class JsonArray {
-        private final String stringValue;
-
-        public JsonArray(String stringValue) {
-            this.stringValue = stringValue;
-        }
-
-        public String getStringValue() {
-            return stringValue;
-        }
     }
 }
