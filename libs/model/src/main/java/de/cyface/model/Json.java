@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Cyface GmbH
+ * Copyright 2021-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -18,13 +18,16 @@
  */
 package de.cyface.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class allows structuring data in the Json format without Json dependencies.
  *
  * @author Armin Schnabel
  * @since 1.1.0
+ * @version 1.1.0
  */
 public class Json {
 
@@ -161,6 +164,7 @@ public class Json {
      *
      * @author Armin Schnabel
      * @since 1.1.0
+     * @version 1.1.0
      */
     public static class JsonObject {
         /**
@@ -183,6 +187,45 @@ public class Json {
         public String getStringValue() {
             return stringValue;
         }
+
+        /**
+         * Builder for creating a {@link JsonObject}.
+         *
+         * @author Armin Schnabel
+         * @since 1.2.0
+         * @version 1.0.0
+         */
+        public static class Builder {
+
+            /**
+             * The object to be added to the {@link JsonObject}.
+             */
+            private final List<KeyValuePair> objects = new ArrayList<>();
+
+            /**
+             * Adds the supplied {@code objects} to this builder.
+             *
+             * @param object the {@link KeyValuePair} to add
+             * @return this builder
+             */
+            public Builder add(final KeyValuePair object) {
+                this.objects.add(object);
+                return this;
+            }
+
+            /**
+             * Creates a {@link JsonObject} with the supplied {@code objects}.
+             *
+             * @return the {@code JsonObject}
+             */
+            public JsonObject build() {
+                final var builder = new StringBuilder("{");
+                objects.forEach(p -> builder.append(p.stringValue).append(","));
+                builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+                builder.append("}");
+                return new JsonObject(builder.toString());
+            }
+        }
     }
 
     /**
@@ -190,6 +233,7 @@ public class Json {
      *
      * @author Armin Schnabel
      * @since 1.1.0
+     * @version 1.0.0
      */
     public static class JsonArray {
         /**
