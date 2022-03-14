@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Armin Schnabel
  * @since 1.1.0
- * @version 1.1.0
+ * @version 1.1.1
  */
 public class Json {
 
@@ -39,8 +39,10 @@ public class Json {
      */
     public static JsonArray jsonArray(final String... objects) {
         final var builder = new StringBuilder("[");
-        Arrays.stream(objects).forEach(p -> builder.append(p).append(","));
-        builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+        if (objects.length > 0) {
+            Arrays.stream(objects).forEach(p -> builder.append(p).append(","));
+            builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+        }
         builder.append("]");
         return new JsonArray(builder.toString());
     }
@@ -53,8 +55,10 @@ public class Json {
      */
     public static JsonObject jsonObject(final KeyValuePair... keyValuePairs) {
         final var builder = new StringBuilder("{");
-        Arrays.stream(keyValuePairs).forEach(p -> builder.append(p.stringValue).append(","));
-        builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+        if (keyValuePairs.length > 0) {
+            Arrays.stream(keyValuePairs).forEach(p -> builder.append(p.stringValue).append(","));
+            builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+        }
         builder.append("}");
         return new JsonObject(builder.toString());
     }
@@ -193,7 +197,7 @@ public class Json {
          *
          * @author Armin Schnabel
          * @since 1.2.0
-         * @version 1.0.0
+         * @version 1.0.1
          */
         public static class Builder {
 
@@ -220,8 +224,10 @@ public class Json {
              */
             public JsonObject build() {
                 final var builder = new StringBuilder("{");
-                objects.forEach(p -> builder.append(p.stringValue).append(","));
-                builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+                if (objects.size() > 0) {
+                    objects.forEach(p -> builder.append(p.stringValue).append(","));
+                    builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+                }
                 builder.append("}");
                 return new JsonObject(builder.toString());
             }
