@@ -202,30 +202,30 @@ public class Json {
         public static class Builder {
 
             /**
-             * The object to be added to the {@link JsonObject}.
+             * The {@link KeyValuePair}s to be added to the {@link JsonObject}.
              */
-            private final List<KeyValuePair> objects = new ArrayList<>();
+            private final List<KeyValuePair> keyValuePairs = new ArrayList<>();
 
             /**
              * Adds the supplied {@code objects} to this builder.
              *
-             * @param object the {@link KeyValuePair} to add
+             * @param pair the {@link KeyValuePair} to add
              * @return this builder
              */
-            public Builder add(final KeyValuePair object) {
-                this.objects.add(object);
+            public Builder add(final KeyValuePair pair) {
+                this.keyValuePairs.add(pair);
                 return this;
             }
 
             /**
-             * Creates a {@link JsonObject} with the supplied {@code objects}.
+             * Creates a {@link JsonObject} with the supplied {@code keyValuePairs}.
              *
              * @return the {@code JsonObject}
              */
             public JsonObject build() {
                 final var builder = new StringBuilder("{");
-                if (objects.size() > 0) {
-                    objects.forEach(p -> builder.append(p.stringValue).append(","));
+                if (keyValuePairs.size() > 0) {
+                    keyValuePairs.forEach(p -> builder.append(p.stringValue).append(","));
                     builder.deleteCharAt(builder.length() - 1); // remove trailing comma
                 }
                 builder.append("}");
@@ -239,7 +239,7 @@ public class Json {
      *
      * @author Armin Schnabel
      * @since 1.1.0
-     * @version 1.0.0
+     * @version 1.1.0
      */
     public static class JsonArray {
         /**
@@ -261,6 +261,47 @@ public class Json {
          */
         public String getStringValue() {
             return stringValue;
+        }
+
+        /**
+         * Builder for creating a {@link JsonArray}.
+         *
+         * @author Armin Schnabel
+         * @since 1.3.0
+         * @version 1.0.0
+         */
+        public static class Builder {
+
+            /**
+             * The objects to be added to the {@link JsonArray}.
+             */
+            private final List<JsonObject> objects = new ArrayList<>();
+
+            /**
+             * Adds the supplied {@code objects} to this builder.
+             *
+             * @param object the {@link JsonObject} to add
+             * @return this builder
+             */
+            public Builder add(final JsonObject object) {
+                this.objects.add(object);
+                return this;
+            }
+
+            /**
+             * Creates a {@link JsonArray} with the supplied {@code objects}.
+             *
+             * @return the {@code JsonArray}
+             */
+            public JsonArray build() {
+                final var builder = new StringBuilder("[");
+                if (objects.size() > 0) {
+                    objects.forEach(o -> builder.append(o.stringValue).append(","));
+                    builder.deleteCharAt(builder.length() - 1); // remove trailing comma
+                }
+                builder.append("]");
+                return new JsonArray(builder.toString());
+            }
         }
     }
 }
