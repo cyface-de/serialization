@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -29,6 +29,8 @@ import de.cyface.model.MetaData;
  * A collection of static factory methods to hide the possible complexity of {@link Deserializer} creation.
  * 
  * @author Klemens Muthmann
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class DeserializerFactory {
 
@@ -59,7 +61,7 @@ public final class DeserializerFactory {
      * in the form of four zip archives. The first contains an SQLite database with the location information and some
      * metadata. The other three contain the sensor data from the accelerometer, the gyroscope and the compass.
      * 
-     * @param username The username of the user who created the data to be deserialized by the created deserializer.
+     * @param userId The id of the user who created the data to be deserialized by the created deserializer.
      *            This information is lost during the export process and needs to be provided here
      * @param measuresArchive The archive containing the SQLite database with the location data
      * @param accelerationsArchive The archive containing the accelerations from the accelerometer
@@ -67,9 +69,9 @@ public final class DeserializerFactory {
      * @param directionsArchive The archive containing directions from the compass
      * @return A {@link ZippedPhoneDataDeserializer} to read measurements from a phone export
      */
-    public static ZippedPhoneDataDeserializer create(final String username, final Path measuresArchive,
+    public static ZippedPhoneDataDeserializer create(final String userId, final Path measuresArchive,
             final Path accelerationsArchive, final Path rotationsArchive, final Path directionsArchive) {
-        return new ZippedPhoneDataDeserializer(username, measuresArchive, accelerationsArchive, rotationsArchive,
+        return new ZippedPhoneDataDeserializer(userId, measuresArchive, accelerationsArchive, rotationsArchive,
                 directionsArchive);
     }
 
@@ -78,7 +80,7 @@ public final class DeserializerFactory {
      * <code>Deserializer</code> is for data that has already been extracted to disk. Therefore, it expects sensor data
      * files as a list of multiple files (one per measurement and sensor data).
      * 
-     * @param username The username of the user who created the data to be deserialized by the created deserializer.
+     * @param userId The id of the user who created the data to be deserialized by the created deserializer.
      *            This information is lost during the export process and needs to be provided here
      * @param measuresDatabase An SQLite database containing the location information
      * @param accelerationFiles The files containing the accelerations from the accelerometer for each measurement
@@ -86,8 +88,8 @@ public final class DeserializerFactory {
      * @param directionFiles The files containing the directions from the compass for each measurement
      * @return A {@link UnzippedPhoneDataDeserializer} to read measurements from an unzipped phone export
      */
-    public static UnzippedPhoneDataDeserializer create(final String username, final Path measuresDatabase,
+    public static UnzippedPhoneDataDeserializer create(final String userId, final Path measuresDatabase,
                                                        final List<Path> accelerationFiles, final List<Path> rotationFiles, final List<Path> directionFiles) {
-        return new UnzippedPhoneDataDeserializer(username, measuresDatabase, accelerationFiles, rotationFiles, directionFiles);
+        return new UnzippedPhoneDataDeserializer(userId, measuresDatabase, accelerationFiles, rotationFiles, directionFiles);
     }
 }

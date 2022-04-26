@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -25,7 +25,7 @@ import java.util.Objects;
  * The context of a {@code Measurement}.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.2.0
  */
 public class MetaData implements Serializable {
@@ -61,9 +61,9 @@ public class MetaData implements Serializable {
      */
     private double length;
     /**
-     * The name of the user who has uploaded this measurement.
+     * The id of the user who has uploaded this measurement.
      */
-    private String username;
+    private String userId;
     /**
      * The version of the {@code Measurement} model in the deserialized format, such as "1.1.1" or "2.0.0".
      */
@@ -77,17 +77,17 @@ public class MetaData implements Serializable {
      * @param osVersion The operating system version, such as "Android 9.0.0" or "iOS 11.2".
      * @param appVersion The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
      * @param length The length of the measurement in meters.
-     * @param username The name of the user who has uploaded this measurement.
+     * @param userId The id of the user who has uploaded this measurement.
      * @param version The version of this {@code Measurement} model, such as "1.1.1" or "2.0.0".
      */
     public MetaData(final MeasurementIdentifier identifier, final String deviceType, final String osVersion,
-            final String appVersion, final double length, final String username, final String version) {
+            final String appVersion, final double length, final String userId, final String version) {
         this.identifier = identifier;
         this.deviceType = deviceType;
         this.osVersion = osVersion;
         this.appVersion = appVersion;
         this.length = length;
-        this.username = username;
+        this.userId = userId;
         this.version = version;
     }
 
@@ -100,7 +100,7 @@ public class MetaData implements Serializable {
     }
 
     /**
-     * @return The world wide unique identifier of the measurement.
+     * @return The worldwide unique identifier of the measurement.
      */
     public MeasurementIdentifier getIdentifier() {
         return identifier;
@@ -135,10 +135,10 @@ public class MetaData implements Serializable {
     }
 
     /**
-     * @return The name of the user who has uploaded this measurement.
+     * @return The id of the user who has uploaded this measurement.
      */
-    public String getUsername() {
-        return username;
+    public String getUserId() {
+        return userId;
     }
 
     /**
@@ -151,7 +151,7 @@ public class MetaData implements Serializable {
     /**
      * Required by Apache Flink.
      *
-     * @param identifier The world wide unique identifier of the measurement.
+     * @param identifier The worldwide unique identifier of the measurement.
      */
     public void setIdentifier(final MeasurementIdentifier identifier) {
         this.identifier = identifier;
@@ -162,6 +162,7 @@ public class MetaData implements Serializable {
      *
      * @param deviceType The type of device uploading the data, such as "Pixel 3" or "iPhone 6 Plus".
      */
+    @SuppressWarnings("unused")
     public void setDeviceType(final String deviceType) {
         this.deviceType = deviceType;
     }
@@ -171,6 +172,7 @@ public class MetaData implements Serializable {
      *
      * @param osVersion The operating system version, such as "Android 9.0.0" or "iOS 11.2".
      */
+    @SuppressWarnings("unused")
     public void setOsVersion(final String osVersion) {
         this.osVersion = osVersion;
     }
@@ -180,6 +182,7 @@ public class MetaData implements Serializable {
      *
      * @param appVersion The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
      */
+    @SuppressWarnings("unused")
     public void setAppVersion(final String appVersion) {
         this.appVersion = appVersion;
     }
@@ -189,6 +192,7 @@ public class MetaData implements Serializable {
      *
      * @param length The length of the measurement in meters.
      */
+    @SuppressWarnings("unused")
     public void setLength(final double length) {
         this.length = length;
     }
@@ -196,10 +200,11 @@ public class MetaData implements Serializable {
     /**
      * Required by Apache Flink.
      *
-     * @param username The name of the user who has uploaded this measurement.
+     * @param userId The name of the user who has uploaded this measurement.
      */
-    public void setUsername(final String username) {
-        this.username = username;
+    @SuppressWarnings("unused")
+    public void setUserId(final String userId) {
+        this.userId = userId;
     }
 
     /**
@@ -219,7 +224,7 @@ public class MetaData implements Serializable {
                 ", osVersion='" + osVersion + '\'' +
                 ", appVersion='" + appVersion + '\'' +
                 ", length=" + length +
-                ", username='" + username + '\'' +
+                ", userId='" + userId + '\'' +
                 ", version='" + version + '\'' +
                 '}';
     }
@@ -236,12 +241,12 @@ public class MetaData implements Serializable {
                 deviceType.equals(metaData.deviceType) &&
                 osVersion.equals(metaData.osVersion) &&
                 appVersion.equals(metaData.appVersion) &&
-                username.equals(metaData.username) &&
+                userId.equals(metaData.userId) &&
                 version.equals(metaData.version);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identifier, deviceType, osVersion, appVersion, length, username, version);
+        return Objects.hash(identifier, deviceType, osVersion, appVersion, length, userId, version);
     }
 }

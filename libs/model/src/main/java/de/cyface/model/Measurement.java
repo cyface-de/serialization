@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Cyface GmbH
+ * Copyright 2019-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -18,6 +18,10 @@
  */
 package de.cyface.model;
 
+import static de.cyface.model.Json.jsonArray;
+import static de.cyface.model.Json.jsonKeyValue;
+import static de.cyface.model.Json.jsonObject;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,10 +35,6 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static de.cyface.model.Json.jsonArray;
-import static de.cyface.model.Json.jsonKeyValue;
-import static de.cyface.model.Json.jsonObject;
-
 /**
  * A single measurement captured by a Cyface measurement device.
  * <p>
@@ -45,6 +45,8 @@ import static de.cyface.model.Json.jsonObject;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
+ * @version 2.0.0
+ * @since 1.0.0
  */
 public class Measurement implements Serializable {
 
@@ -124,10 +126,11 @@ public class Measurement implements Serializable {
     /**
      * Exports this measurement as a CSV file.
      *
-     * @param handler A handler that gets one line of CSV output per call
      * @param withCsvHeader {@code True} if a CSV header should be added before the data
+     * @param username The name of the user who uploaded the data
+     * @param handler A handler that gets one line of CSV output per call
      */
-    public void asCsv(final boolean withCsvHeader, final Consumer<String> handler) {
+    public void asCsv(final boolean withCsvHeader, final String username, final Consumer<String> handler) {
         if (withCsvHeader) {
             csvHeader(handler);
         }
@@ -162,7 +165,7 @@ public class Measurement implements Serializable {
                     modalityTypeTravelTime = 0L;
                 }
 
-                handler.accept(csvRow(getMetaData(), locationRecord, trackId,
+                handler.accept(csvRow(username, getMetaData(), locationRecord, trackId,
                         modalityTypeDistance, totalDistance,
                         modalityTypeTravelTime, totalTravelTime));
 
@@ -206,20 +209,21 @@ public class Measurement implements Serializable {
     /**
      * Exports this measurement as Json <b>without sensor data</b>.
      *
+     * @param username The name of the user who uploaded the data
      * @param handler A handler that gets the Json as string
      */
-    public void asJson(final Consumer<String> handler) {
+    public void asJson(final String username, final Consumer<String> handler) {
         // We decided to generate a String instead of using a JSON library to avoid dependencies in the model library
         handler.accept("{");
 
-        handler.accept(jsonKeyValue("metaData", asJson(metaData)).getStringValue());
+        handler.accept(jsonKeyValue("metaData", asJson(username, metaData)).getStringValue());
         handler.accept(",");
 
         handler.accept("\"tracks\":[");
         for (int i = 0; i < tracks.size(); i++) {
             final var track = tracks.get(i);
             handler.accept(featureCollection(track).getStringValue());
-            if (i != tracks.size()-1) {
+            if (i != tracks.size() - 1) {
                 handler.accept(",");
             }
         }
@@ -228,8 +232,10 @@ public class Measurement implements Serializable {
         handler.accept("}");
     }
 
-    private Json.JsonObject asJson(final MetaData metaData) {
-        return jsonObject(jsonKeyValue("username", metaData.getUsername()),
+    private Json.JsonObject asJson(final String username, final MetaData metaData) {
+        return jsonObject(
+                jsonKeyValue("userId", metaData.getUserId()),
+                jsonKeyValue("username", username),
                 jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()),
                 jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()),
                 jsonKeyValue("length", metaData.getLength()));
@@ -346,7 +352,9 @@ public class Measurement implements Serializable {
      * @param handler The handler that is notified of the new CSV row.
      */
     public static void csvHeader(final Consumer<String> handler) {
-        final var csvHeaderRow = String.join(",", "username", "deviceId",
+        // The deserialized.metadata only contains the `userId` as the `username` can change over time and, thus, we
+        // annotate both. The `username` is required as the customer usually cannot make much use of the `userId`.
+        final var csvHeaderRow = String.join(",", "userId", "username", "deviceId",
                 "measurementId",
                 "trackId",
                 "timestamp [ms]", "latitude", "longitude", "speed [m/s]",
@@ -359,6 +367,7 @@ public class Measurement implements Serializable {
     /**
      * Converts one location entry annotated with metadata to a CSV row.
      *
+     * @param username the name of the user who uploaded the data
      * @param metaData the {@code Measurement} of the {@param location}
      * @param locationRecord the {@code GeoLocationRecord} to be processed
      * @param trackId the id of the sub track starting at 1
@@ -368,13 +377,14 @@ public class Measurement implements Serializable {
      * @param totalTravelTime the time traveled so far
      * @return the csv row as String
      */
-    private String csvRow(final MetaData metaData, final RawRecord locationRecord, final int trackId,
+    private String csvRow(final String username, final MetaData metaData, final RawRecord locationRecord,
+            final int trackId,
             final double modalityTypeDistance, final double totalDistance,
             final long modalityTypeTravelTime, final long totalTravelTime) {
-        final var username = metaData.getUsername();
+        final var userId = metaData.getUserId();
         final var deviceId = metaData.getIdentifier().getDeviceIdentifier();
         final var measurementId = String.valueOf(metaData.getIdentifier().getMeasurementIdentifier());
-        return String.join(",", username, deviceId, measurementId, String.valueOf(trackId),
+        return String.join(",", userId, username, deviceId, measurementId, String.valueOf(trackId),
                 String.valueOf(locationRecord.getTimestamp()),
                 String.valueOf(locationRecord.getLatitude()),
                 String.valueOf(locationRecord.getLongitude()), String.valueOf(locationRecord.getSpeed()),
