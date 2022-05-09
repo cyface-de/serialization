@@ -108,7 +108,7 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
         Validate.isTrue(Files.exists(accelerationsFilePath));
         Validate.isTrue(Files.exists(rotationsFilePath));
         Validate.isTrue(Files.exists(directionsFilePath));
-        Validate.notEmpty(userId);
+        Validate.notEmpty(username);
 
         this.sqliteDatabasePath = sqliteDatabasePath;
         this.accelerationsFilePath = accelerationsFilePath;
