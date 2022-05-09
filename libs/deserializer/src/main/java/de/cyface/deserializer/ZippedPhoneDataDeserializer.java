@@ -68,10 +68,10 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
      */
     private boolean isUnzipped;
     /**
-     * The user id used to identify the deserialized information. This is lost during export. It does
-     * not matter to use the correct one here, but a user id is often necessary for further processing steps.
+     * The username to identify the deserialized information. This is lost during export. It is not necessary
+     * to use the correct one here, but a username is often necessary for further processing steps
      */
-    private final String userId;
+    private final String username;
     /**
      * The path in the local file system to the SQLite database with the location and event
      * information
@@ -95,14 +95,14 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * * {@link #setMeasurementNumber(long)} must have been called with a valid number. The valid numbers are available
      * * via {@link #peakIntoDatabase()}.
      *
-     * @param userId The user id used to identify the deserialized information. This is lost during export. It does
-     *            not matter to use the correct one here, but a user id is often necessary for further processing steps
+     * @param username The username to identify the deserialized information. This is lost during export. It is not necessary
+     *            to use the correct one here, but a username is often necessary for further processing steps
      * @param sqliteDatabasePath The archive containing the SQLite database with the location data
      * @param accelerationsFilePath The archive containing the accelerations from the accelerometer
      * @param rotationsFilePath The archive containing rotations from the gyroscope
      * @param directionsFilePath The archive containing directions from the compass
      */
-    ZippedPhoneDataDeserializer(final String userId, final Path sqliteDatabasePath, final Path accelerationsFilePath,
+    ZippedPhoneDataDeserializer(final String username, final Path sqliteDatabasePath, final Path accelerationsFilePath,
             final Path rotationsFilePath, final Path directionsFilePath) {
         Validate.isTrue(Files.exists(sqliteDatabasePath));
         Validate.isTrue(Files.exists(accelerationsFilePath));
@@ -115,7 +115,7 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
         this.rotationsFilePath = rotationsFilePath;
         this.directionsFilePath = directionsFilePath;
         this.isUnzipped = false;
-        this.userId = userId;
+        this.username = username;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
             this.directionPaths = unzip(directionsFilePath);
             isUnzipped = true;
         }
-        final var phoneDataDeserializer = new UnzippedPhoneDataDeserializer(userId, databaseFile, accelerationPaths,
+        final var phoneDataDeserializer = new UnzippedPhoneDataDeserializer(username, databaseFile, accelerationPaths,
                 rotationPaths, directionPaths);
         phoneDataDeserializer.setMeasurementNumber(measurementNumber);
 
