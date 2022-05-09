@@ -47,7 +47,7 @@ import de.cyface.model.RawRecord;
 
 /**
  * A {@link Deserializer} for phone data exports, that are already unzipped. Each such export consists of an SQLite file
- * containing some meta information, the captured geolocations and user interaction events during capturing. In
+ * containing some meta information, the captured geographic locations and user interaction events during capturing. In
  * addition, there are binary files with the
  * information from the individual <code>Measurement</code>s. There is one such file for each sensor and
  * <code>Measurement</code>. The sensors are the accelerometer (*.cyfa files), the gyroscope (*.cyfr files) and the
