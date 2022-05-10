@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -28,19 +28,21 @@ import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
-import de.cyface.deserializer.exceptions.NoSuchMeasurement;
 import org.apache.commons.lang3.Validate;
 
+import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
+import de.cyface.deserializer.exceptions.NoSuchMeasurement;
 import de.cyface.model.Measurement;
 import de.cyface.model.MeasurementIdentifier;
 
 /**
  * A {@link Deserializer} for zipped phone data. This is the format as it is returned by the smartphone. This data comes
  * in the form of four zip archives. The first contains an SQLite database with the location information and some
- * meta data. The other three contain the sensor data from the accelerometer, the gyroscope and the compass.
+ * metadata. The other three contain the sensor data from the accelerometer, the gyroscope and the compass.
  * 
  * @author Klemens Muthmann
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
 
@@ -66,11 +68,10 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
      */
     private boolean isUnzipped;
     /**
-     * The username used to identify the deserialized information. This is lost during export. It does
-     * not matter to use the correct one here, but a user name is often necessary for further processing
-     * steps.
+     * The userId to identify the deserialized information. This is lost during export. It is not necessary
+     * to use the correct one here, but a userId is often necessary for further processing steps
      */
-    private final String username;
+    private final String userId;
     /**
      * The path in the local file system to the SQLite database with the location and event
      * information
@@ -94,28 +95,27 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * * {@link #setMeasurementNumber(long)} must have been called with a valid number. The valid numbers are available
      * * via {@link #peakIntoDatabase()}.
      *
-     * @param username The username used to identify the deserialized information. This is lost during export. It does
-     *            not matter to use the correct one here, but a user name is often necessary for further processing
-     *            steps
+     * @param userId The userId to identify the deserialized information. This is lost during export. It is not necessary
+     *            to use the correct one here, but a userId is often necessary for further processing steps
      * @param sqliteDatabasePath The archive containing the SQLite database with the location data
      * @param accelerationsFilePath The archive containing the accelerations from the accelerometer
      * @param rotationsFilePath The archive containing rotations from the gyroscope
      * @param directionsFilePath The archive containing directions from the compass
      */
-    ZippedPhoneDataDeserializer(final String username, final Path sqliteDatabasePath, final Path accelerationsFilePath,
+    ZippedPhoneDataDeserializer(final String userId, final Path sqliteDatabasePath, final Path accelerationsFilePath,
             final Path rotationsFilePath, final Path directionsFilePath) {
         Validate.isTrue(Files.exists(sqliteDatabasePath));
         Validate.isTrue(Files.exists(accelerationsFilePath));
         Validate.isTrue(Files.exists(rotationsFilePath));
         Validate.isTrue(Files.exists(directionsFilePath));
-        Validate.notEmpty(username);
+        Validate.notEmpty(userId);
 
         this.sqliteDatabasePath = sqliteDatabasePath;
         this.accelerationsFilePath = accelerationsFilePath;
         this.rotationsFilePath = rotationsFilePath;
         this.directionsFilePath = directionsFilePath;
         this.isUnzipped = false;
-        this.username = username;
+        this.userId = userId;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
             this.directionPaths = unzip(directionsFilePath);
             isUnzipped = true;
         }
-        final var phoneDataDeserializer = new UnzippedPhoneDataDeserializer(username, databaseFile, accelerationPaths,
+        final var phoneDataDeserializer = new UnzippedPhoneDataDeserializer(userId, databaseFile, accelerationPaths,
                 rotationPaths, directionPaths);
         phoneDataDeserializer.setMeasurementNumber(measurementNumber);
 
@@ -161,7 +161,8 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * @return The path to the unzipped entry
      * @throws IOException If unzipping the data fails
      */
-    private Path unzipAndReturnMatching(final Path zipFile, final String nameOfZipFileEntryToReturn)
+    private Path unzipAndReturnMatching(final Path zipFile,
+            @SuppressWarnings("SameParameterValue") final String nameOfZipFileEntryToReturn)
             throws IOException {
         final var onUnzippedAction = new BiConsumer<Path, ZipEntry>() {
 
@@ -200,7 +201,8 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
 
                 final var path = Paths.get(entry.getName());
                 final var fileName = path.getFileName().toString(); // path.endsWith() does not work
-                final var fileExtension = fileName.endsWith(".cyfa") ? ".cyfa" : fileName.endsWith(".cyfr") ? ".cyfr" : fileName.endsWith(".cyfd") ? ".cyfd" : ".tmp";
+                final var fileExtension = fileName.endsWith(".cyfa") ? ".cyfa"
+                        : fileName.endsWith(".cyfr") ? ".cyfr" : fileName.endsWith(".cyfd") ? ".cyfd" : ".tmp";
                 final var tempPath = Files.createTempFile(path.getFileName().toString(), fileExtension);
                 try (final var fos = Files.newOutputStream(tempPath)) {
                     int len;

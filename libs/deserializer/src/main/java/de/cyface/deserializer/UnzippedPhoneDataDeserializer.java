@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -47,14 +47,16 @@ import de.cyface.model.RawRecord;
 
 /**
  * A {@link Deserializer} for phone data exports, that are already unzipped. Each such export consists of an SQLite file
- * containing some meta information, the captured geo locations and user interaction events during capturing. In
- * addition there are binary files with the
+ * containing some meta information, the captured geographic locations and user interaction events during capturing. In
+ * addition, there are binary files with the
  * information from the individual <code>Measurement</code>s. There is one such file for each sensor and
  * <code>Measurement</code>. The sensors are the accelerometer (*.cyfa files), the gyroscope (*.cyfr files) and the
  * compass (*.cyfd files). The name of each file is the <code>Measurement</code> number, which can be used as a foreign
  * key into the database.
  * 
  * @author Klemens Muthmann
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
     /**
@@ -98,18 +100,18 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
      */
     private final List<Path> directionsFilePaths;
     /**
-     * The username used to identify the deserialized information. This is lost during export. It does not matter to use
-     * the correct one here, but a username is often necessary for further processing steps.
+     * The user id used to identify the deserialized information. This is lost during export. It does not matter to use
+     * the correct one here, but a user id is often necessary for further processing steps.
      */
-    private final String username;
+    private final String userId;
 
     /**
      * Create a new {@link Deserializer} for phone data. Before calling read on an instance of this class
      * {@link #setMeasurementNumber(long)} must have been called with a valid number. The valid numbers are available
      * via {@link #peakIntoDatabase()}.
      * 
-     * @param username The username used to identify the deserialized information. This is lost during export. It does
-     *            not matter to use the correct one here, but a username is often necessary for further processing
+     * @param userId The user id used to identify the deserialized information. This is lost during export. It does
+     *            not matter to use the correct one here, but a user id is often necessary for further processing
      *            steps
      * @param sqliteDatabasePath The path in the local file system to the SQLite database with the location and event
      *            information
@@ -117,9 +119,9 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * @param rotationsFilePaths The files containing the gyroscope sensor data
      * @param directionsFilePaths The files containing the compass sensor data
      */
-    UnzippedPhoneDataDeserializer(final String username, final Path sqliteDatabasePath,
-            final List<Path> accelerationsFilePaths,
-            final List<Path> rotationsFilePaths, final List<Path> directionsFilePaths) {
+    UnzippedPhoneDataDeserializer(final String userId, final Path sqliteDatabasePath,
+                                  final List<Path> accelerationsFilePaths,
+                                  final List<Path> rotationsFilePaths, final List<Path> directionsFilePaths) {
         Validate.isTrue(Files.exists(sqliteDatabasePath));
         Validate.isTrue(accelerationsFilePaths.stream().map(Files::exists)
                 .reduce((first, second) -> first || second).orElseThrow());
@@ -127,13 +129,13 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
                 .reduce((first, second) -> first || second).orElseThrow());
         Validate.isTrue(directionsFilePaths.stream().map(Files::exists)
                 .reduce((first, second) -> first || second).orElseThrow());
-        Validate.notEmpty(username);
+        Validate.notEmpty(userId);
 
         this.sqliteDatabasePath = sqliteDatabasePath;
         this.accelerationsFilePaths = accelerationsFilePaths;
         this.rotationsFilePaths = rotationsFilePaths;
         this.directionsFilePaths = directionsFilePaths;
-        this.username = username;
+        this.userId = userId;
     }
 
     @Override
@@ -211,7 +213,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
     }
 
     /**
-     * Query the SQLite database for the user interaction events that occured during <code>Measurement</code>.
+     * Query the SQLite database for the user interaction events that occurred during <code>Measurement</code>.
      * 
      * @param connection A JDBC <code>Connection</code> to the SQLite database at {@link #sqliteDatabasePath}
      * @param measurementIdentifier The identifier of the <code>Measurement</code> to load locations for
@@ -242,11 +244,11 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
     }
 
     /**
-     * Query the SQLite database for the meta data of the requested <code>Measurement</code>.
+     * Query the SQLite database for the metadata of the requested <code>Measurement</code>.
      * 
      * @param connection A JDBC <code>Connection</code> to the SQLite database at {@link #sqliteDatabasePath}
      * @param measurementNumber The number of the <code>Measurement</code> to read the data for
-     * @return The meta data for the requested <code>Measurement</code> all fields not stored in the data are set with
+     * @return The metadata for the requested <code>Measurement</code> all fields not stored in the data are set with
      *         default values
      * @throws SQLException If the query was not successful
      */
@@ -266,7 +268,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
         lengthResultSet.next();
         final var length = lengthResultSet.getDouble(1);
         final var version = "1";
-        return new MetaData(measurementIdentifier, deviceType, osVersion, appVersion, length, username, version);
+        return new MetaData(measurementIdentifier, deviceType, osVersion, appVersion, length, userId, version);
     }
 
     /**
