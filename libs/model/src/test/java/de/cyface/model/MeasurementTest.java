@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class MeasurementTest {
 
@@ -54,6 +54,10 @@ public class MeasurementTest {
      * The name of the user to add test data for.
      */
     private static final String TEST_USER_USERNAME = "guest";
+    /**
+     * The id of the user to add test data for.
+     */
+    private static final String TEST_USER_ID = "624d8c51c0879068499676c6";
 
     /**
      * Tests that writing the CSV header produces the correct output.
@@ -61,7 +65,7 @@ public class MeasurementTest {
     @Test
     void testWriteCsvHeaderRow() {
         // Arrange
-        final var expectedHeader = "username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,"
+        final var expectedHeader = "userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,"
                 + "speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime"
                 + " [ms],travelTime [ms]";
 
@@ -91,22 +95,21 @@ public class MeasurementTest {
                                 accuracy(3), speed(3), UNKNOWN)),
                         point3DS, point3DS, point3DS));
         final var measurement = new Measurement(metaData, tracks);
-        final var expectedOutput = "username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime [ms],travelTime [ms]\r\n"
-                +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",0,1000," + latitude(1)
-                + ","
+        final var expectedOutput = "userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,"
+                + "speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],"
+                + "modalityTypeTravelTime [ms],travelTime [ms]\r\n"
+                + TEST_USER_ID + "," + TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER
+                + ",0,1000," + latitude(1) + ","
                 + longitude(1) + "," + speed(1) + "," + accuracy(1) + "," + UNKNOWN.getDatabaseIdentifier()
-                + ",0.0,0.0,0,0\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,3000," + latitude(3)
-                + ","
+                + ",0.0,0.0,0,0\r\n"
+                + TEST_USER_ID + "," + TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER
+                + ",1,3000," + latitude(3) + ","
                 + longitude(3) + "," + speed(3) + "," + accuracy(3) + "," + UNKNOWN.getDatabaseIdentifier()
                 + ",0.0,0.0,0,0\r\n";
 
         // Act
         final var csvOutput = new StringBuilder();
-        measurement.asCsv(true, line -> {
-            csvOutput.append(line).append("\r\n");
-        });
+        measurement.asCsv(true, TEST_USER_USERNAME, line -> csvOutput.append(line).append("\r\n"));
 
         // Assert
         assertThat(csvOutput.toString(), is(equalTo(expectedOutput)));
@@ -140,30 +143,28 @@ public class MeasurementTest {
         final var measurement = new Measurement(metaData, tracks);
 
         final var csvOutput = new StringBuilder();
-        final var expectedOutput = "username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime [ms],travelTime [ms]\r\n"
-                +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",0,1000," + latitude(1)
-                + ","
+        final var expectedOutput = "userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,"
+                + "speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],"
+                + "modalityTypeTravelTime [ms],travelTime [ms]\r\n"
+                + TEST_USER_ID + "," + TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER
+                + ",0,1000," + latitude(1) + ","
                 + longitude(1) + "," + speed(1) + "," + accuracy(1) + "," + WALKING.getDatabaseIdentifier()
                 + ",0.0,0.0,0,0\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",0,1500," + latitude(2)
-                + ","
+                TEST_USER_ID + "," + TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER
+                + ",0,1500," + latitude(2) + ","
                 + longitude(2) + "," + speed(2) + "," + accuracy(2) + "," + WALKING.getDatabaseIdentifier()
                 + ",13.12610864737932,13.12610864737932,500,500\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,3000," + latitude(3)
-                + ","
+                TEST_USER_ID + "," + TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER
+                + ",1,3000," + latitude(3) + ","
                 + longitude(3) + "," + speed(3) + "," + accuracy(3) + "," + BICYCLE.getDatabaseIdentifier()
                 + ",0.0,13.12610864737932,0,500\r\n" +
-                TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER + ",1,4000," + latitude(4)
-                + ","
+                TEST_USER_ID + "," + TEST_USER_USERNAME + "," + DEVICE_IDENTIFIER + "," + MEASUREMENT_IDENTIFIER
+                + ",1,4000," + latitude(4) + ","
                 + longitude(4) + "," + speed(4) + "," + accuracy(4) + "," + BICYCLE.getDatabaseIdentifier()
                 + ",13.110048189675535,26.236156837054857,1000,1500\r\n";
 
         // Act
-        measurement.asCsv(true, line -> {
-            csvOutput.append(line).append("\r\n");
-        });
-        // oocut.writeLocationsAsCsvRows(response, measurement);
+        measurement.asCsv(true, TEST_USER_USERNAME, line -> csvOutput.append(line).append("\r\n"));
 
         // Assert
         assertThat(csvOutput.toString(), is(equalTo(expectedOutput)));
@@ -215,7 +216,8 @@ public class MeasurementTest {
                                 speed(1), UNKNOWN)),
                         point3DS, point3DS, point3DS));
         final var measurement = new Measurement(metaData, tracks);
-        final var expectedOutput = "{\"metaData\":{\"username\":\"guest\",\"deviceId\":\""
+        final var expectedOutput = "{\"metaData\":{\"userId\":\"" + TEST_USER_ID
+                + "\",\"username\":\"guest\",\"deviceId\":\""
                 + identifier.getDeviceIdentifier() + "\",\"measurementId\":" + identifier.getMeasurementIdentifier()
                 + ",\"length\":0.0},\"tracks\":[{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\","
                 + "\"geometry\":{\"type\":\"Point\",\"coordinates\":[13.1,51.1]},\"properties\":{\"timestamp\":1000,"
@@ -223,7 +225,7 @@ public class MeasurementTest {
 
         // Act
         final var jsonOutput = new StringBuilder();
-        measurement.asJson(jsonOutput::append);
+        measurement.asJson(TEST_USER_USERNAME, jsonOutput::append);
 
         // Assert
         assertThat(jsonOutput.toString(), is(equalTo(expectedOutput)));
@@ -262,11 +264,11 @@ public class MeasurementTest {
     }
 
     /**
-     * @return A static set of meta data to be used by test {@link Measurement} instances
+     * @return A static set of metadata to be used by test {@link Measurement} instances
      */
     private MetaData metaData() {
         return new MetaData(new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER),
                 "Android SDK built for x86", "Android 8.0.0",
-                "2.7.0-beta1", 0.0, TEST_USER_USERNAME, "1.0.0");
+                "2.7.0-beta1", 0.0, TEST_USER_ID, "1.0.0");
     }
 }

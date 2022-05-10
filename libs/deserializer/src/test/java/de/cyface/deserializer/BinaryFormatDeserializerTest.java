@@ -73,6 +73,10 @@ class BinaryFormatDeserializerTest {
     private static final long TRACK2_PAUSE_TIME = 1556050163150L;
     private static final long TRACK3_RESUME_TIME = 1556050163200L;
     private static final long MEASUREMENT_STOP_TIME = 1556050163250L;
+    /**
+     * The id of the user to add test data for.
+     */
+    private static final String TEST_USER_ID = "624d8c51c0879068499676c6";
 
     /**
      * This test evaluates the general workings of reading some binary data from a very short file in the Cyface binary
@@ -86,7 +90,7 @@ class BinaryFormatDeserializerTest {
         // Arrange
         final var identifier = new MeasurementIdentifier("test", 1);
         try (final var testData = testData(identifier)) {
-            final var metaData = new MetaData(identifier, "Pixel 3", "Android 9.0.0", "1.2.0-beta1", 500.5, "admin",
+            final var metaData = new MetaData(identifier, "Pixel 3", "Android 9.0.0", "1.2.0-beta1", 500.5, TEST_USER_ID,
                     MetaData.CURRENT_VERSION);
             final var reader = new BinaryFormatDeserializer(metaData, testData);
 
@@ -100,7 +104,7 @@ class BinaryFormatDeserializerTest {
             assertThat(result.getMetaData().getOsVersion(), is("Android 9.0.0"));
             assertThat(result.getMetaData().getAppVersion(), is("1.2.0-beta1"));
             assertThat(result.getMetaData().getLength(), is(500.5));
-            assertThat(result.getMetaData().getUsername(), is("admin"));
+            assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID));
             assertThat(result.getMetaData().getVersion(), is(MetaData.CURRENT_VERSION));
 
             final var resultTracks = result.getTracks();
