@@ -127,12 +127,27 @@ public class Measurement implements Serializable {
      * Exports this measurement as a CSV file.
      *
      * @param withCsvHeader {@code True} if a CSV header should be added before the data
-     * @param username The name of the user who uploaded the data
+     * @param handler A handler that gets one line of CSV output per call
+     */
+    @SuppressWarnings("unused") // API used by backend/executables/cyface-to-csv
+    public void asCsv(final boolean withCsvHeader, final Consumer<String> handler) {
+        asCsv(withCsvHeader, null, handler);
+    }
+
+    /**
+     * Exports this measurement as a CSV file.
+     *
+     * @param withCsvHeader {@code True} if a CSV header should be added before the data
+     * @param username The name of the user who uploaded the data or {@code null} to not export this field
      * @param handler A handler that gets one line of CSV output per call
      */
     public void asCsv(final boolean withCsvHeader, final String username, final Consumer<String> handler) {
         if (withCsvHeader) {
-            csvHeader(handler);
+            if (username == null) {
+                csvHeaderWithUsername(handler);
+            } else {
+                csvHeader(handler);
+            }
         }
 
         Modality lastModality = Modality.UNKNOWN;
@@ -352,22 +367,42 @@ public class Measurement implements Serializable {
      * @param handler The handler that is notified of the new CSV row.
      */
     public static void csvHeader(final Consumer<String> handler) {
-        // The deserialized.metadata only contains the `userId` as the `username` can change over time and, thus, we
-        // annotate both. The `username` is required as the customer usually cannot make much use of the `userId`.
-        final var csvHeaderRow = String.join(",", "userId", "username", "deviceId",
-                "measurementId",
-                "trackId",
-                "timestamp [ms]", "latitude", "longitude", "speed [m/s]",
-                "accuracy [m]",
-                "modalityType", "modalityTypeDistance [m]", "distance [m]",
-                "modalityTypeTravelTime [ms]", "travelTime [ms]");
+        csvHeader(true, handler);
+    }
+
+    /**
+     * Creates a CSV header for this measurement.
+     *
+     * @param handler The handler that is notified of the new CSV row.
+     */
+    public static void csvHeaderWithUsername(final Consumer<String> handler) {
+        csvHeader(false, handler);
+    }
+
+    /**
+     * Creates a CSV header for this measurement.
+     *
+     * @param includeUsername {@code True} if the username should be included
+     * @param handler The handler that is notified of the new CSV row.
+     */
+    private static void csvHeader(final boolean includeUsername, final Consumer<String> handler) {
+
+        final var elements = new ArrayList<String>();
+        elements.add("userId");
+        if (includeUsername) {
+            elements.add("username");
+        }
+        elements.addAll(List.of("deviceId", "measurementId", "trackId", "timestamp [ms]", "latitude", "longitude",
+                "speed [m/s]", "accuracy [m]", "modalityType", "modalityTypeDistance [m]", "distance [m]",
+                "modalityTypeTravelTime [ms]", "travelTime [ms]"));
+        final var csvHeaderRow = String.join(",", elements);
         handler.accept(csvHeaderRow);
     }
 
     /**
      * Converts one location entry annotated with metadata to a CSV row.
      *
-     * @param username the name of the user who uploaded the data
+     * @param username the name of the user who uploaded the data or {@code null} to not annotate a username
      * @param metaData the {@code Measurement} of the {@param location}
      * @param locationRecord the {@code GeoLocationRecord} to be processed
      * @param trackId the id of the sub track starting at 1
@@ -378,20 +413,27 @@ public class Measurement implements Serializable {
      * @return the csv row as String
      */
     private String csvRow(final String username, final MetaData metaData, final RawRecord locationRecord,
-            final int trackId,
-            final double modalityTypeDistance, final double totalDistance,
+            final int trackId, final double modalityTypeDistance, final double totalDistance,
             final long modalityTypeTravelTime, final long totalTravelTime) {
+
         final var userId = metaData.getUserId();
         final var deviceId = metaData.getIdentifier().getDeviceIdentifier();
         final var measurementId = String.valueOf(metaData.getIdentifier().getMeasurementIdentifier());
-        return String.join(",", userId, username, deviceId, measurementId, String.valueOf(trackId),
+
+        final var elements = new ArrayList<String>();
+        elements.add(userId);
+        if (username != null) {
+            elements.add(username);
+        }
+        elements.addAll(List.of(deviceId, measurementId, String.valueOf(trackId),
                 String.valueOf(locationRecord.getTimestamp()),
                 String.valueOf(locationRecord.getLatitude()),
                 String.valueOf(locationRecord.getLongitude()), String.valueOf(locationRecord.getSpeed()),
                 String.valueOf(locationRecord.getAccuracy()),
                 locationRecord.getModality().getDatabaseIdentifier(),
                 String.valueOf(modalityTypeDistance), String.valueOf(totalDistance),
-                String.valueOf(modalityTypeTravelTime), String.valueOf(totalTravelTime));
+                String.valueOf(modalityTypeTravelTime), String.valueOf(totalTravelTime)));
+        return String.join(",", elements);
     }
 
     /**
