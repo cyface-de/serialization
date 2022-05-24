@@ -18,6 +18,8 @@
  */
 package de.cyface.model;
 
+import org.apache.commons.lang3.Validate;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -25,17 +27,21 @@ import java.util.Objects;
  * The context of a {@code Measurement}.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 1.2.0
  */
 public class MetaData implements Serializable {
 
     /**
-     * The version of the deserialized measurement model.
+     * The current version of the deserialized measurement model.
      * <p>
      * Required to read measurement documents from the database which were deserialized by different deserializers.
      */
     public static final String CURRENT_VERSION = "2.0.0";
+    /**
+     * Regex of supported {@link MetaData} versions of this class.
+     */
+    public static final String SUPPORTED_VERSIONS = "2.[0-9]+.[0-9]+";
     /**
      * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
      */
@@ -65,7 +71,7 @@ public class MetaData implements Serializable {
      */
     private String userId;
     /**
-     * The version of the {@code Measurement} model in the deserialized format, such as "1.1.1" or "2.0.0".
+     * The format version in which the {@code Measurement} was deserialized, e.g. "2.0.0".
      */
     private String version;
 
@@ -78,10 +84,12 @@ public class MetaData implements Serializable {
      * @param appVersion The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
      * @param length The length of the measurement in meters.
      * @param userId The id of the user who has uploaded this measurement.
-     * @param version The version of this {@code Measurement} model, such as "1.1.1" or "2.0.0".
+     * @param version The format version in which the {@code Measurement} was deserialized, e.g. "2.0.0".
      */
     public MetaData(final MeasurementIdentifier identifier, final String deviceType, final String osVersion,
             final String appVersion, final double length, final String userId, final String version) {
+
+        Validate.isTrue(version.matches(SUPPORTED_VERSIONS), "Unsupported version: %s", version);
         this.identifier = identifier;
         this.deviceType = deviceType;
         this.osVersion = osVersion;
