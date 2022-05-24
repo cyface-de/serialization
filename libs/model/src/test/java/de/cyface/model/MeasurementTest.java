@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class MeasurementTest {
 
@@ -269,6 +269,6 @@ public class MeasurementTest {
     private MetaData metaData() {
         return new MetaData(new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER),
                 "Android SDK built for x86", "Android 8.0.0",
-                "2.7.0-beta1", 0.0, TEST_USER_ID, "1.0.0");
+                "2.7.0-beta1", 0.0, TEST_USER_ID, MetaData.CURRENT_VERSION);
     }
 }

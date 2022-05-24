@@ -55,7 +55,7 @@ import de.cyface.model.RawRecord;
  * key into the database.
  * 
  * @author Klemens Muthmann
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
@@ -267,8 +267,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
         final var lengthResultSet = lengthQuery.executeQuery();
         lengthResultSet.next();
         final var length = lengthResultSet.getDouble(1);
-        final var version = "1";
-        return new MetaData(measurementIdentifier, deviceType, osVersion, appVersion, length, userId, version);
+        return new MetaData(measurementIdentifier, deviceType, osVersion, appVersion, length, userId, MetaData.CURRENT_VERSION);
     }
 
     /**
