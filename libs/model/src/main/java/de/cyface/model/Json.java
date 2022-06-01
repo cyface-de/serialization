@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Armin Schnabel
  * @since 1.1.0
- * @version 1.1.1
+ * @version 1.2.0
  */
 public class Json {
 
