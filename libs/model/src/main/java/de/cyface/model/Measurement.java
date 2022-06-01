@@ -113,7 +113,7 @@ public class Measurement implements Serializable {
      * @param trackBuckets the data to merge
      * @return the tracks
      */
-    public List<Track> tracks(final List<TrackBucket> trackBuckets) {
+    private List<Track> tracks(final List<TrackBucket> trackBuckets) {
 
         // Group by trackId
         final var groupedBuckets = trackBuckets.stream()
