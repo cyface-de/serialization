@@ -43,6 +43,8 @@ import de.cyface.model.MeasurementIdentifier;
  * Tests that deserialization of phone data exports works as expected.
  *
  * @author Klemens Muthmann
+ * @since 1.0.0
+ * @version 1.0.0
  */
 public class UnzippedPhoneDataDeserializerTest {
 
