@@ -66,7 +66,7 @@ public class RequestMetaData implements Serializable {
      * The current version of the transferred file. This is always specified by the first two bytes of the file
      * transferred and helps compatible APIs to process data from different client versions.
      */
-    public static final int CURRENT_TRANSFER_FILE_FORMAT_VERSION = 2;
+    public static final int CURRENT_TRANSFER_FILE_FORMAT_VERSION = 3;
     /**
      * The worldwide unique identifier of the device uploading the data.
      */
