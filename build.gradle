@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2022 Cyface GmbH
  *
  * This file is part of the Cyface Serialization.
  *
@@ -20,7 +20,7 @@
  * The build gradle file for the Cyface Serialization.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 buildscript {
@@ -83,8 +83,8 @@ subprojects {
     commonsLangVersion = '3.12.0'
     sqliteDriverVersion = '3.34.0'
     gradleWrapperVersion = '6.9'
-    protobufVersion = '3.17.3'
-    cyfaceProtosVersion = '1.0.0'
+    protobufVersion = '3.21.1'
+    cyfaceProtosVersion = '2.0.0-beta1'
 
     // Versions of testing dependencies
     junitVersion = '5.7.2'
