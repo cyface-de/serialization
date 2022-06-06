@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Cyface GmbH
+ * Copyright 2021-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -27,7 +27,7 @@ import org.apache.commons.lang3.Validate;
  * The metadata as transmitted in the request header or pre-request body.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 6.0.0
  */
 public class RequestMetaData implements Serializable {
@@ -66,7 +66,7 @@ public class RequestMetaData implements Serializable {
      * The current version of the transferred file. This is always specified by the first two bytes of the file
      * transferred and helps compatible APIs to process data from different client versions.
      */
-    public static final int CURRENT_TRANSFER_FILE_FORMAT_VERSION = 2;
+    public static final int CURRENT_TRANSFER_FILE_FORMAT_VERSION = 3;
     /**
      * The worldwide unique identifier of the device uploading the data.
      */
