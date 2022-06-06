@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -39,6 +39,8 @@ import de.cyface.model.MetaData;
  * A {@link DeserializerFactory} is necessary to create such a <code>Deserializer</code>.
  * 
  * @author Klemens Muthmann
+ * @since 1.0.0
+ * @version 1.0.0
  * @see DeserializerFactory
  */
 public class BinaryFormatDeserializer implements Deserializer {
@@ -55,7 +57,7 @@ public class BinaryFormatDeserializer implements Deserializer {
      * The current version of the transferred file. This is always specified by the first two bytes of the file
      * transferred and helps compatible APIs to process data from different client versions.
      */
-    public static final short TRANSFER_FILE_FORMAT_VERSION = 2;
+    public static final short TRANSFER_FILE_FORMAT_VERSION = 3;
 
     /**
      * The meta information about the {@link Measurement}. This information is not part of the datafiles but is usually

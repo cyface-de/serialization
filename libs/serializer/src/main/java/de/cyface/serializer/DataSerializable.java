@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Cyface GmbH
+ * Copyright 2019-2022 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -45,7 +45,7 @@ import de.cyface.protos.model.Measurement;
  * This class is absolutely not thread safe!
  *
  * @author Klemens Muthmann
- * @version 2.0.0
+ * @version 2.0.1
  * @since 1.0.0
  */
 public final class DataSerializable {
@@ -57,7 +57,7 @@ public final class DataSerializable {
      * The current version of the transferred file. This is always specified by the first two bytes of the file
      * transferred and helps compatible APIs to process data from different client versions.
      */
-    public static final short TRANSFER_FILE_FORMAT_VERSION = 2;
+    public static final short TRANSFER_FILE_FORMAT_VERSION = 3;
     /**
      * Since our current API Level does not support {@code Short.Bytes}.
      */
