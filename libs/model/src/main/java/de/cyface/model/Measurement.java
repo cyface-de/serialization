@@ -21,15 +21,21 @@ package de.cyface.model;
 import static de.cyface.model.Json.jsonArray;
 import static de.cyface.model.Json.jsonKeyValue;
 import static de.cyface.model.Json.jsonObject;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -45,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.0.0
+ * @version 2.1.0
  * @since 1.0.0
  */
 public class Measurement implements Serializable {
@@ -87,6 +93,64 @@ public class Measurement implements Serializable {
 
         this.metaData = metaData;
         this.tracks = new ArrayList<>(tracks);
+    }
+
+    public Measurement(final List<TrackBucket> buckets) {
+        if (buckets.isEmpty()) {
+            throw new IllegalArgumentException("Cannot create a measurement from 0 buckets!");
+        }
+        final var metaData = buckets.get(0).getMetaData();
+        Validate.notNull(metaData);
+
+        this.metaData = metaData;
+        final var tracks = tracks(buckets);
+        this.tracks = new ArrayList<>(tracks);
+    }
+
+    /**
+     * Merges {@link TrackBucket}s into {@link Track}s.
+     *
+     * @param trackBuckets the data to merge
+     * @return the tracks
+     */
+    private List<Track> tracks(final List<TrackBucket> trackBuckets) {
+
+        // Group by trackId
+        final var groupedBuckets = trackBuckets.stream()
+                .collect(groupingBy(TrackBucket::getTrackId));
+
+        // Sort bucket groups by trackId
+        final var sortedBucketGroups = groupedBuckets.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new));
+
+        // Convert buckets to Track
+        final var tracks = new ArrayList<Track>();
+        sortedBucketGroups.forEach((trackId, bucketGroup) -> {
+            // Sort buckets
+            final var sortedBuckets = bucketGroup.stream()
+                    .sorted(Comparator.comparing(TrackBucket::getBucket))
+                    .collect(toList());
+
+            // Merge buckets
+            final var locations = sortedBuckets.stream()
+                    .flatMap(bucket -> bucket.getTrack().getLocationRecords().stream())
+                    .collect(toList());
+            final var accelerations = sortedBuckets.stream()
+                    .flatMap(bucket -> bucket.getTrack().getAccelerations().stream())
+                    .collect(toList());
+            final var rotations = sortedBuckets.stream()
+                    .flatMap(bucket -> bucket.getTrack().getRotations().stream())
+                    .collect(toList());
+            final var directions = sortedBuckets.stream()
+                    .flatMap(bucket -> bucket.getTrack().getDirections().stream())
+                    .collect(toList());
+
+            final var track = new Track(locations, accelerations, rotations, directions);
+            tracks.add(track);
+        });
+        return tracks;
     }
 
     /**

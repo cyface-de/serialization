@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Armin Schnabel
  * @since 1.1.0
- * @version 1.1.1
+ * @version 1.2.0
  */
 public class Json {
 
@@ -207,13 +207,24 @@ public class Json {
             private final List<KeyValuePair> keyValuePairs = new ArrayList<>();
 
             /**
-             * Adds the supplied {@code objects} to this builder.
+             * Adds the supplied {@code pair} to this builder.
              *
              * @param pair the {@link KeyValuePair} to add
              * @return this builder
              */
             public Builder add(final KeyValuePair pair) {
                 this.keyValuePairs.add(pair);
+                return this;
+            }
+
+            /**
+             * Adds the supplied {@code pairs} to this builder.
+             *
+             * @param pairs the {@link KeyValuePair}s to add
+             * @return this builder
+             */
+            public Builder addAll(final KeyValuePair... pairs) {
+                this.keyValuePairs.addAll(List.of(pairs));
                 return this;
             }
 
@@ -278,13 +289,24 @@ public class Json {
             private final List<JsonObject> objects = new ArrayList<>();
 
             /**
-             * Adds the supplied {@code objects} to this builder.
+             * Adds the supplied {@code object} to this builder.
              *
              * @param object the {@link JsonObject} to add
              * @return this builder
              */
             public Builder add(final JsonObject object) {
                 this.objects.add(object);
+                return this;
+            }
+
+            /**
+             * Adds the supplied {@code objects} to this builder.
+             *
+             * @param objects the {@link JsonObject}s to add
+             * @return this builder
+             */
+            public Builder addAll(final JsonObject... objects) {
+                this.objects.addAll(List.of(objects));
                 return this;
             }
 
