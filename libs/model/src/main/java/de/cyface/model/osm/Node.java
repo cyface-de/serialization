@@ -28,19 +28,31 @@ import de.cyface.model.GeoLocation;
  *
  * @author Klemens Muthmann
  * @since 2.2.0
- * @version 1.0.4
+ * @version 1.0.5
  */
 public final class Node extends GeoLocation {
+
     /**
      * The OSM identifier of this node.
      */
     private long identifier;
 
+    /**
+     * No arguments' constructor as required by Apache Flink.
+     */
     @SuppressWarnings("unused") // Part of the API
     public Node() {
-        // No arguments' constructor as required by Apache Flink
+        // Nothing to do
     }
 
+    /**
+     * Creates a fully initialized instance of this class.
+     *
+     * @param identifier The OSM identifier of this node.
+     * @param latitude Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north).
+     * @param longitude Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180°
+     *            (east).
+     */
     @SuppressWarnings("unused") // Part of the API
     public Node(final long identifier, final double latitude, final double longitude) {
         super(latitude, longitude);
@@ -89,6 +101,11 @@ public final class Node extends GeoLocation {
         return identifier == other.identifier;
     }
 
+    /**
+     * Converts this {@link Node} to a {@code String} in the {@code Json} object format.
+     *
+     * @return The node as Json String.
+     */
     @SuppressWarnings("UnusedReturnValue") // Part of the API
     public String toJson() {
         return String.format("{\"identifier\":%d,\"latitude\":%f,\"longitude\":%f}", identifier, getLatitude(),

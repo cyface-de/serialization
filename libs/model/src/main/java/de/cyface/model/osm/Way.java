@@ -172,6 +172,11 @@ public final class Way<T extends MapTag> implements Comparable<Way<? extends Map
         return Objects.hash(identifier);
     }
 
+    /**
+     * Converts this {@link Way} to a {@code String} in the {@code Json} object format.
+     *
+     * @return The node as Json String.
+     */
     @SuppressWarnings("unused") // Part of the API
     public String toJson() {
         final var stringBuilder = new StringBuilder(String.format("{\"id\":%d,", getIdentifier()));
