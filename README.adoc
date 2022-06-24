@@ -49,33 +49,10 @@ Serialization wrappers for the Cyface Binary Format.
 [#_release_a_new_version]
 == Release a new Version
 
-To release a new version:
+See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Collector Readme]
 
-1. *Create a new release branch* following the format `release-x.y.z`.
-a. `x.y.z` is the number of the new version following link:http://semver.org[Semantic Versioning].
-b. *Hotfixes could be branched from the already existing release-branch*
-A. Merge the hotfix into the `main` and `release` branch, create pull requests and pass reviewing.
-B. No new features are allowed on a release-branch, only fixes and minor changes.
-
-2. *Increase version numbers* in root `build.gradle`,
-a. and optional in any associated `docker-compose.yml` or OpenAPI documentation (usually located in `src/main/resources/webroot/openapi.yml`).
-b. If you need to version sub-projects differently, create a version attribute in the corresponding `build.gradle`.
-
-3. *Commit version bump and push branch* to GitHub.
-a. Wait until the continuous integration system passes.
-b. Create Pull Requests from your `release-x.y.z` branch to `release` and `main`.
-c. Get those Pull Requests accepted and merge them to both branches
-
-4. *Tag the new release on the release branch*.
-a. Ensure you are on the correct branch and commit.
-b. Follow the guidelines from link:https://keepachangelog.com["Keep a Changelog"] in your tag description.
-
-5. *Push the release tag to GitHub*.
-a. The docker image and GitHub packages are automatically published when a new version is tagged and pushed by our
-link:https://github.com/cyface-de/backend/actions[GitHub Actions] to the
-link:https://github.com/cyface-de/backend/packages[GitHub Registry].
-
-6. *Mark the released version as 'new Release' on link:https://github.com/cyface-de/backend/releases[GitHub]*.
+* Increment the `version` in the `build.gradle`
+* After pushing the release tag to Github the CI automatically builds the artifacts and marks the release on Github
 
 
 [#_publishing_artifacts_to_github_packages_manually]
