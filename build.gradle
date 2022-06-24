@@ -58,7 +58,7 @@ subprojects {
   apply plugin: 'java'
 
   group = 'de.cyface'
-  version = '2.1.0'
+  version = '2.2.0'
 
   tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
