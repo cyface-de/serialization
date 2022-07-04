@@ -125,13 +125,16 @@ public class Json {
 
     /**
      * Creates a {@link KeyValuePair} from the supplied key and value.
+     * <p>
+     * Replaces double quotes in {@code String} values with single quotes to ensure the String is parsable [DAT-1313].
      *
      * @param key the name of the key to be used
      * @param value the value as {@code String}
      * @return the created {@code KeyValuePair}
      */
     public static KeyValuePair jsonKeyValue(final String key, final String value) {
-        return new KeyValuePair("\"" + key + "\":\"" + value + "\"");
+        final var processedValue = value.replace('"', '\'');
+        return new KeyValuePair("\"" + key + "\":\"" + processedValue + "\"");
     }
 
     /**
