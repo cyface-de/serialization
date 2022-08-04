@@ -32,15 +32,14 @@ import de.cyface.model.MeasurementIdentifier;
 import de.cyface.model.MetaData;
 
 /**
- * A {@link Deserializer} for a file in Cyface binary format. The deserializer requires one file containing the data and
- * another containing the user events. Constructs a new measurement from a ZLIB compressed <code>InputStream</code> of
- * data.
+ * A {@link Deserializer} for a file in Cyface binary format. Constructs a new measurement from a ZLIB compressed
+ * <code>InputStream</code> of data.
  * <p>
  * A {@link DeserializerFactory} is necessary to create such a <code>Deserializer</code>.
  * 
  * @author Klemens Muthmann
  * @since 1.0.0
- * @version 1.0.0
+ * @version 1.0.1
  * @see DeserializerFactory
  */
 public class BinaryFormatDeserializer implements Deserializer {
@@ -61,8 +60,7 @@ public class BinaryFormatDeserializer implements Deserializer {
 
     /**
      * The meta information about the {@link Measurement}. This information is not part of the datafiles but is usually
-     * stored
-     * alongside the binary data. It is usually used to get a glimpse into what data to expect.
+     * stored alongside the binary data. It is usually used to get a glimpse into what data to expect.
      */
     private final MetaData metaData;
     /**
@@ -99,7 +97,8 @@ public class BinaryFormatDeserializer implements Deserializer {
             final var accelerations = Point3DDeserializer
                     .accelerations(measurement.getAccelerationsBinary().getAccelerationsList());
             final var rotations = Point3DDeserializer.rotations(measurement.getRotationsBinary().getRotationsList());
-            final var directions = Point3DDeserializer.directions(measurement.getDirectionsBinary().getDirectionsList());
+            final var directions = Point3DDeserializer
+                    .directions(measurement.getDirectionsBinary().getDirectionsList());
             final var builder = new TrackBuilder();
             final var tracks = builder.build(locations, events, accelerations, rotations, directions,
                     metaData.getIdentifier());
