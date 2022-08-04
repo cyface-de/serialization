@@ -218,7 +218,7 @@ class BinaryFormatDeserializerTest {
         final var batches = 100;
         final var sensorPointsPerBatch = 100;
         final var sensorPoints = batches * sensorPointsPerBatch;
-        final long measurementStart = 1_660_000_000_000L;
+        final var measurementStart = 1_660_000_000_000L;
         final var measurementEnd = measurementStart + sensorPoints * 10L + 1L;
         final var events = new ArrayList<de.cyface.protos.model.Event>(3);
         events.add(de.cyface.protos.model.Event.newBuilder()
@@ -322,9 +322,10 @@ class BinaryFormatDeserializerTest {
                 .setAccelerationsBinary(ByteString.copyFrom(accelerationBytes))
                 .setRotationsBinary(ByteString.copyFrom(rotationBytes))
                 .setDirectionsBinary(ByteString.copyFrom(directionBytes));
+        // During transfer, the measurement bytes would be succeeded by 2 bytes of the transfer file format (short)
+        final var measurementBytes = builder.build().toByteArray();
 
         // Act - Deserialize
-        final var measurementBytes = builder.build().toByteArray();
         final var parsedMeasurement = parseFrom(measurementBytes);
         final var deserializedEvents = EventDeserializer.deserialize(parsedMeasurement.getEventsList());
         final var deserializedLocations = LocationDeserializer.deserialize(parsedMeasurement.getLocationRecords());
