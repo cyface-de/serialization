@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -22,6 +22,8 @@ package de.cyface.model;
  * A {@link Job} which contains details about filtered data during calibration.
  *
  * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 2.3.1
  */
 @SuppressWarnings("unused") // Part of the API
 public class CalibrationJob extends Job {
@@ -31,13 +33,17 @@ public class CalibrationJob extends Job {
      */
     private boolean processable;
     /**
-     * The number of tracks which were filtered due to a rotated device.
+     * The number of locations to be processed for this job.
      */
-    private int rotatedTracks = 0;
+    private final int totalLocations;
     /**
-     * The total number of tracks, to calculate the share of {@link #getRotatedTracks()}.
+     * The number of locations which were filtered due to a rotated device.
      */
-    private int totalTracks = 0;
+    private int rotatedLocations = 0;
+    /**
+     * The number of locations which were filtered during interpolation.
+     */
+    private int nonInterpolatableLocations = 0;
 
     /**
      * Constructs a fully initialized instance of this class.
@@ -45,10 +51,13 @@ public class CalibrationJob extends Job {
      * @param id The id of the job to update about the status and progress of the processing.
      * @param startedBy The id of the user who triggered the pipeline and will own the result data.
      * @param processable {@code true} when the measurement contains processable tracks.
+     * @param totalLocations The number of locations to be processed for this job.
      */
-    public CalibrationJob(final String id, final String startedBy, final boolean processable) {
+    public CalibrationJob(final String id, final String startedBy, final boolean processable,
+            final int totalLocations) {
         super(id, startedBy);
         this.processable = processable;
+        this.totalLocations = totalLocations;
     }
 
     /**
@@ -56,18 +65,12 @@ public class CalibrationJob extends Job {
      *
      * @param job The job which is processed.
      * @param processable {@code true} when the measurement contains processable tracks.
+     * @param totalLocations The number of locations to be processed for this job.
      */
-    public CalibrationJob(final Job job, final boolean processable) {
+    public CalibrationJob(final Job job, final boolean processable, final int totalLocations) {
         super(job.getId(), job.getStartedBy());
         this.processable = processable;
-    }
-
-    /**
-     * @return The share of the tracks which were filtered due to a rotated device.
-     */
-    @SuppressWarnings("unused") // Part of the API
-    public double rotatedShare() {
-        return totalTracks == 0 ? 0 : (double)rotatedTracks / totalTracks;
+        this.totalLocations = totalLocations;
     }
 
     /**
@@ -82,35 +85,40 @@ public class CalibrationJob extends Job {
      * @return The number of tracks which were filtered due to a rotated device.
      */
     @SuppressWarnings("unused") // Part of the API
-    public int getRotatedTracks() {
-        return rotatedTracks;
+    public int getRotatedLocations() {
+        return rotatedLocations;
     }
 
     /**
-     * @return The total number of tracks, to calculate the share of {@link #getRotatedTracks()}.
+     * @return The number of locations which were filtered during interpolation.
      */
-    @SuppressWarnings("unused") // Part of the API
-    public int getTotalTracks() {
-        return totalTracks;
+    public int getNonInterpolatableLocations() {
+        return nonInterpolatableLocations;
     }
 
     /**
-     * @param rotatedTracks The number of tracks which were filtered due to a rotated device.
+     * @return The number of locations to be processed for this job.
+     */
+    public int getTotalLocations() {
+        return totalLocations;
+    }
+
+    /**
+     * @param rotatedLocations The number of tracks which were filtered due to a rotated device.
      * @return This for chaining.
      */
     @SuppressWarnings("unused") // Part of the API
-    public CalibrationJob setRotatedTracks(final int rotatedTracks) {
-        this.rotatedTracks = rotatedTracks;
+    public CalibrationJob setRotatedLocations(final int rotatedLocations) {
+        this.rotatedLocations = rotatedLocations;
         return this;
     }
 
     /**
-     * @param totalTracks The total number of tracks, to calculate the share of {@link #getRotatedTracks()}.
+     * @param nonInterpolatableLocations The number of locations which were filtered during interpolation.
      * @return This for chaining.
      */
-    @SuppressWarnings("unused") // Part of the API
-    public CalibrationJob setTotalTracks(int totalTracks) {
-        this.totalTracks = totalTracks;
+    public CalibrationJob setNonInterpolatableLocations(int nonInterpolatableLocations) {
+        this.nonInterpolatableLocations = nonInterpolatableLocations;
         return this;
     }
 
