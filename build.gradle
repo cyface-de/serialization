@@ -62,7 +62,7 @@ subprojects {
   apply plugin: 'kotlin'
 
   group = 'de.cyface'
-  version = '2.3.2'
+  version = "0.0.0" // Automatically overwritten by CI
 
   tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

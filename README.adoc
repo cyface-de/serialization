@@ -1,7 +1,8 @@
 = Serialization
 
 image:https://img.shields.io/badge/vert.x-4.1.2-purple.svg[link="https://vertx.io"]
-image:https://github.com/cyface-de/serialization/workflows/Cyface%20Serialization/badge.svg[link="https://github.com/cyface-de/serialization/actions"]
+image:https://github.com/cyface-de/serialization/actions/workflows/gradle_build.yml/badge.svg[link="https://github.com/cyface-de/serialization/actions/workflows/gradle_build.yml"]
+image:https://github.com/cyface-de/serialization/actions/workflows/gradle_publish.yml/badge.svg[link="https://github.com/cyface-de/serialization/actions/workflows/gradle_publish.yml"]
 
 This application represents the https://cyface.de[Cyface] serialization software.
 
@@ -51,8 +52,12 @@ Serialization wrappers for the Cyface Binary Format.
 
 See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Collector Readme]
 
-* Increment the `version` in the `build.gradle`
-* After pushing the release tag to Github the CI automatically builds the artifacts and marks the release on Github
+* `cyfaceAndroidBackendVersion` in root `build.gradle` is automatically set by the CI
+* Just tag the release and push the tag to Github
+* The Github package is automatically published when a new version is tagged and pushed by our
+https://github.com/cyface-de/serialization/actions[Github Actions] to
+the https://github.com/cyface-de/serialization/packages[Github Registry]
+* The tag is automatically marked as a 'new Release' on https://github.com/cyface-de/serialization/releases[Github]
 
 
 [#_publishing_artifacts_to_github_packages_manually]
@@ -74,7 +79,7 @@ This project uses link:https://semver.org/[semantic versioning].
 
 [#_licensing]
 == Licensing
-Copyright 2018-2021 Cyface GmbH
+Copyright 2018-2023 Cyface GmbH
 
 This file is part of the Cyface Serialization.
 
