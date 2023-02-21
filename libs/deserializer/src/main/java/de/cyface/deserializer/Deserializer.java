@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Cyface GmbH
+ * Copyright 2019-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -32,6 +32,7 @@ import de.cyface.model.MeasurementIdentifier;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
+ * @since 1.0.0
  */
 public interface Deserializer extends Serializable {
     /**
@@ -51,6 +52,7 @@ public interface Deserializer extends Serializable {
     Measurement read() throws IOException, InvalidLifecycleEvents, NoSuchMeasurement, UnsupportedFileVersion;
     /**
      * @return A list with all the valid <code>{@link MeasurementIdentifier}</code> within the deserializable data.
+     * @throws IOException If reading data fails
      */
     List<MeasurementIdentifier> peakIntoDatabase() throws IOException;
 }
