@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Cyface GmbH
+ * Copyright 2020-2023 Cyface GmbH
  *
  * This file is part of the Cyface Serialization.
  *
@@ -20,15 +20,18 @@
  * The build gradle file for the Cyface Serialization.
  *
  * @author Armin Schnabel
- * @version 1.0.1
+ * @version 1.1.0
  * @since 1.0.0
  */
 buildscript {
+  ext.kotlin_version = "1.7.10"
+
   repositories {
     mavenCentral()
   }
   dependencies {
     classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.5"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
 
@@ -56,6 +59,7 @@ subprojects {
   apply plugin: 'checkstyle'
   apply plugin: 'pmd'
   apply plugin: 'java'
+  apply plugin: 'kotlin'
 
   group = 'de.cyface'
   version = '2.3.2'
@@ -100,7 +104,21 @@ subprojects {
     gradleVersion = "$gradleWrapperVersion"
   }
 
+  compileKotlin {
+    kotlinOptions {
+      jvmTarget = "11"
+    }
+  }
+  compileTestKotlin {
+    kotlinOptions {
+      jvmTarget = "11"
+    }
+  }
+
   dependencies {
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version" // there is no stdlib-jdk11
+
     // Testing Dependencies
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation "org.junit.jupiter:junit-jupiter-params"  // Required for parameterized tests
