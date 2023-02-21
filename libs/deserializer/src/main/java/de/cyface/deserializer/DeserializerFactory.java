@@ -51,6 +51,7 @@ public final class DeserializerFactory {
      * @param compressedDataStream The compressed input stream containing the <code>Measurement</code> data in Cyface
      *            binary format
      * @return A <code>Deserializer</code> for the Cyface binary format
+     * @throws IOException When writing data failed
      */
     public static BinaryFormatDeserializer create(final MetaData metaData, final InputStream compressedDataStream) throws IOException {
         return new BinaryFormatDeserializer(metaData, compressedDataStream);
