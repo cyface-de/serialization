@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Cyface GmbH
+ * Copyright 2021-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -16,26 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.model;
+package de.cyface.model
 
-public interface Point3D {
+/*
+ * Interface for three-dimensional data points.
+ *
+ * @author Armin Schnabel
+ * @since 1.0.0
+ */
+interface Point3D {
     /**
      * @return The x component of the data point
      */
-    float getX();
+    val x: Float
 
     /**
      * @return The y component of the data point
      */
-    float getY();
+    val y: Float
 
     /**
      * @return The z component of the data point
      */
-    float getZ();
+    val z: Float
 
     /**
      * @return The Unix timestamp at which this point was measured in milliseconds since the first of January 1970.
      */
-    long getTimestamp();
+    val timestamp: Long
 }
