@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Cyface GmbH
+ * Copyright 2021-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Armin Schnabel
  * @since 1.1.0
- * @version 1.2.0
+ * @version 1.2.1
  */
 public class Json {
 
@@ -171,7 +171,7 @@ public class Json {
      *
      * @author Armin Schnabel
      * @since 1.1.0
-     * @version 1.1.0
+     * @version 1.1.1
      */
     public static class JsonObject {
         /**
@@ -192,6 +192,11 @@ public class Json {
          * @return The {@code String} representation of the {@link JsonObject}.
          */
         public String getStringValue() {
+            return stringValue;
+        }
+
+        @Override
+        public String toString() {
             return stringValue;
         }
 
@@ -253,7 +258,7 @@ public class Json {
      *
      * @author Armin Schnabel
      * @since 1.1.0
-     * @version 1.1.0
+     * @version 1.1.1
      */
     public static class JsonArray {
         /**
@@ -274,6 +279,11 @@ public class Json {
          * @return The {@code String} representation of the {@link JsonArray}.
          */
         public String getStringValue() {
+            return stringValue;
+        }
+
+        @Override
+        public String toString() {
             return stringValue;
         }
 

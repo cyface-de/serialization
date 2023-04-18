@@ -52,7 +52,7 @@ Serialization wrappers for the Cyface Binary Format.
 
 See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Collector Readme]
 
-* `cyfaceAndroidBackendVersion` in root `build.gradle` is automatically set by the CI
+* `version` in root `build.gradle` is automatically set by the CI
 * Just tag the release and push the tag to Github
 * The Github package is automatically published when a new version is tagged and pushed by our
 https://github.com/cyface-de/serialization/actions[Github Actions] to
