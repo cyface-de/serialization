@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Cyface GmbH
+ * Copyright 2019-2023 Cyface GmbH
  *
  * This file is part of the Cyface Serialization.
  *
@@ -22,7 +22,7 @@
  * @since 1.0.0
  */
 plugins {
-  id 'com.google.protobuf' version '0.8.16'
+  id 'com.google.protobuf'
   // To download the `measurement.proto` file and to generate `java-lite` files required here
   //noinspection SpellCheckingInspection
   id 'de.undercouch.download' //version '4.1.1'
@@ -32,7 +32,7 @@ dependencies {
   api project(':libs:model')
 
   // Protocol Buffer: generate java files
-  api "com.google.protobuf:protobuf-javalite:$protobufVersion"  // api to import protobuf classes
+  api "com.google.protobuf:protobuf-javalite:${protobufVersion}"  // api to import protobuf classes
 }
 
 sourceSets {
