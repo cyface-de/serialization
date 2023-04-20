@@ -44,7 +44,8 @@ plugins {
   // Plugin to display the Gradle task graph
   //noinspection SpellCheckingInspection
   id 'org.barfuin.gradle.taskinfo' version '2.1.0'
-  id 'com.google.protobuf' version '0.9.2' apply false // Keep in sync with `plugins` in `protos/build.gradle
+  // protobuf plugin 0.9.0-2 fail: https://github.com/google/protobuf-gradle-plugin/issues/686
+  id 'com.google.protobuf' version '0.8.19' apply false // Maybe keep in sync with `plugins` in `protos/build.gradle
 }
 
 allprojects {
@@ -179,7 +180,7 @@ subprojects {
     toolVersion = "$pmdToolsVersion"
     incrementalAnalysis = true
     ruleSetFiles = project(':').files('config/pmd.xml')
-    rulePriority = 4
+    rulesMinimumPriority = 4
     ruleSets = []
     // There are so many violations and currently it is not really important in this application.
     ignoreFailures = true

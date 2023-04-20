@@ -29,7 +29,6 @@ jobs:
         run: |
           sed -i "s/version = \"0.0.0\"/version = \"${{ github.ref_name }}\"/g" build.gradle
 
-
       # Publish slim JARS to Github Package Registry
       - name: Publish with Gradle
         run: ./gradlew publish
