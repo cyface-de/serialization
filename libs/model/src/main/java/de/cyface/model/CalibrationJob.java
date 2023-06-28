@@ -18,11 +18,13 @@
  */
 package de.cyface.model;
 
+import java.util.UUID;
+
 /**
  * A {@link Job} which contains details about filtered data during calibration.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 2.3.1
  */
 @SuppressWarnings("unused") // Part of the API
@@ -53,8 +55,8 @@ public class CalibrationJob extends Job {
      * @param processable {@code true} when the measurement contains processable tracks.
      * @param totalLocations The number of locations to be processed for this job.
      */
-    public CalibrationJob(final String id, final String startedBy, final boolean processable,
-            final int totalLocations) {
+    public CalibrationJob(final String id, final UUID startedBy, final boolean processable,
+                          final int totalLocations) {
         super(id, startedBy);
         this.processable = processable;
         this.totalLocations = totalLocations;

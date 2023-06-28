@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -20,6 +20,7 @@ package de.cyface.model;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 
@@ -27,7 +28,7 @@ import org.apache.commons.lang3.Validate;
  * The job which triggered pipeline processing.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 2.3.0
  */
 @SuppressWarnings("unused") // Part of the API
@@ -44,7 +45,7 @@ public class Job implements Serializable {
     /**
      * The id of the user who triggered the pipeline and will own the result data.
      */
-    private final String startedBy;
+    private final UUID startedBy;
 
     /**
      * Constructs a fully initialized instance of this class.
@@ -53,9 +54,9 @@ public class Job implements Serializable {
      * @param startedBy The id of the user who triggered the pipeline and will own the result data.
      */
     @SuppressWarnings("unused") // Part of the API
-    public Job(final String id, final String startedBy) {
+    public Job(final String id, final UUID startedBy) {
         this.id = Validate.notEmpty(id);
-        this.startedBy = Validate.notEmpty(startedBy);
+        this.startedBy = Validate.notNull(startedBy);
     }
 
     /**
@@ -70,7 +71,7 @@ public class Job implements Serializable {
      * @return The id of the user who triggered the pipeline and will own the result data.
      */
     @SuppressWarnings("unused") // Part of the API
-    public String getStartedBy() {
+    public UUID getStartedBy() {
         return startedBy;
     }
 
