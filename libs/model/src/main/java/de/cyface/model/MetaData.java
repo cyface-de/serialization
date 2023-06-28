@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Cyface GmbH
+ * Copyright 2020-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -22,12 +22,13 @@ import org.apache.commons.lang3.Validate;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
- * The context of a {@code Measurement}.
+ * The context of a deserialized {@code Measurement}.
  *
  * @author Armin Schnabel
- * @version 2.0.1
+ * @version 3.0.0
  * @since 1.2.0
  */
 public class MetaData implements Serializable {
@@ -35,17 +36,17 @@ public class MetaData implements Serializable {
     /**
      * The current version of the deserialized measurement model.
      * <p>
-     * Required to read measurement documents from the database which were deserialized by different deserializers.
+     * To be able to read measurements deserialized by different deserializer versions.
      */
-    public static final String CURRENT_VERSION = "2.0.0";
+    public static final String CURRENT_VERSION = "3.0.0";
     /**
      * Regex of supported {@link MetaData} versions of this class.
      */
-    public static final String SUPPORTED_VERSIONS = "2.[0-9]+.[0-9]+";
+    public static final String SUPPORTED_VERSIONS = "3.0.0";
     /**
      * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
      */
-    private static final long serialVersionUID = -8113278901259461591L;
+    private static final long serialVersionUID = -2781311916778609965L;
     /**
      * The worldwide unique identifier of the measurement.
      */
@@ -69,9 +70,9 @@ public class MetaData implements Serializable {
     /**
      * The id of the user who has uploaded this measurement.
      */
-    private String userId;
+    private UUID userId;
     /**
-     * The format version in which the {@code Measurement} was deserialized, e.g. "2.0.0".
+     * The format version in which the {@code Measurement} was deserialized, e.g. "1.2.3".
      */
     private String version;
 
@@ -87,7 +88,7 @@ public class MetaData implements Serializable {
      * @param version The format version in which the {@code Measurement} was deserialized, e.g. "2.0.0".
      */
     public MetaData(final MeasurementIdentifier identifier, final String deviceType, final String osVersion,
-            final String appVersion, final double length, final String userId, final String version) {
+            final String appVersion, final double length, final UUID userId, final String version) {
 
         Validate.isTrue(version.matches(SUPPORTED_VERSIONS), "Unsupported version: %s", version);
         this.identifier = identifier;
@@ -145,7 +146,7 @@ public class MetaData implements Serializable {
     /**
      * @return The id of the user who has uploaded this measurement.
      */
-    public String getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
@@ -211,7 +212,7 @@ public class MetaData implements Serializable {
      * @param userId The name of the user who has uploaded this measurement.
      */
     @SuppressWarnings("unused")
-    public void setUserId(final String userId) {
+    public void setUserId(final UUID userId) {
         this.userId = userId;
     }
 

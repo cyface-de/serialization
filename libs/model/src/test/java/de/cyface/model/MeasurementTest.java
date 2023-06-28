@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Cyface GmbH
+ * Copyright 2020-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -47,7 +47,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.2
+ * @version 1.0.3
  */
 public class MeasurementTest {
 
@@ -67,7 +67,7 @@ public class MeasurementTest {
     /**
      * The id of the user to add test data for.
      */
-    private static final String TEST_USER_ID = "624d8c51c0879068499676c6";
+    private static final UUID TEST_USER_ID = UUID.randomUUID();
 
     /**
      * Tests that writing the CSV header produces the correct output.

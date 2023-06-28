@@ -21,12 +21,13 @@ package de.cyface.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * This class allows structuring data in the Json format without Json dependencies.
  *
  * @author Armin Schnabel
- * @since 1.1.0
+ * @since 1.2.0
  * @version 1.2.1
  */
 public class Json {
@@ -85,6 +86,18 @@ public class Json {
     public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
             final JsonObject value) {
         return new KeyValuePair("\"" + key + "\":" + value.stringValue);
+    }
+
+    /**
+     * Creates a {@link KeyValuePair} from the supplied key and value.
+     *
+     * @param key the name of the key to be used
+     * @param value the value as {@link UUID}
+     * @return the created {@code KeyValuePair}
+     */
+    public static KeyValuePair jsonKeyValue(@SuppressWarnings("SameParameterValue") final String key,
+                                            final UUID value) {
+        return new KeyValuePair("\"" + key + "\":" + value);
     }
 
     /**

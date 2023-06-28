@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -22,6 +22,13 @@ import org.apache.commons.lang3.Validate;
 
 import de.cyface.model.Measurement;
 
+/**
+ * Reads a measurement from the Cyface binary format.
+ *
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public abstract class PhoneDataDeserializer implements Deserializer {
     /**
      * The running number of the {@link Measurement} to deserialize on the next call to {@link #read()}. Since each
