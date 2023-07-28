@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 import de.cyface.model.MetaData;
 
@@ -29,7 +30,7 @@ import de.cyface.model.MetaData;
  * A collection of static factory methods to hide the possible complexity of {@link Deserializer} creation.
  * 
  * @author Klemens Muthmann
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public final class DeserializerFactory {
@@ -70,7 +71,7 @@ public final class DeserializerFactory {
      * @param directionsArchive The archive containing directions from the compass
      * @return A {@link ZippedPhoneDataDeserializer} to read measurements from a phone export
      */
-    public static ZippedPhoneDataDeserializer create(final String userId, final Path measuresArchive,
+    public static ZippedPhoneDataDeserializer create(final UUID userId, final Path measuresArchive,
             final Path accelerationsArchive, final Path rotationsArchive, final Path directionsArchive) {
         return new ZippedPhoneDataDeserializer(userId, measuresArchive, accelerationsArchive, rotationsArchive,
                 directionsArchive);
@@ -89,7 +90,7 @@ public final class DeserializerFactory {
      * @param directionFiles The files containing the directions from the compass for each measurement
      * @return A {@link UnzippedPhoneDataDeserializer} to read measurements from an unzipped phone export
      */
-    public static UnzippedPhoneDataDeserializer create(final String userId, final Path measuresDatabase,
+    public static UnzippedPhoneDataDeserializer create(final UUID userId, final Path measuresDatabase,
                                                        final List<Path> accelerationFiles, final List<Path> rotationFiles, final List<Path> directionFiles) {
         return new UnzippedPhoneDataDeserializer(userId, measuresDatabase, accelerationFiles, rotationFiles, directionFiles);
     }

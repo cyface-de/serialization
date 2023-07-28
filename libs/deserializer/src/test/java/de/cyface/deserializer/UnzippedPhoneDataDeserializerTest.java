@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +60,7 @@ public class UnzippedPhoneDataDeserializerTest {
         final var directionsLocation = path(folder + mid + ".cyfd");
         final var rotationsLocation = path(folder + mid + ".cyfr");
 
-        final var oocut = new UnzippedPhoneDataDeserializer("test-user", databaseLocation,
+        final var oocut = new UnzippedPhoneDataDeserializer(UUID.randomUUID(), databaseLocation,
                 List.of(accelerationsLocation), List.of(rotationsLocation), List.of(directionsLocation));
 
         // Act
@@ -91,7 +92,7 @@ public class UnzippedPhoneDataDeserializerTest {
         final var accelerations = path(folder + "cyface-accelerations" + suffix);
         final var directions = path(folder + "cyface-directions" + suffix);
         final var rotations = path(folder + "cyface-rotations" + suffix);
-        final var oocut = new ZippedPhoneDataDeserializer("test-user", databaseLocation, accelerations, directions,
+        final var oocut = new ZippedPhoneDataDeserializer(UUID.randomUUID(), databaseLocation, accelerations, directions,
                 rotations);
 
         // Act

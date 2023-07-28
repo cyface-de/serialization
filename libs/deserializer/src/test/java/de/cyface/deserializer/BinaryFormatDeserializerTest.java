@@ -47,6 +47,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.DisplayName;
@@ -75,7 +76,7 @@ import de.cyface.serializer.Serializer;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 class BinaryFormatDeserializerTest {
@@ -93,7 +94,7 @@ class BinaryFormatDeserializerTest {
     /**
      * The id of the user to add test data for.
      */
-    private static final String TEST_USER_ID = "624d8c51c0879068499676c6";
+    private static final UUID TEST_USER_ID = UUID.randomUUID();
 
     private final static short PERSISTENCE_FILE_FORMAT_VERSION = 3;
 

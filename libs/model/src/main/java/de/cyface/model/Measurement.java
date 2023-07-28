@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Cyface GmbH
+ * Copyright 2019-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.1.0
+ * @version 2.1.1
  * @since 1.0.0
  */
 public class Measurement implements Serializable {
@@ -313,7 +313,7 @@ public class Measurement implements Serializable {
 
     private Json.JsonObject asJson(final String username, final MetaData metaData) {
         return jsonObject(
-                jsonKeyValue("userId", metaData.getUserId()),
+                jsonKeyValue("userId", metaData.getUserId().toString()),
                 jsonKeyValue("username", username),
                 jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()),
                 jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()),
@@ -485,7 +485,7 @@ public class Measurement implements Serializable {
         final var measurementId = String.valueOf(metaData.getIdentifier().getMeasurementIdentifier());
 
         final var elements = new ArrayList<String>();
-        elements.add(userId);
+        elements.add(userId.toString());
         if (username != null) {
             elements.add(username);
         }

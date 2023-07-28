@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -41,7 +42,7 @@ import de.cyface.model.MeasurementIdentifier;
  * metadata. The other three contain the sensor data from the accelerometer, the gyroscope and the compass.
  * 
  * @author Klemens Muthmann
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
@@ -71,7 +72,7 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * The userId to identify the deserialized information. This is lost during export. It is not necessary
      * to use the correct one here, but a userId is often necessary for further processing steps
      */
-    private final String userId;
+    private final UUID userId;
     /**
      * The path in the local file system to the SQLite database with the location and event
      * information
@@ -102,13 +103,13 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * @param rotationsFilePath The archive containing rotations from the gyroscope
      * @param directionsFilePath The archive containing directions from the compass
      */
-    ZippedPhoneDataDeserializer(final String userId, final Path sqliteDatabasePath, final Path accelerationsFilePath,
+    ZippedPhoneDataDeserializer(final UUID userId, final Path sqliteDatabasePath, final Path accelerationsFilePath,
             final Path rotationsFilePath, final Path directionsFilePath) {
         Validate.isTrue(Files.exists(sqliteDatabasePath));
         Validate.isTrue(Files.exists(accelerationsFilePath));
         Validate.isTrue(Files.exists(rotationsFilePath));
         Validate.isTrue(Files.exists(directionsFilePath));
-        Validate.notEmpty(userId);
+        Validate.notNull(userId);
 
         this.sqliteDatabasePath = sqliteDatabasePath;
         this.accelerationsFilePath = accelerationsFilePath;

@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 
@@ -55,7 +56,7 @@ import de.cyface.model.RawRecord;
  * key into the database.
  * 
  * @author Klemens Muthmann
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
@@ -103,7 +104,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * The user id used to identify the deserialized information. This is lost during export. It does not matter to use
      * the correct one here, but a user id is often necessary for further processing steps.
      */
-    private final String userId;
+    private final UUID userId;
 
     /**
      * Create a new {@link Deserializer} for phone data. Before calling read on an instance of this class
@@ -119,7 +120,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * @param rotationsFilePaths The files containing the gyroscope sensor data
      * @param directionsFilePaths The files containing the compass sensor data
      */
-    UnzippedPhoneDataDeserializer(final String userId, final Path sqliteDatabasePath,
+    UnzippedPhoneDataDeserializer(final UUID userId, final Path sqliteDatabasePath,
                                   final List<Path> accelerationsFilePaths,
                                   final List<Path> rotationsFilePaths, final List<Path> directionsFilePaths) {
         Validate.isTrue(Files.exists(sqliteDatabasePath));
@@ -129,7 +130,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
                 .reduce((first, second) -> first || second).orElseThrow());
         Validate.isTrue(directionsFilePaths.stream().map(Files::exists)
                 .reduce((first, second) -> first || second).orElseThrow());
-        Validate.notEmpty(userId);
+        Validate.notNull(userId);
 
         this.sqliteDatabasePath = sqliteDatabasePath;
         this.accelerationsFilePaths = accelerationsFilePaths;
