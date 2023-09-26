@@ -173,6 +173,7 @@ class Track : Serializable {
      * @param location The location to remove.
      * @return This track for method chaining.
      */
+    @Suppress("unused") // Part of the API
     fun clearFor(location: RawRecord): Track {
         // Find the index of the location to remove
         val locationIndex = locationRecords.indexOf(location)
