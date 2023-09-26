@@ -21,7 +21,6 @@ package de.cyface.model
 import java.io.Serializable
 import java.util.Collections
 import java.util.Objects
-import java.util.stream.Collectors
 
 /**
  * A part of a measurement for which continuous data is available and ordered by time.
@@ -31,29 +30,29 @@ import java.util.stream.Collectors
  * when the very last locations is reached.
  *
  * @author Armin Schnabel
- * @version 2.0.1
+ * @version 2.1.0
  * @since 1.0.0
  */
 class Track : Serializable {
     /**
      * The list of `GeoLocationRecord`s collected for this `Track` ordered by timestamp.
      */
-    private lateinit var locationRecords: List<RawRecord>
+    private lateinit var locationRecords: MutableList<RawRecord>
 
     /**
      * The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
      */
-    private lateinit var accelerations: List<Point3DImpl>
+    private lateinit var accelerations: MutableList<Point3DImpl>
 
     /**
      * The list of rotations for this `Track` ordered by timestamp. Unit: rad/s.
      */
-    private lateinit var rotations: List<Point3DImpl>
+    private lateinit var rotations: MutableList<Point3DImpl>
 
     /**
      * The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
      */
-    private lateinit var directions: List<Point3DImpl>
+    private lateinit var directions: MutableList<Point3DImpl>
 
     /**
      * Creates a new completely initialized `Track`.
@@ -161,19 +160,39 @@ class Track : Serializable {
      * @return This track for method chaining
      */
     fun clearAfter(timestamp: Long): Track {
-        locationRecords = locationRecords.stream().filter { record: RawRecord -> record.timestamp >= timestamp }
-            .collect(Collectors.toList())
-        accelerations = accelerations.stream()
-            .filter { acceleration: Point3DImpl -> acceleration.timestamp > timestamp }
-            .collect(Collectors.toList())
-        rotations = rotations.stream()
-            .filter { rotation: Point3DImpl -> rotation.timestamp > timestamp }
-            .collect(Collectors.toList())
-        directions = directions.stream()
-            .filter { direction: Point3DImpl -> direction.timestamp > timestamp }
-            .collect(Collectors.toList())
+        locationRecords.removeIf { it.timestamp < timestamp }
+        accelerations.removeIf { it.timestamp <= timestamp }
+        rotations.removeIf { it.timestamp <= timestamp }
+        directions.removeIf { it.timestamp <= timestamp }
         return this
     }
+
+    /**
+     * Removes a specific location and all sensor data that fall between this location and the previous valid location.
+     *
+     * @param location The location to remove.
+     * @return This track for method chaining.
+     */
+    fun clearFor(location: RawRecord): Track {
+        // Find the index of the location to remove
+        val locationIndex = locationRecords.indexOf(location)
+        if (locationIndex == -1) throw IllegalStateException("Location not found: $location") //return this
+
+        // Determine the timestamp range for which sensor data should be removed
+        val startTimestamp = if (locationIndex > 0) locationRecords[locationIndex - 1].timestamp else 0L
+        val endTimestamp = location.timestamp
+
+        // Remove the location
+        locationRecords.remove(location)
+
+        // Remove sensor data that falls within the determined timestamp range
+        accelerations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        rotations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        directions.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+
+        return this
+    }
+
 
     override fun toString(): String {
         return "Track{" +
