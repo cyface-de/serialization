@@ -24,7 +24,7 @@ import java.util.UUID
  * A [Job] which contains details about filtered data during calibration.
  *
  * @author Armin Schnabel
- * @version 2.0.1
+ * @version 2.1.0
  * @since 2.3.1
  */
 @Suppress("unused") // Part of the API
@@ -32,6 +32,7 @@ class CalibrationJob : Job {
     /**
      * `true` when the measurement contains processable tracks.
      */
+    @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     var isProcessable: Boolean
         private set
 
@@ -44,12 +45,21 @@ class CalibrationJob : Job {
     /**
      * The number of locations which were filtered due to a rotated device.
      */
+    @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     var rotatedLocations = 0
+        private set
+
+    /**
+     * The number of locations which where filtered due to invalid speed, accuracy or time gaps.
+     */
+    @Suppress("MemberVisibilityCanBePrivate") // Part of the API
+    var invalidLocations = 0
         private set
 
     /**
      * The number of locations which were filtered during interpolation.
      */
+    @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     var nonInterpolatableLocations = 0
         private set
 
@@ -96,6 +106,15 @@ class CalibrationJob : Job {
      */
     fun setNonInterpolatableLocations(nonInterpolatableLocations: Int): CalibrationJob {
         this.nonInterpolatableLocations = nonInterpolatableLocations
+        return this
+    }
+
+    /**
+     * @param invalidLocations The number of locations which where filtered due to invalid speed, accuracy or time gaps.
+     * @return This for chaining.
+     */
+    fun setInvalidLocations(invalidLocations: Int): CalibrationJob {
+        this.invalidLocations = invalidLocations
         return this
     }
 
