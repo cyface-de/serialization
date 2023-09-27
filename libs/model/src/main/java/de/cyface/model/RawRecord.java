@@ -142,4 +142,13 @@ public class RawRecord extends GeoLocationRecord {
     public void setModality(Modality modality) {
         this.modality = modality;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RawRecord rawRecord = (RawRecord) o;
+        return Double.compare(rawRecord.accuracy, accuracy) == 0 && Double.compare(rawRecord.speed, speed) == 0 && modality == rawRecord.modality;
+    }
 }

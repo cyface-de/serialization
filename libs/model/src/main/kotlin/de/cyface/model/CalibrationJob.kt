@@ -34,7 +34,6 @@ class CalibrationJob : Job {
      */
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     var isProcessable: Boolean
-        private set
 
     /**
      * The number of locations to be processed for this job.
@@ -47,21 +46,18 @@ class CalibrationJob : Job {
      */
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     var rotatedLocations = 0
-        private set
 
     /**
      * The number of locations which where filtered due to invalid speed, accuracy or time gaps.
      */
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     var invalidLocations = 0
-        private set
 
     /**
      * The number of locations which were filtered during interpolation.
      */
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     var nonInterpolatableLocations = 0
-        private set
 
     /**
      * Constructs a fully initialized instance of this class.
