@@ -24,7 +24,7 @@ import java.util.UUID
  * A [Job] which contains details about filtered data during calibration.
  *
  * @author Armin Schnabel
- * @version 2.1.0
+ * @version 3.0.0
  * @since 2.3.1
  */
 @Suppress("unused") // Part of the API

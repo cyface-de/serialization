@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Cyface GmbH
+ * Copyright 2021-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -20,6 +20,12 @@ package de.cyface.model;
 
 import org.apache.commons.lang3.Validate;
 
+/**
+ * {@link GeoLocationRecord} annotated with accuracy, speed and modality.
+ *
+ * @author Armin Schnabel
+ * @version 1.0.0
+ */
 public class RawRecord extends GeoLocationRecord {
 
     /**
@@ -32,7 +38,7 @@ public class RawRecord extends GeoLocationRecord {
      */
     private double accuracy;
     /**
-     * The traveled speed in meters per second as reported by the geo location system (e.g. GPS, GLONASS, GALILEO) during this recording.
+     * The traveled speed in meters per second as reported by the geographical location system (e.g. GPS, GLONASS, GALILEO) during this recording.
      */
     private double speed;
     /**
@@ -59,7 +65,7 @@ public class RawRecord extends GeoLocationRecord {
     /**
      * Creates a new completely initialized <code>RawRecord</code>.
      *
-     * @param measurementIdentifier The world wide unique identifier of the {@link Measurement} this record belongs to
+     * @param measurementIdentifier The worldwide unique identifier of the {@link Measurement} this record belongs to
      * @param timestamp The timestamp this location was captured on in milliseconds since 1st January 1970 (epoch)
      * @param latitude Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north)
      * @param longitude Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180°
@@ -67,7 +73,7 @@ public class RawRecord extends GeoLocationRecord {
      * @param elevation The elevation above sea level in meters or null if it could not be calculated
      * @param accuracy The measurement accuracy of this location in meters. This accuracy is usually the result of
      *            imperfect measurement hardware
-     * @param speed The traveled speed as reported by the geo location system (e.g. GPS, GLONASS, GALILEO) during this
+     * @param speed The traveled speed as reported by the geographical location system (e.g. GPS, GLONASS, GALILEO) during this
      *            recording
      * @param modality The modality type used while collecting the location or {@code null} if the information is not
      *            available
@@ -100,7 +106,7 @@ public class RawRecord extends GeoLocationRecord {
     }
 
     /**
-     * @return The traveled speed as reported by the geo location system (e.g. GPS, GLONASS, GALILEO) during this
+     * @return The traveled speed as reported by the geographical location system (e.g. GPS, GLONASS, GALILEO) during this
      *         recording
      */
     public double getSpeed() {
@@ -126,7 +132,7 @@ public class RawRecord extends GeoLocationRecord {
     }
 
     /**
-     * @param speed The traveled speed as reported by the geo location system (e.g. GPS, GLONASS, GALILEO) during this
+     * @param speed The traveled speed as reported by the geographical location system (e.g. GPS, GLONASS, GALILEO) during this
      *            recording
      */
     public void setSpeed(double speed) {

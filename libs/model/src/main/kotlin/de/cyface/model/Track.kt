@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Cyface GmbH
+ * Copyright 2019-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -29,7 +29,7 @@ import java.util.Objects
  * when the very last locations is reached.
  *
  * @author Armin Schnabel
- * @version 2.1.0
+ * @version 3.0.0
  * @since 1.0.0
  * @param locationRecords The list of `RawRecord`s collected for this `Track` ordered by
  * timestamp.
