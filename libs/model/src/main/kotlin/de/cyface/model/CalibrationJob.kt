@@ -24,58 +24,32 @@ import java.util.UUID
  * A [Job] which contains details about filtered data during calibration.
  *
  * @author Armin Schnabel
+ * @author Klemens Muthmann
  * @version 3.0.0
  * @since 2.3.1
+ * @param id The id of the job to update about the status and progress of the processing.
+ * @param startedBy The id of the user who triggered the pipeline and will own the result data.
+ * @property isProcessable `true` when the measurement contains processable tracks.
+ * @property totalLocations The number of locations to be processed for this job.
+ * @property rotatedLocations The number of locations which were filtered due to a rotated device.
+ * @property invalidLocations The number of locations which where filtered due to invalid speed, accuracy or time gaps.
+ * @property nonInterpolatableLocations The number of locations which were filtered during interpolation.
  */
 @Suppress("unused") // Part of the API
-class CalibrationJob : Job {
-    /**
-     * `true` when the measurement contains processable tracks.
-     */
+class CalibrationJob(
+    id: String?,
+    startedBy: UUID?,
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
-    var isProcessable: Boolean
-
-    /**
-     * The number of locations to be processed for this job.
-     */
+    var isProcessable: Boolean,
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
-    val totalLocations: Int
-
-    /**
-     * The number of locations which were filtered due to a rotated device.
-     */
+    val totalLocations: Int,
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
-    var rotatedLocations = 0
-
-    /**
-     * The number of locations which where filtered due to invalid speed, accuracy or time gaps.
-     */
+    var rotatedLocations: Int = 0,
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
-    var invalidLocations = 0
-
-    /**
-     * The number of locations which were filtered during interpolation.
-     */
+    var invalidLocations: Int = 0,
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
-    var nonInterpolatableLocations = 0
-
-    /**
-     * Constructs a fully initialized instance of this class.
-     *
-     * @param id The id of the job to update about the status and progress of the processing.
-     * @param startedBy The id of the user who triggered the pipeline and will own the result data.
-     * @param processable `true` when the measurement contains processable tracks.
-     * @param totalLocations The number of locations to be processed for this job.
-     */
-    constructor(
-        id: String?,
-        startedBy: UUID?,
-        processable: Boolean,
-        totalLocations: Int
-    ) : super(id, startedBy) {
-        this.isProcessable = processable
-        this.totalLocations = totalLocations
-    }
+    var nonInterpolatableLocations: Int = 0,
+) : Job(id, startedBy) {
 
     /**
      * Constructs a fully initialized instance of this class.

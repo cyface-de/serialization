@@ -29,6 +29,7 @@ import java.util.Objects
  * when the very last locations is reached.
  *
  * @author Armin Schnabel
+ * @author Klemens Muthmann
  * @version 3.0.0
  * @since 1.0.0
  * @param locationRecords The list of `RawRecord`s collected for this `Track` ordered by
@@ -38,73 +39,11 @@ import java.util.Objects
  * @param directions The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
  */
 class Track(
-    locationRecords: List<RawRecord> = emptyList(),
-    accelerations: List<Point3DImpl> = emptyList(),
-    rotations: List<Point3DImpl> = emptyList(),
-    directions: List<Point3DImpl> = emptyList()
+    var locationRecords: MutableList<RawRecord> = mutableListOf(),
+    var accelerations: MutableList<Point3DImpl> = mutableListOf(),
+    var rotations: MutableList<Point3DImpl> = mutableListOf(),
+    var directions: MutableList<Point3DImpl> = mutableListOf(),
 ) : Serializable {
-
-    private var _locationRecords = locationRecords.toMutableList()
-    private var _accelerations = accelerations.toMutableList()
-    private var _rotations = rotations.toMutableList()
-    private var _directions = directions.toMutableList()
-
-    /**
-     * The list of `GeoLocationRecord`s collected for this `Track` ordered by timestamp.
-     */
-    val locationRecords: List<RawRecord> get() = _locationRecords
-
-    /**
-     * The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
-     */
-    val accelerations: List<Point3DImpl> get() = _accelerations
-
-    /**
-     * The list of rotations for this `Track` ordered by timestamp. Unit: rad/s.
-     */
-    val rotations: List<Point3DImpl> get() = _rotations
-
-    /**
-     * The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
-     */
-    val directions: List<Point3DImpl> get() = _directions
-
-    /**
-     * Required by Apache Flink.
-     *
-     * @param locationRecords The list of `GeoLocationRecord`s collected for this `Track` ordered by
-     * timestamp.
-     */
-    fun setLocationRecords(locationRecords: List<RawRecord>) {
-        _locationRecords = locationRecords.toMutableList()
-    }
-
-    /**
-     * Required by Apache Flink.
-     *
-     * @param accelerations The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
-     */
-    fun setAccelerations(accelerations: List<Point3DImpl>) {
-        _accelerations = accelerations.toMutableList()
-    }
-
-    /**
-     * Required by Apache Flink.
-     *
-     * @param rotations The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
-     */
-    fun setRotations(rotations: List<Point3DImpl>) {
-        _rotations = rotations.toMutableList()
-    }
-
-    /**
-     * Required by Apache Flink.
-     *
-     * @param directions The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
-     */
-    fun setDirections(directions: List<Point3DImpl>) {
-        _directions = directions.toMutableList()
-    }
 
     /**
      * Removes all data after the provided `timestamp` from this `Track`.
@@ -113,10 +52,10 @@ class Track(
      * @return This track for method chaining
      */
     fun clearAfter(timestamp: Long): Track {
-        _locationRecords.removeIf { it.timestamp < timestamp }
-        _accelerations.removeIf { it.timestamp <= timestamp }
-        _rotations.removeIf { it.timestamp <= timestamp }
-        _directions.removeIf { it.timestamp <= timestamp }
+        locationRecords.removeIf { it.timestamp < timestamp }
+        accelerations.removeIf { it.timestamp <= timestamp }
+        rotations.removeIf { it.timestamp <= timestamp }
+        directions.removeIf { it.timestamp <= timestamp }
         return this
     }
 
@@ -129,20 +68,20 @@ class Track(
     @Suppress("unused") // Part of the API
     fun clearFor(location: RawRecord): Track {
         // Find the index of the location to remove
-        val locationIndex = _locationRecords.indexOf(location)
+        val locationIndex = locationRecords.indexOf(location)
         if (locationIndex == -1) throw IllegalStateException("Location not found: $location") //return this
 
         // Determine the timestamp range for which sensor data should be removed
-        val startTimestamp = if (locationIndex > 0) _locationRecords[locationIndex - 1].timestamp else 0L
+        val startTimestamp = if (locationIndex > 0) locationRecords[locationIndex - 1].timestamp else 0L
         val endTimestamp = location.timestamp
 
         // Remove the location
-        _locationRecords.remove(location)
+        locationRecords.remove(location)
 
         // Remove sensor data that falls within the determined timestamp range
-        _accelerations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
-        _rotations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
-        _directions.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        accelerations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        rotations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        directions.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
 
         return this
     }
