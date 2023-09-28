@@ -68,10 +68,12 @@ class CalibrationJob : Job {
      * @param totalLocations The number of locations to be processed for this job.
      */
     constructor(
-        id: String?, startedBy: UUID?, processable: Boolean,
+        id: String?,
+        startedBy: UUID?,
+        processable: Boolean,
         totalLocations: Int
     ) : super(id, startedBy) {
-        isProcessable = processable
+        this.isProcessable = processable
         this.totalLocations = totalLocations
     }
 
@@ -82,44 +84,9 @@ class CalibrationJob : Job {
      * @param processable `true` when the measurement contains processable tracks.
      * @param totalLocations The number of locations to be processed for this job.
      */
-    constructor(job: Job, processable: Boolean, totalLocations: Int) : super(job.id, job.startedBy) {
-        isProcessable = processable
-        this.totalLocations = totalLocations
-    }
-
-    /**
-     * @param rotatedLocations The number of tracks which were filtered due to a rotated device.
-     * @return This for chaining.
-     */
-    fun setRotatedLocations(rotatedLocations: Int): CalibrationJob {
-        this.rotatedLocations = rotatedLocations
-        return this
-    }
-
-    /**
-     * @param nonInterpolatableLocations The number of locations which were filtered during interpolation.
-     * @return This for chaining.
-     */
-    fun setNonInterpolatableLocations(nonInterpolatableLocations: Int): CalibrationJob {
-        this.nonInterpolatableLocations = nonInterpolatableLocations
-        return this
-    }
-
-    /**
-     * @param invalidLocations The number of locations which where filtered due to invalid speed, accuracy or time gaps.
-     * @return This for chaining.
-     */
-    fun setInvalidLocations(invalidLocations: Int): CalibrationJob {
-        this.invalidLocations = invalidLocations
-        return this
-    }
-
-    /**
-     * @param processable `true` when the measurement contains processable tracks.
-     * @return This for chaining.
-     */
-    fun setProcessable(processable: Boolean): CalibrationJob {
-        isProcessable = processable
-        return this
-    }
+    constructor(
+        job: Job,
+        processable: Boolean,
+        totalLocations: Int
+    ) : this(job.id, job.startedBy, processable, totalLocations)
 }

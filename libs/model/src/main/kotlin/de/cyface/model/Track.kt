@@ -19,7 +19,6 @@
 package de.cyface.model
 
 import java.io.Serializable
-import java.util.Collections
 import java.util.Objects
 
 /**
@@ -32,85 +31,43 @@ import java.util.Objects
  * @author Armin Schnabel
  * @version 2.1.0
  * @since 1.0.0
+ * @param locationRecords The list of `RawRecord`s collected for this `Track` ordered by
+ * timestamp.
+ * @param accelerations The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
+ * @param rotations The list of rotations for this `Track` ordered by timestamp. Unit: rad/s.
+ * @param directions The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
  */
-class Track : Serializable {
+class Track(
+    locationRecords: List<RawRecord> = emptyList(),
+    accelerations: List<Point3DImpl> = emptyList(),
+    rotations: List<Point3DImpl> = emptyList(),
+    directions: List<Point3DImpl> = emptyList()
+) : Serializable {
+
+    private var _locationRecords = locationRecords.toMutableList()
+    private var _accelerations = accelerations.toMutableList()
+    private var _rotations = rotations.toMutableList()
+    private var _directions = directions.toMutableList()
+
     /**
      * The list of `GeoLocationRecord`s collected for this `Track` ordered by timestamp.
      */
-    private lateinit var locationRecords: MutableList<RawRecord>
+    val locationRecords: List<RawRecord> get() = _locationRecords
 
     /**
      * The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
      */
-    private lateinit var accelerations: MutableList<Point3DImpl>
+    val accelerations: List<Point3DImpl> get() = _accelerations
 
     /**
      * The list of rotations for this `Track` ordered by timestamp. Unit: rad/s.
      */
-    private lateinit var rotations: MutableList<Point3DImpl>
+    val rotations: List<Point3DImpl> get() = _rotations
 
     /**
      * The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
      */
-    private lateinit var directions: MutableList<Point3DImpl>
-
-    /**
-     * Creates a new completely initialized `Track`.
-     *
-     * @param locationRecords The list of `RawRecord`s collected for this `Track` ordered by
-     * timestamp.
-     * @param accelerations The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
-     * @param rotations The list of rotations for this `Track` ordered by timestamp. Unit: rad/s.
-     * @param directions The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
-     */
-    constructor(
-        locationRecords: List<RawRecord>, accelerations: List<Point3DImpl>,
-        rotations: List<Point3DImpl>, directions: List<Point3DImpl>
-    ) {
-        Objects.requireNonNull(locationRecords)
-        Objects.requireNonNull(accelerations)
-        Objects.requireNonNull(rotations)
-        Objects.requireNonNull(directions)
-        this.locationRecords = ArrayList(locationRecords)
-        this.accelerations = ArrayList(accelerations)
-        this.rotations = ArrayList(rotations)
-        this.directions = ArrayList(directions)
-    }
-
-    /**
-     * No argument constructor as required by Apache Flink. Do not use this in your own code.
-     */
-    constructor() {
-        // Nothing to do
-    }
-
-    /**
-     * @return The list of `GeoLocationRecord`s collected for this `Track` ordered by timestamp.
-     */
-    fun getLocationRecords(): List<RawRecord> {
-        return Collections.unmodifiableList(locationRecords)
-    }
-
-    /**
-     * @return The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
-     */
-    fun getAccelerations(): List<Point3DImpl> {
-        return Collections.unmodifiableList(accelerations)
-    }
-
-    /**
-     * @return The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
-     */
-    fun getRotations(): List<Point3DImpl> {
-        return Collections.unmodifiableList(rotations)
-    }
-
-    /**
-     * @return The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
-     */
-    fun getDirections(): List<Point3DImpl> {
-        return Collections.unmodifiableList(directions)
-    }
+    val directions: List<Point3DImpl> get() = _directions
 
     /**
      * Required by Apache Flink.
@@ -119,8 +76,7 @@ class Track : Serializable {
      * timestamp.
      */
     fun setLocationRecords(locationRecords: List<RawRecord>) {
-        Objects.requireNonNull(locationRecords)
-        this.locationRecords = ArrayList(locationRecords)
+        _locationRecords = locationRecords.toMutableList()
     }
 
     /**
@@ -129,8 +85,7 @@ class Track : Serializable {
      * @param accelerations The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
      */
     fun setAccelerations(accelerations: List<Point3DImpl>) {
-        Objects.requireNonNull(locationRecords)
-        this.accelerations = ArrayList(accelerations)
+        _accelerations = accelerations.toMutableList()
     }
 
     /**
@@ -139,8 +94,7 @@ class Track : Serializable {
      * @param rotations The list of accelerations for this `Track` ordered by timestamp. Unit: m/s².
      */
     fun setRotations(rotations: List<Point3DImpl>) {
-        Objects.requireNonNull(locationRecords)
-        this.rotations = ArrayList(rotations)
+        _rotations = rotations.toMutableList()
     }
 
     /**
@@ -149,8 +103,7 @@ class Track : Serializable {
      * @param directions The list of directions for this `Track` ordered by timestamp. Unit. micro-Tesla (uT).
      */
     fun setDirections(directions: List<Point3DImpl>) {
-        Objects.requireNonNull(locationRecords)
-        this.directions = ArrayList(directions)
+        _directions = directions.toMutableList()
     }
 
     /**
@@ -160,10 +113,10 @@ class Track : Serializable {
      * @return This track for method chaining
      */
     fun clearAfter(timestamp: Long): Track {
-        locationRecords.removeIf { it.timestamp < timestamp }
-        accelerations.removeIf { it.timestamp <= timestamp }
-        rotations.removeIf { it.timestamp <= timestamp }
-        directions.removeIf { it.timestamp <= timestamp }
+        _locationRecords.removeIf { it.timestamp < timestamp }
+        _accelerations.removeIf { it.timestamp <= timestamp }
+        _rotations.removeIf { it.timestamp <= timestamp }
+        _directions.removeIf { it.timestamp <= timestamp }
         return this
     }
 
@@ -176,20 +129,20 @@ class Track : Serializable {
     @Suppress("unused") // Part of the API
     fun clearFor(location: RawRecord): Track {
         // Find the index of the location to remove
-        val locationIndex = locationRecords.indexOf(location)
+        val locationIndex = _locationRecords.indexOf(location)
         if (locationIndex == -1) throw IllegalStateException("Location not found: $location") //return this
 
         // Determine the timestamp range for which sensor data should be removed
-        val startTimestamp = if (locationIndex > 0) locationRecords[locationIndex - 1].timestamp else 0L
+        val startTimestamp = if (locationIndex > 0) _locationRecords[locationIndex - 1].timestamp else 0L
         val endTimestamp = location.timestamp
 
         // Remove the location
-        locationRecords.remove(location)
+        _locationRecords.remove(location)
 
         // Remove sensor data that falls within the determined timestamp range
-        accelerations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
-        rotations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
-        directions.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        _accelerations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        _rotations.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
+        _directions.removeIf { it.timestamp in (startTimestamp until endTimestamp) }
 
         return this
     }
