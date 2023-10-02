@@ -25,7 +25,7 @@ import java.util.UUID
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 3.0.0
+ * @version 3.1.0
  * @since 2.3.1
  * @param id The id of the job to update about the status and progress of the processing.
  * @param startedBy The id of the user who triggered the pipeline and will own the result data.
@@ -63,4 +63,8 @@ class CalibrationJob(
         processable: Boolean,
         totalLocations: Int
     ) : this(job.id, job.startedBy, processable, totalLocations)
+
+    companion object {
+        private const  val serialVersionUID = -46L
+    }
 }
