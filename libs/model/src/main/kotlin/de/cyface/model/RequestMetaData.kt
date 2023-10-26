@@ -42,6 +42,7 @@ import java.nio.charset.Charset
  * @property logCount The number of logs captured for this measurement.
  * @property imageCount The number of images captured for this measurement.
  * @property videoCount The number of videos captured for this measurement.
+ * @property filesSize The number of bytes of the files collected for this measurement (log, image and video data).
  */
 @Suppress("unused") // Part of the API
 data class RequestMetaData(
@@ -58,7 +59,8 @@ data class RequestMetaData(
     val formatVersion: Int,
     val logCount: Int,
     val imageCount: Int,
-    val videoCount: Int
+    val videoCount: Int,
+    val filesSize: Long
 ) : Serializable {
 
     init {
@@ -98,6 +100,7 @@ data class RequestMetaData(
         require(logCount >= 0) { "Invalid logCount: $logCount" }
         require(imageCount >= 0) { "Invalid imageCount: $imageCount" }
         require(videoCount >= 0) { "Invalid videoCount: $videoCount" }
+        require(filesSize >= 0) { "Invalid filesSize: $filesSize" }
     }
 
     /**
