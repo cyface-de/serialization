@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Cyface GmbH
+ * Copyright 2021-2023 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -26,7 +26,7 @@ import java.nio.charset.Charset
  * The metadata as transmitted in the request header or pre-request body.
  *
  * @author Armin Schnabel
- * @version 1.0.1
+ * @version 2.0.0
  * @since 6.0.0
  * @property deviceType The worldwide unique identifier of the device uploading the data.
  * @property measurementIdentifier The device wide unique identifier of the uploaded measurement.
@@ -39,6 +39,9 @@ import java.nio.charset.Charset
  * @property endLocation The `GeoLocation` at the end of the track represented by the transmitted measurement.
  * @property modality The modality type used to capture the measurement.
  * @property formatVersion The format version of the upload file.
+ * @property logCount The number of logs captured for this measurement.
+ * @property imageCount The number of images captured for this measurement.
+ * @property videoCount The number of videos captured for this measurement.
  */
 @Suppress("unused") // Part of the API
 data class RequestMetaData(
@@ -52,7 +55,10 @@ data class RequestMetaData(
     val startLocation: GeoLocation?,
     val endLocation: GeoLocation?,
     val modality: String,
-    val formatVersion: Int
+    val formatVersion: Int,
+    val logCount: Int,
+    val imageCount: Int,
+    val videoCount: Int
 ) : Serializable {
 
     init {
@@ -89,6 +95,9 @@ data class RequestMetaData(
         require(formatVersion == CURRENT_TRANSFER_FILE_FORMAT_VERSION) {
             "Unsupported formatVersion: ${formatVersion.toLong()}"
         }
+        require(logCount >= 0) { "Invalid logCount: $logCount" }
+        require(imageCount >= 0) { "Invalid imageCount: $imageCount" }
+        require(videoCount >= 0) { "Invalid videoCount: $videoCount" }
     }
 
     /**
