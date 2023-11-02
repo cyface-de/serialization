@@ -39,9 +39,9 @@ import java.nio.charset.Charset
  * @property endLocation The `GeoLocation` at the end of the track represented by the transmitted measurement.
  * @property modality The modality type used to capture the measurement.
  * @property formatVersion The format version of the upload file.
- * @property logCount The number of logs captured for this measurement.
- * @property imageCount The number of images captured for this measurement.
- * @property videoCount The number of videos captured for this measurement.
+ * @property logCount The number of log files captured for this measurement, e.g. metrics captured during distance-based image capturing.
+ * @property imageCount The number of images captured for this measurement. This allows the backend to notice when all images are transmitted.
+ * @property videoCount The number of videos captured for this measurement. This allows the backend to notice when all videos are transmitted.
  * @property filesSize The number of bytes of the files collected for this measurement (log, image and video data).
  */
 @Suppress("unused") // Part of the API
