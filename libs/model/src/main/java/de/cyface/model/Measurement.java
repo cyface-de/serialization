@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.1.1
+ * @version 3.0.0
  * @since 1.0.0
  */
 public class Measurement implements Serializable {
@@ -190,30 +190,43 @@ public class Measurement implements Serializable {
     /**
      * Exports this measurement as a CSV file.
      *
-     * @param withCsvHeader {@code True} if a CSV header should be added before the data
+     * @param options The options which describe which data should be exported.
      * @param handler A handler that gets one line of CSV output per call
      */
     @SuppressWarnings("unused") // API used by backend/executables/cyface-to-csv
-    public void asCsv(final boolean withCsvHeader, final Consumer<String> handler) {
-        asCsv(withCsvHeader, null, handler);
+    public void asCsv(final ExportOptions options, final Consumer<String> handler) {
+        asCsv(options, null, handler);
     }
 
     /**
      * Exports this measurement as a CSV file.
      *
-     * @param withCsvHeader {@code True} if a CSV header should be added before the data
+     * @param options The options which describe which data should be exported.
      * @param username The name of the user who uploaded the data or {@code null} to not export this field
      * @param handler A handler that gets one line of CSV output per call
      */
-    public void asCsv(final boolean withCsvHeader, final String username, final Consumer<String> handler) {
-        if (withCsvHeader) {
-            if (username == null) {
-                csvHeaderWithUsername(handler);
-            } else {
-                csvHeader(handler);
-            }
+    public void asCsv(final ExportOptions options, final String username, final Consumer<String> handler) {
+        Validate.isTrue(!options.getIncludeUsername() || username != null);
+
+        if (options.getIncludeHeader()) {
+            csvHeader(options, handler);
         }
 
+        switch (options.getType()) {
+            case LOCATION:
+                locationDataAsCsv(options, username, handler);
+                break;
+            case ACCELERATION:
+            case ROTATION:
+            case DIRECTION:
+                sensorDataAsCsv(options, username, handler);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unsupported type: %s", options.getType()));
+        }
+    }
+
+    private void locationDataAsCsv(ExportOptions options, String username, Consumer<String> handler) {
         Modality lastModality = Modality.UNKNOWN;
 
         // Iterate through tracks
@@ -244,11 +257,30 @@ public class Measurement implements Serializable {
                     modalityTypeTravelTime = 0L;
                 }
 
-                handler.accept(csvRow(username, getMetaData(), locationRecord, trackId,
+                handler.accept(csvRow(options, username, getMetaData(), locationRecord, trackId,
                         modalityTypeDistance, totalDistance,
                         modalityTypeTravelTime, totalTravelTime));
+                handler.accept("\r\n");
 
                 lastLocation = locationRecord;
+            }
+        }
+    }
+
+    private void sensorDataAsCsv(ExportOptions options, String username, Consumer<String> handler) {
+        // Iterate through tracks
+        for (var trackId = 0; trackId < tracks.size(); trackId++) {
+            final var track = tracks.get(trackId);
+
+            // Iterate through sensor points
+            final var points = options.getType().equals(DataType.ACCELERATION) ? track.getAccelerations()
+                    : options.getType().equals(DataType.ROTATION) ? track.getRotations()
+                            : options.getType().equals(DataType.DIRECTION) ? track.getDirections()
+                                    : null;
+            Validate.notNull(points, "Unsupported type: " + options.getType());
+            for (final var point : points) {
+                handler.accept(csvSensorRow(options, username, getMetaData(), point, trackId));
+                handler.accept("\r\n");
             }
         }
     }
@@ -428,44 +460,47 @@ public class Measurement implements Serializable {
     /**
      * Creates a CSV header for this measurement.
      *
+     * @param options The options describing which data is exported
      * @param handler The handler that is notified of the new CSV row.
      */
-    public static void csvHeader(final Consumer<String> handler) {
-        csvHeader(true, handler);
-    }
-
-    /**
-     * Creates a CSV header for this measurement.
-     *
-     * @param handler The handler that is notified of the new CSV row.
-     */
-    public static void csvHeaderWithUsername(final Consumer<String> handler) {
-        csvHeader(false, handler);
-    }
-
-    /**
-     * Creates a CSV header for this measurement.
-     *
-     * @param includeUsername {@code True} if the username should be included
-     * @param handler The handler that is notified of the new CSV row.
-     */
-    private static void csvHeader(final boolean includeUsername, final Consumer<String> handler) {
+    public static void csvHeader(final ExportOptions options, final Consumer<String> handler) {
 
         final var elements = new ArrayList<String>();
-        elements.add("userId");
-        if (includeUsername) {
+        if (options.getIncludeUserId()) {
+            elements.add("userId");
+        }
+        if (options.getIncludeUsername()) {
             elements.add("username");
         }
-        elements.addAll(List.of("deviceId", "measurementId", "trackId", "timestamp [ms]", "latitude", "longitude",
-                "speed [m/s]", "accuracy [m]", "modalityType", "modalityTypeDistance [m]", "distance [m]",
-                "modalityTypeTravelTime [ms]", "travelTime [ms]"));
+        elements.addAll(List.of("deviceId", "measurementId", "trackId", "timestamp [ms]"));
+        switch (options.getType()) {
+            case LOCATION:
+                elements.addAll(List.of("latitude", "longitude",
+                        "speed [m/s]", "accuracy [m]", "modalityType", "modalityTypeDistance [m]", "distance [m]",
+                        "modalityTypeTravelTime [ms]", "travelTime [ms]"));
+                break;
+            case ACCELERATION:
+                elements.addAll(List.of("x [m/s^2]", "y [m/s^2]", "z [m/s^2]"));
+                break;
+            case ROTATION:
+                elements.addAll(List.of("x [rad/s]", "y [rad/s]", "z [rad/s]"));
+                break;
+            case DIRECTION:
+                elements.addAll(List.of("x [uT]", "y [uT]", "z [uT]"));
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unsupported type: %s", options.getType()));
+        }
+
         final var csvHeaderRow = String.join(",", elements);
         handler.accept(csvHeaderRow);
+        handler.accept("\r\n");
     }
 
     /**
      * Converts one location entry annotated with metadata to a CSV row.
      *
+     * @param options The options which describe which data should be exported.
      * @param username the name of the user who uploaded the data or {@code null} to not annotate a username
      * @param metaData the {@code Measurement} of the {@param location}
      * @param locationRecord the {@code GeoLocationRecord} to be processed
@@ -476,7 +511,8 @@ public class Measurement implements Serializable {
      * @param totalTravelTime the time traveled so far
      * @return the csv row as String
      */
-    private String csvRow(final String username, final MetaData metaData, final RawRecord locationRecord,
+    private String csvRow(ExportOptions options, final String username, final MetaData metaData,
+            final RawRecord locationRecord,
             final int trackId, final double modalityTypeDistance, final double totalDistance,
             final long modalityTypeTravelTime, final long totalTravelTime) {
 
@@ -485,8 +521,11 @@ public class Measurement implements Serializable {
         final var measurementId = String.valueOf(metaData.getIdentifier().getMeasurementIdentifier());
 
         final var elements = new ArrayList<String>();
-        elements.add(userId.toString());
-        if (username != null) {
+        if (options.getIncludeUserId()) {
+            elements.add(userId.toString());
+        }
+        if (options.getIncludeUsername()) {
+            Validate.notNull(username);
             elements.add(username);
         }
         elements.addAll(List.of(deviceId, measurementId, String.valueOf(trackId),
@@ -497,6 +536,30 @@ public class Measurement implements Serializable {
                 locationRecord.getModality().getDatabaseIdentifier(),
                 String.valueOf(modalityTypeDistance), String.valueOf(totalDistance),
                 String.valueOf(modalityTypeTravelTime), String.valueOf(totalTravelTime)));
+        return String.join(",", elements);
+    }
+
+    private String csvSensorRow(ExportOptions options, final String username, final MetaData metaData,
+            final Point3DImpl pointRecord,
+            final int trackId) {
+
+        final var userId = metaData.getUserId();
+        final var deviceId = metaData.getIdentifier().getDeviceIdentifier();
+        final var measurementId = String.valueOf(metaData.getIdentifier().getMeasurementIdentifier());
+
+        final var elements = new ArrayList<String>();
+        if (options.getIncludeUserId()) {
+            elements.add(userId.toString());
+        }
+        if (options.getIncludeUsername()) {
+            Validate.notNull(username);
+            elements.add(username);
+        }
+        elements.addAll(List.of(deviceId, measurementId, String.valueOf(trackId),
+                String.valueOf(pointRecord.getTimestamp()),
+                String.valueOf(pointRecord.getX()),
+                String.valueOf(pointRecord.getY()),
+                String.valueOf(pointRecord.getZ())));
         return String.join(",", elements);
     }
 

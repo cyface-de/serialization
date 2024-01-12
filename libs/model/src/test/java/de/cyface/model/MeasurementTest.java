@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Cyface GmbH
+ * Copyright 2020-2024 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -47,7 +47,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.3
+ * @version 1.0.4
  */
 public class MeasurementTest {
 
@@ -77,11 +77,20 @@ public class MeasurementTest {
         // Arrange
         final var expectedHeader = "userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,"
                 + "speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime"
-                + " [ms],travelTime [ms]";
+                + " [ms],travelTime [ms]\r\n";
 
         // Act
+        final var csvOutput = new StringBuilder();
+        final var options = new ExportOptions()
+                .format(DataFormat.CSV)
+                .type(DataType.LOCATION)
+                .includeHeader(true)
+                .includeUserId(true)
+                .includeUsername(true);
+        Measurement.csvHeader(options, csvOutput::append);
+
         // Assert
-        Measurement.csvHeader(row -> assertThat(row, is(equalTo(expectedHeader))));
+        assertThat(csvOutput.toString(), is(equalTo(expectedHeader)));
     }
 
     /**
@@ -119,7 +128,13 @@ public class MeasurementTest {
 
         // Act
         final var csvOutput = new StringBuilder();
-        measurement.asCsv(true, TEST_USER_USERNAME, line -> csvOutput.append(line).append("\r\n"));
+        final var options = new ExportOptions()
+                .format(DataFormat.CSV)
+                .type(DataType.LOCATION)
+                .includeHeader(true)
+                .includeUserId(true)
+                .includeUsername(true);
+        measurement.asCsv(options, TEST_USER_USERNAME, csvOutput::append);
 
         // Assert
         assertThat(csvOutput.toString(), is(equalTo(expectedOutput)));
@@ -152,7 +167,6 @@ public class MeasurementTest {
                         point3DS, point3DS, point3DS));
         final var measurement = new Measurement(metaData, tracks);
 
-        final var csvOutput = new StringBuilder();
         final var expectedOutput = "userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,"
                 + "speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],"
                 + "modalityTypeTravelTime [ms],travelTime [ms]\r\n"
@@ -174,7 +188,14 @@ public class MeasurementTest {
                 + ",13.110048189675535,26.236156837054857,1000,1500\r\n";
 
         // Act
-        measurement.asCsv(true, TEST_USER_USERNAME, line -> csvOutput.append(line).append("\r\n"));
+        final var csvOutput = new StringBuilder();
+        final var options = new ExportOptions()
+                .format(DataFormat.CSV)
+                .type(DataType.LOCATION)
+                .includeHeader(true)
+                .includeUserId(true)
+                .includeUsername(true);
+        measurement.asCsv(options, TEST_USER_USERNAME, csvOutput::append);
 
         // Assert
         assertThat(csvOutput.toString(), is(equalTo(expectedOutput)));
