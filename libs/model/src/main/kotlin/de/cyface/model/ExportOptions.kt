@@ -74,7 +74,7 @@ class ExportOptions {
  * @param parameterValue The parameter value which represents the enum option.
  */
 enum class DataFormat(
-    @Suppress("MemberVisibilityCanBePrivate") val parameterValue: String
+    val parameterValue: String
 ) {
     /**
      * Default value when no format was specified.
@@ -108,7 +108,7 @@ enum class DataFormat(
          * @return The `DataFormat` for the parameterValue.
          */
         @Suppress("unused") // Part of the API
-        fun valueOfParameterValue(parameterValue: String): DataFormat? {
+        fun of(parameterValue: String): DataFormat? {
             return BY_PARAMETER_VALUE[parameterValue]
         }
     }
@@ -164,7 +164,7 @@ enum class DataType(@Suppress("MemberVisibilityCanBePrivate") val parameterValue
          * @return The `DataType` for the parameterValue.
          */
         @Suppress("unused") // Part of the API
-        fun valueOfParameterValue(parameterValue: String): DataType? {
+        fun of(parameterValue: String): DataType? {
             return BY_PARAMETER_VALUE[parameterValue]
         }
     }
