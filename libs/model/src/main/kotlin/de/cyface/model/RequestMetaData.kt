@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Cyface GmbH
+ * Copyright 2021-2024 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -26,8 +26,6 @@ import java.nio.charset.Charset
  * The metadata as transmitted in the request header or pre-request body.
  *
  * @author Armin Schnabel
- * @version 2.0.0
- * @since 6.0.0
  * @property deviceType The worldwide unique identifier of the device uploading the data.
  * @property measurementIdentifier The device wide unique identifier of the uploaded measurement.
  * @property operatingSystemVersion The operating system version, such as Android 9.0.0 or iOS 11.2.
@@ -39,10 +37,11 @@ import java.nio.charset.Charset
  * @property endLocation The `GeoLocation` at the end of the track represented by the transmitted measurement.
  * @property modality The modality type used to capture the measurement.
  * @property formatVersion The format version of the upload file.
- * @property logCount The number of log files captured for this measurement, e.g. metrics captured during distance-based image capturing.
- * @property imageCount The number of images captured for this measurement. This allows the backend to notice when all images are transmitted.
- * @property videoCount The number of videos captured for this measurement. This allows the backend to notice when all videos are transmitted.
+ * @property logCount Count of log files captured for this measurement, e.g. metrics captured during image capturing.
+ * @property imageCount Count of images captured for this measurement. Allows to notice when all images are transmitted.
+ * @property videoCount Count of videos captured for this measurement. Allows to notice when all videos are transmitted.
  * @property filesSize The number of bytes of the files collected for this measurement (log, image and video data).
+ * @property attachmentIdentifier The identifier of the attachment, if this measurement is an attachment.
  */
 @Suppress("unused") // Part of the API
 data class RequestMetaData(
@@ -60,7 +59,8 @@ data class RequestMetaData(
     val logCount: Int,
     val imageCount: Int,
     val videoCount: Int,
-    val filesSize: Long
+    val filesSize: Long,
+    val attachmentIdentifier: String? = null,
 ) : Serializable {
 
     init {
@@ -70,10 +70,11 @@ data class RequestMetaData(
         require(deviceType.isNotEmpty() && deviceType.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
             "Field deviceType had an invalid length of ${deviceType.length.toLong()}"
         }
-        require(measurementIdentifier.isNotEmpty() && measurementIdentifier.length <= MAX_MEASUREMENT_ID_LENGTH) {
+        require(measurementIdentifier.isNotEmpty() && measurementIdentifier.length <= MAX_ID_LENGTH) {
             "Field measurementId had an invalid length of ${measurementIdentifier.length.toLong()}"
         }
-        require(operatingSystemVersion.isNotEmpty() && operatingSystemVersion.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
+        require(operatingSystemVersion.isNotEmpty() &&
+                operatingSystemVersion.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
             "Field osVersion had an invalid length of ${operatingSystemVersion.length.toLong()}"
         }
         require(applicationVersion.isNotEmpty() && applicationVersion.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
@@ -101,17 +102,18 @@ data class RequestMetaData(
         require(imageCount >= 0) { "Invalid imageCount: $imageCount" }
         require(videoCount >= 0) { "Invalid videoCount: $videoCount" }
         require(filesSize >= 0) { "Invalid filesSize: $filesSize" }
+        require(attachmentIdentifier == null || attachmentIdentifier.length <= MAX_ID_LENGTH) {
+            "Field attachmentId had an invalid length of ${attachmentIdentifier!!.length.toLong()}"
+        }
     }
 
     /**
      * This class represents a geolocation at the start or end of a track.
      *
      * @author Armin Schnabel
-     * @version 1.0.0
-     * @since 6.0.0
      * @property timestamp The timestamp this location was captured on in milliseconds since 1st January 1970 (epoch).
-     * @property latitude Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north).
-     * @property longitude Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180° (east).
+     * @property latitude Geographical latitude (decimal fraction) raging from -90° (south) to 90° (north).
+     * @property longitude Geographical longitude (decimal fraction) ranging from -180° (west) to 180° (east).
      */
     data class GeoLocation(
         val timestamp: Long,
@@ -123,6 +125,7 @@ data class RequestMetaData(
         /**
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
          */
+        @Suppress("ConstPropertyName")
         private const val serialVersionUID = -1700430112854515404L
 
         /**
@@ -136,16 +139,16 @@ data class RequestMetaData(
         private const val DEFAULT_CHARSET = "UTF-8"
 
         /**
-         * Maximum size of a metadata field, with plenty space for future development. This prevents attackers from putting
+         * Maximum size of a metadata field, with plenty space for future development. Prevents attackers from putting
          * arbitrary long data into these fields.
          */
         const val MAX_GENERIC_METADATA_FIELD_LENGTH = 30
 
         /**
-         * The maximum length of the measurement identifier in characters (this is the amount of characters of
-         * {@value Long#MAX_VALUE}).
+         * The maximum length of the measurement or attachment identifier in characters (this is the amount of
+         * characters of {@value Long#MAX_VALUE}).
          */
-        private const val MAX_MEASUREMENT_ID_LENGTH = 20
+        private const val MAX_ID_LENGTH = 20
 
         /**
          * The minimum length of a track stored with a measurement.
