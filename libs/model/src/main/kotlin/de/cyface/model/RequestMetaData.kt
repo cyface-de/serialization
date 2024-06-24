@@ -19,151 +19,336 @@
 
 package de.cyface.model
 
+import de.cyface.model.RequestMetaData.MeasurementMetaData.GeoLocation
 import java.io.Serializable
 import java.nio.charset.Charset
 
 /**
- * The metadata as transmitted in the request header or pre-request body.
+ * The metadata as transmitted in the request header or pre-request body for the measurement file.
  *
  * @author Armin Schnabel
- * @property deviceType The worldwide unique identifier of the device uploading the data.
- * @property measurementIdentifier The device wide unique identifier of the uploaded measurement.
- * @property operatingSystemVersion The operating system version, such as Android 9.0.0 or iOS 11.2.
- * @property deviceType The type of device uploading the data, such as Pixel 3 or iPhone 6 Plus.
- * @property applicationVersion The version of the app that transmitted the measurement.
- * @property length The length of the measurement in meters.
- * @property locationCount The count of geolocations in the transmitted measurement.
- * @property startLocation The `GeoLocation` at the beginning of the track represented by the transmitted measurement.
- * @property endLocation The `GeoLocation` at the end of the track represented by the transmitted measurement.
- * @property modality The modality type used to capture the measurement.
- * @property formatVersion The format version of the upload file.
- * @property logCount Count of log files captured for this measurement, e.g. metrics captured during image capturing.
- * @property imageCount Count of images captured for this measurement. Allows to notice when all images are transmitted.
- * @property videoCount Count of videos captured for this measurement. Allows to notice when all videos are transmitted.
- * @property filesSize The number of bytes of the files collected for this measurement (log, image and video data).
- * @property attachmentIdentifier The identifier of the attachment, if this measurement is an attachment.
+ * @property identifier The identifier which identifies the data object transmitted.
  */
 @Suppress("unused") // Part of the API
-data class RequestMetaData(
-    val deviceIdentifier: String,
-    val measurementIdentifier: String,
-    val operatingSystemVersion: String,
-    val deviceType: String,
-    val applicationVersion: String,
-    val length: Double,
-    val locationCount: Long,
-    val startLocation: GeoLocation?,
-    val endLocation: GeoLocation?,
-    val modality: String,
-    val formatVersion: Int,
-    val logCount: Int,
-    val imageCount: Int,
-    val videoCount: Int,
-    val filesSize: Long,
-    val attachmentIdentifier: String? = null,
+data class RequestMetaData<T : RequestMetaData.MeasurementIdentifier>(
+    val identifier: T,
+    val deviceMetaData: DeviceMetaData,
+    val applicationMetaData: ApplicationMetaData,
+    val measurementMetaData: MeasurementMetaData,
+    val attachmentMetaData: AttachmentMetaData,
 ) : Serializable {
+    /**
+     * An identifier for a transmitted measurement file.
+     *
+     * @author Armin Schnabel
+     * @property deviceId The world-unique identifier of the device which collected the data.
+     * @property measurementId The device-unique identifier of the measurement transmitted.
+     */
+    open class MeasurementIdentifier(
+        val deviceId: String,
+        val measurementId: String,
+    ) : Serializable {
 
-    init {
-        require(deviceIdentifier.toByteArray(Charset.forName(DEFAULT_CHARSET)).size == UUID_LENGTH) {
-            "Field deviceId was not exactly 128 Bit, which is required for UUIDs!"
+        init {
+            require(deviceId.toByteArray(Charset.forName(DEFAULT_CHARSET)).size == UUID_LENGTH) {
+                "Field deviceId was not exactly 128 Bit, which is required for UUIDs!"
+            }
+            require(measurementId.isNotEmpty() && measurementId.length <= MAX_ID_LENGTH) {
+                "Field measurementId had an invalid length of ${measurementId.length.toLong()}"
+            }
         }
-        require(deviceType.isNotEmpty() && deviceType.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
-            "Field deviceType had an invalid length of ${deviceType.length.toLong()}"
+
+        companion object {
+            /**
+             * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
+             */
+            @Suppress("ConstPropertyName")
+            private const val serialVersionUID = 1L
+
+            /**
+             * The length of a universal unique identifier.
+             */
+            const val UUID_LENGTH = 36
+
+            /**
+             * The default char set to use for encoding and decoding strings transmitted as metadata.
+             */
+            const val DEFAULT_CHARSET = "UTF-8"
+
+            /**
+             * The maximum length of the measurement or attachment identifier in characters (this is the amount of
+             * characters of {@value Long#MAX_VALUE}).
+             */
+            const val MAX_ID_LENGTH = 20
         }
-        require(measurementIdentifier.isNotEmpty() && measurementIdentifier.length <= MAX_ID_LENGTH) {
-            "Field measurementId had an invalid length of ${measurementIdentifier.length.toLong()}"
+
+        override fun toString(): String {
+            return "MeasurementIdentifier(deviceId='$deviceId', measurementId='$measurementId')"
         }
-        require(operatingSystemVersion.isNotEmpty() &&
-                operatingSystemVersion.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
-            "Field osVersion had an invalid length of ${operatingSystemVersion.length.toLong()}"
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as MeasurementIdentifier
+
+            if (deviceId != other.deviceId) return false
+            if (measurementId != other.measurementId) return false
+
+            return true
         }
-        require(applicationVersion.isNotEmpty() && applicationVersion.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
-            "Field applicationVersion had an invalid length of ${applicationVersion.length.toLong()}"
-        }
-        require(length >= MINIMUM_TRACK_LENGTH) {
-            "Field length had an invalid value smaller then 0.0: $length"
-        }
-        require(locationCount >= MINIMUM_LOCATION_COUNT) {
-            "Field locationCount had an invalid value smaller then 0: $locationCount"
-        }
-        require(locationCount == MINIMUM_LOCATION_COUNT || startLocation != null) {
-            "Start location should only be defined if there is at least one location in the uploaded track!"
-        }
-        require(locationCount == MINIMUM_LOCATION_COUNT || endLocation != null) {
-            "End location should only be defined if there is at least one location in the uploaded track!"
-        }
-        require(modality.isNotEmpty() && modality.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
-            "Field modality had an invalid length of ${modality.length.toLong()}"
-        }
-        require(formatVersion == CURRENT_TRANSFER_FILE_FORMAT_VERSION) {
-            "Unsupported formatVersion: ${formatVersion.toLong()}"
-        }
-        require(logCount >= 0) { "Invalid logCount: $logCount" }
-        require(imageCount >= 0) { "Invalid imageCount: $imageCount" }
-        require(videoCount >= 0) { "Invalid videoCount: $videoCount" }
-        require(filesSize >= 0) { "Invalid filesSize: $filesSize" }
-        require(attachmentIdentifier == null || attachmentIdentifier.length <= MAX_ID_LENGTH) {
-            "Field attachmentId had an invalid length of ${attachmentIdentifier!!.length.toLong()}"
+
+        override fun hashCode(): Int {
+            var result = deviceId.hashCode()
+            result = 31 * result + measurementId.hashCode()
+            return result
         }
     }
 
     /**
-     * This class represents a geolocation at the start or end of a track.
+     * An identifier for a transmitted attachment file.
      *
      * @author Armin Schnabel
-     * @property timestamp The timestamp this location was captured on in milliseconds since 1st January 1970 (epoch).
-     * @property latitude Geographical latitude (decimal fraction) raging from -90° (south) to 90° (north).
-     * @property longitude Geographical longitude (decimal fraction) ranging from -180° (west) to 180° (east).
+     * @property deviceId The world-unique identifier of the device which collected the data.
+     * @property measurementId The device-unique identifier of the measurement transmitted.
+     * @property attachmentId The device-unique identifier of the attachment file transmitted.
      */
-    data class GeoLocation(
-        val timestamp: Long,
-        val latitude: Double,
-        val longitude: Double
-    )
+    class AttachmentIdentifier(
+        deviceId: String,
+        measurementId: String,
+        val attachmentId: String,
+    ) : MeasurementIdentifier(deviceId, measurementId) {
+        init {
+            require(attachmentId.isNotEmpty() && attachmentId.length <= MAX_ID_LENGTH) {
+                "Field attachmentId had an invalid length of ${attachmentId.length.toLong()}"
+            }
+        }
+
+        companion object {
+            /**
+             * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
+             */
+            @Suppress("ConstPropertyName")
+            private const val serialVersionUID = 1L
+        }
+
+        override fun toString(): String {
+            return "AttachmentIdentifier(attachmentId='$attachmentId')"
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            if (!super.equals(other)) return false
+
+            other as AttachmentIdentifier
+
+            return attachmentId == other.attachmentId
+        }
+
+        override fun hashCode(): Int {
+            var result = super.deviceId.hashCode() // The attachmentId is device-unique
+            result = 31 * result + attachmentId.hashCode()
+            return result
+        }
+    }
+
+    /**
+     * The metadata which describes the device which collected the data.
+     *
+     * @author Armin Schnabel
+     * @property operatingSystemVersion The operating system version, such as Android 9.0.0 or iOS 11.2.
+     * @property deviceType The type of device uploading the data, such as Pixel 3 or iPhone 6 Plus.
+     */
+    data class DeviceMetaData(
+        val operatingSystemVersion: String,
+        val deviceType: String,
+    ) : Serializable {
+        init {
+            require(
+                operatingSystemVersion.isNotEmpty() &&
+                        operatingSystemVersion.length <= MAX_GENERIC_METADATA_FIELD_LENGTH
+            ) {
+                "Field osVersion had an invalid length of ${operatingSystemVersion.length.toLong()}"
+            }
+            require(deviceType.isNotEmpty() && deviceType.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
+                "Field deviceType had an invalid length of ${deviceType.length.toLong()}"
+            }
+        }
+
+        companion object {
+            /**
+             * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
+             */
+            @Suppress("ConstPropertyName")
+            private const val serialVersionUID = 1L
+        }
+    }
+
+    /**
+     * The metadata which describes the application which collected the data.
+     *
+     * @author Armin Schnabel
+     * @property applicationVersion The version of the app that transmitted the measurement.
+     * @property formatVersion The format version of the upload file.
+     */
+    data class ApplicationMetaData(
+        val applicationVersion: String,
+        val formatVersion: Int,
+    ) : Serializable {
+        init {
+            require(applicationVersion.isNotEmpty() && applicationVersion.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
+                "Field applicationVersion had an invalid length of ${applicationVersion.length.toLong()}"
+            }
+            require(formatVersion == CURRENT_TRANSFER_FILE_FORMAT_VERSION) {
+                "Unsupported formatVersion: ${formatVersion.toLong()}"
+            }
+        }
+
+        companion object {
+            /**
+             * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
+             */
+            @Suppress("ConstPropertyName")
+            private const val serialVersionUID = 1L
+
+            /**
+             * The current version of the transferred file. This is always specified by the first two bytes of the file
+             * transferred and helps compatible APIs to process data from different client versions.
+             */
+            const val CURRENT_TRANSFER_FILE_FORMAT_VERSION = 3
+        }
+    }
+
+    /**
+     * The metadata which describes the measurement the data was collected for.
+     *
+     * @author Armin Schnabel
+     * @property length The length of the measurement in meters.
+     * @property locationCount The count of geolocations in the transmitted measurement.
+     * @property startLocation The first [GeoLocation] captured by the transmitted measurement.
+     * @property endLocation The last [GeoLocation] captured by the transmitted measurement.
+     * @property modality The modality type used to capture the measurement.
+     */
+    data class MeasurementMetaData(
+        val length: Double,
+        val locationCount: Long,
+        val startLocation: GeoLocation?,
+        val endLocation: GeoLocation?,
+        val modality: String,
+    ) : Serializable {
+        init {
+            require(length >= MINIMUM_TRACK_LENGTH) {
+                "Field length had an invalid value smaller then 0.0: $length"
+            }
+            require(locationCount >= MINIMUM_LOCATION_COUNT) {
+                "Field locationCount had an invalid value smaller then 0: $locationCount"
+            }
+            require(locationCount == MINIMUM_LOCATION_COUNT || startLocation != null) {
+                "Start location should only be defined if there is at least one location in the uploaded track!"
+            }
+            require(locationCount == MINIMUM_LOCATION_COUNT || endLocation != null) {
+                "End location should only be defined if there is at least one location in the uploaded track!"
+            }
+            require(modality.isNotEmpty() && modality.length <= MAX_GENERIC_METADATA_FIELD_LENGTH) {
+                "Field modality had an invalid length of ${modality.length.toLong()}"
+            }
+        }
+
+        /**
+         * This class represents a geolocation at the start or end of a track.
+         *
+         * @author Armin Schnabel
+         * @property timestamp The Unix timestamp this location was captured on in milliseconds.
+         * @property latitude Geographical latitude (decimal fraction) raging from -90° (south) to 90° (north).
+         * @property longitude Geographical longitude (decimal fraction) ranging from -180° (west) to 180° (east).
+         */
+        data class GeoLocation(
+            val timestamp: Long,
+            val latitude: Double,
+            val longitude: Double
+        )
+
+        companion object {
+            /**
+             * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
+             */
+            @Suppress("ConstPropertyName")
+            private const val serialVersionUID = 1L
+
+            /**
+             * The minimum length of a track stored with a measurement.
+             */
+            private const val MINIMUM_TRACK_LENGTH = 0.0
+
+            /**
+             * The minimum valid amount of locations stored inside a measurement.
+             */
+            private const val MINIMUM_LOCATION_COUNT = 0L
+        }
+    }
+
+    /**
+     * The metadata which describes the attachments which were collected together with the measurement.
+     *
+     * @author Armin Schnabel
+     * @property logCount Number of log files captured for this measurement, e.g. image capturing metrics.
+     * @property imageCount Number of image files captured for this measurement.
+     * @property videoCount Number of video files captured for this measurement.
+     * @property filesSize The number of bytes of the files collected for this measurement (log, image and video data).
+     */
+    data class AttachmentMetaData(
+        val logCount: Int,
+        val imageCount: Int,
+        val videoCount: Int,
+        val filesSize: Long,
+    ) : Serializable {
+        init {
+            require(logCount >= 0) { "Invalid logCount: $logCount" }
+            require(imageCount >= 0) { "Invalid imageCount: $imageCount" }
+            require(videoCount >= 0) { "Invalid videoCount: $videoCount" }
+            require(filesSize >= 0) { "Invalid filesSize: $filesSize" }
+        }
+
+        companion object {
+            /**
+             * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
+             */
+            @Suppress("ConstPropertyName")
+            private const val serialVersionUID = 1L
+        }
+    }
 
     companion object {
         /**
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
          */
         @Suppress("ConstPropertyName")
-        private const val serialVersionUID = -1700430112854515404L
-
-        /**
-         * The length of a universal unique identifier.
-         */
-        private const val UUID_LENGTH = 36
-
-        /**
-         * The default char set to use for encoding and decoding strings transmitted as metadata.
-         */
-        private const val DEFAULT_CHARSET = "UTF-8"
+        private const val serialVersionUID = 2L
 
         /**
          * Maximum size of a metadata field, with plenty space for future development. Prevents attackers from putting
          * arbitrary long data into these fields.
          */
         const val MAX_GENERIC_METADATA_FIELD_LENGTH = 30
+    }
 
-        /**
-         * The maximum length of the measurement or attachment identifier in characters (this is the amount of
-         * characters of {@value Long#MAX_VALUE}).
-         */
-        private const val MAX_ID_LENGTH = 20
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-        /**
-         * The minimum length of a track stored with a measurement.
-         */
-        private const val MINIMUM_TRACK_LENGTH = 0.0
+        other as RequestMetaData<*>
 
-        /**
-         * The minimum valid amount of locations stored inside a measurement.
-         */
-        private const val MINIMUM_LOCATION_COUNT = 0L
+        if (identifier != other.identifier) return false
+        if (deviceMetaData != other.deviceMetaData) return false
+        if (applicationMetaData != other.applicationMetaData) return false
+        if (measurementMetaData != other.measurementMetaData) return false
+        if (attachmentMetaData != other.attachmentMetaData) return false
 
-        /**
-         * The current version of the transferred file. This is always specified by the first two bytes of the file
-         * transferred and helps compatible APIs to process data from different client versions.
-         */
-        const val CURRENT_TRANSFER_FILE_FORMAT_VERSION = 3
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return identifier.hashCode()
     }
 }
