@@ -147,7 +147,7 @@ public class MatchedRecord extends GeoLocationRecord implements MatchedGeometry 
                 ", timestamp=" + getTimestamp() +
                 ", latitude=" + getLatitude() +
                 ", longitude=" + getLongitude() +
-                ", elevation=" + getElevation() +
+                ", elevation=" + elevation +
                 ", predecessor=" + predecessor +
                 ", successor=" + successor +
                 ", ways=" + ways +
