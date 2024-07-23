@@ -27,15 +27,10 @@ import org.apache.commons.lang3.Validate
  * @property key The key of the OSM attribute
  * @property value The value of the OSM attribute
  */
-class OsmTag(key: String?, value: Any) : MapTag(key!!) {
-    val value: Any
-
+class OsmTag(key: String?, val value: Any) : MapTag(key!!) {
     init {
-        Validate.notNull(value)
         // Before other types were injected by accident, like `TextNode`
         Validate.isTrue(value is String || value is Double || value is Int)
-
-        this.value = value
     }
 
     override fun equals(other: Any?): Boolean {

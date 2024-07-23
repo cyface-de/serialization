@@ -22,8 +22,9 @@ import org.apache.commons.lang3.Validate
 import java.util.Locale
 import java.util.Objects
 import java.util.Optional
-import java.util.function.Function
 import java.util.stream.Collectors
+
+
 
 /**
  * A POJO representing an Open Street Map way.
@@ -39,16 +40,27 @@ import java.util.stream.Collectors
  * @property nodes The OSM nodes constituting this way.
  * @property tags A `Collection` of all the tags associated with this Open Street Map way.
  */
-class Way<T : MapTag>(
-    var identifier: Long = 0L,
-    var nodes: Array<Node> = emptyArray(),
-    private var tags: Map<String, T> = emptyMap(),
-) : Comparable<Way<out MapTag>> {
+class Way<T : MapTag> : Comparable<Way<out MapTag>> {
+    var identifier: Long = 0L
+
+    var nodes: Array<Node> = emptyArray()
+        get() = field.copyOf()
+        set(value) {
+            Validate.notNull(value)
+            field = value.copyOf()
+        }
+
+    var tags: Map<String, T> = emptyMap()
+        set(value) {
+            Validate.notNull(value)
+            field = value.toMap()
+        }
+
     /**
      * A no argument constructor as required by Apache flink
      */
     @Suppress("unused") // Part of the API
-    constructor(): this(0L, emptyArray(), emptyMap())
+    constructor()
 
     /**
      * Creates a new completely initialized instance of this class.
@@ -58,33 +70,14 @@ class Way<T : MapTag>(
      * @param tags The tags associated with the way. This might be an empty `Collection`
      */
     @Suppress("unused") // Part of the API
-    constructor(identifier: Long, nodes: Array<Node>, tags: Collection<T>) : this(identifier, nodes, emptyMap()) {
+    constructor(identifier: Long, nodes: Array<Node>, tags: Collection<T>) {
         Validate.isTrue(identifier > 0L)
         Validate.notNull(nodes)
 
         this.identifier = identifier
-        this.nodes = nodes.copyOf()
-        setTags(tags)
+        this.nodes = nodes
+        this.tags = tags.associateBy { it.key }
     }
-
-    /**
-     * @return The OSM nodes constituting this way.
-     */
-    fun getNodes(): Array<Node> = nodes.copyOf()
-
-    /**
-     * @param nodes The OSM nodes constituting this way.
-     */
-    fun setNodes(nodes: Array<Node>) {
-        Validate.notNull(nodes)
-        this.nodes = nodes.copyOf()
-    }
-
-    /**
-     * @return The tags associated with the way. This might be an empty [Collection]
-     */
-    @Suppress("unused", "MemberVisibilityCanBePrivate") // Part of the API
-    fun getTags(): Collection<T> = tags.values
 
     /**
      * Returns the Open Street Map tag associated with the provided key.
@@ -96,12 +89,12 @@ class Way<T : MapTag>(
     fun getTag(key: String): Optional<T> = Optional.ofNullable(tags[key])
 
     /**
-     * @param tags The tags associated with the way. This might be an empty [Collection]
+     * @param tags The tags associated with the way. This might be an empty `Collection`
      */
-    @Suppress("unused", "MemberVisibilityCanBePrivate") // Part of the API
     fun setTags(tags: Collection<T>) {
         Validate.notNull(tags)
-        this.tags = tags.stream().collect(Collectors.toMap({ it.key }, Function.identity()))
+
+        this.tags = tags.stream().collect(Collectors.toMap({ it.key }, { it }))
     }
 
     override fun toString(): String {

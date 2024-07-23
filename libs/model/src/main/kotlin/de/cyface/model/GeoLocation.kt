@@ -41,13 +41,27 @@ open class GeoLocation : Serializable {
     /**
      * Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north).
      */
-    private var latitude = 0.0
+    @Suppress("MagicNumber")
+    var latitude: Double = 0.0
+        set(value) {
+            if (value < -90.0 || value > 90.0) {
+                LOGGER.warn("Setting latitude to invalid value: {}", value)
+            }
+            field = value
+        }
 
     /**
      * Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180°
      * (east).
      */
-    private var longitude = 0.0
+    @Suppress("MagicNumber")
+    var longitude: Double = 0.0
+        set(value) {
+            if (value < -180.0 || value > 180.0) {
+                LOGGER.warn("Setting longitude to invalid value: {}", value)
+            }
+            field = value
+        }
 
     /**
      * Elevation above sea level in meters or null if it could not be calculated.
@@ -69,8 +83,8 @@ open class GeoLocation : Serializable {
      */
     @JvmOverloads
     constructor(latitude: Double, longitude: Double, elevation: Double? = null) {
-        setLatitude(latitude)
-        setLongitude(longitude)
+        this.latitude = latitude
+        this.longitude = longitude
         this.elevation = elevation
     }
 
@@ -87,10 +101,10 @@ open class GeoLocation : Serializable {
     fun distanceTo(location: GeoLocation): Double {
         @SuppressWarnings("MagicNumber")
         val earthRadiusInMeters = 6371000
-        val latitudeDifferenceRad = degreeToRad(location.getLatitude() - getLatitude())
-        val longitudeDifferenceRad = degreeToRad(location.getLongitude() - getLongitude())
-        val a = sin(latitudeDifferenceRad / 2) * sin(latitudeDifferenceRad / 2) + cos(degreeToRad(getLatitude())) * cos(
-            degreeToRad(location.getLatitude())
+        val latitudeDifferenceRad = degreeToRad(location.latitude - latitude)
+        val longitudeDifferenceRad = degreeToRad(location.longitude - longitude)
+        val a = sin(latitudeDifferenceRad / 2) * sin(latitudeDifferenceRad / 2)+ cos(degreeToRad(latitude)) * cos(
+            degreeToRad(location.latitude)
         ) * sin(
             longitudeDifferenceRad / 2
         ) * sin(longitudeDifferenceRad / 2)
@@ -114,48 +128,6 @@ open class GeoLocation : Serializable {
 
     override fun toString(): String {
         return "GeoLocation{latitude=$latitude, longitude=$longitude, elevation=$elevation}"
-    }
-
-    /**
-     * @param longitude Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180°
-     * (east)
-     */
-    @SuppressWarnings("MagicNumber")
-    fun setLongitude(longitude: Double) {
-        if (longitude < -180.0 || longitude > 180.0) {
-            // We may only warn here, since some smartphone manufacturers seem to have a strange definition of geo
-            // coordinates.
-            LOGGER.warn("Setting longitude to invalid value: {}", longitude)
-        }
-        this.longitude = longitude
-    }
-
-    /**
-     * @param latitude Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north)
-     */
-    @SuppressWarnings("MagicNumber")
-    fun setLatitude(latitude: Double) {
-        if (latitude < -90.0 || latitude > 90.0) {
-            // We may only warn here, since some smartphone manufacturers seem to have a strange definition of geo
-            // coordinates.
-            LOGGER.warn("Setting latitude to invalid value: {}", latitude)
-        }
-        this.latitude = latitude
-    }
-
-    /**
-     * @return Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north)
-     */
-    fun getLatitude(): Double {
-        return latitude
-    }
-
-    /**
-     * @return Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180°
-     * (east)
-     */
-    fun getLongitude(): Double {
-        return longitude
     }
 
     override fun hashCode(): Int {

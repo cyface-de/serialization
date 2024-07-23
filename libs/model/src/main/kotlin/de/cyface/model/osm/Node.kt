@@ -87,8 +87,10 @@ class Node : GeoLocation {
     fun toJson(): String {
         return String.format(
             Locale.getDefault(),
-            "{\"identifier\":%d,\"latitude\":%f,\"longitude\":%f}", identifier, latitude,
-            longitude
+            "{\"identifier\":%d,\"latitude\":%f,\"longitude\":%f}",
+            identifier,
+            latitude,
+            longitude,
         )
     }
 }
