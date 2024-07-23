@@ -34,12 +34,20 @@ class MeasurementIdentifier : Comparable<MeasurementIdentifier>, Serializable {
     /**
      * The worldwide unique identifier of the device that captured this measurement.
      */
-    private var deviceIdentifier: String? = null
+    var deviceIdentifier: String? = null
+        set (value) {
+            Validate.notEmpty(value)
+            field = value
+        }
 
     /**
      * The device wide unique identifier of the measurement.
      */
-    private var measurementIdentifier: Long = 0
+    var measurementIdentifier: Long = 0
+        set(value) {
+            Validate.isTrue(value >= 0)
+            field = value
+        }
 
     /**
      * The default no arguments constructor as required by Apache Flink to serialize and deserialize objects of this
@@ -54,41 +62,7 @@ class MeasurementIdentifier : Comparable<MeasurementIdentifier>, Serializable {
      * @param measurementIdentifier The device wide unique identifier of the measurement
      */
     constructor(deviceIdentifier: String?, measurementIdentifier: Long) {
-        setDeviceIdentifier(deviceIdentifier)
-        setMeasurementIdentifier(measurementIdentifier)
-    }
-
-    /**
-     * @return The worldwide unique identifier of the device that captured this measurement
-     */
-    fun getDeviceIdentifier(): String? {
-        return deviceIdentifier
-    }
-
-    /**
-     * @return The device wide unique identifier of the measurement
-     */
-    fun getMeasurementIdentifier(): Long {
-        return measurementIdentifier
-    }
-
-    /**
-     * @param deviceIdentifier The worldwide unique identifier of the device that captured this measurement
-     */
-    @Suppress("MemberVisibilityCanBePrivate") // API
-    fun setDeviceIdentifier(deviceIdentifier: String?) {
-        Validate.notEmpty(deviceIdentifier)
-
         this.deviceIdentifier = deviceIdentifier
-    }
-
-    /**
-     * @param measurementIdentifier The device wide unique identifier of the measurement
-     */
-    @Suppress("MemberVisibilityCanBePrivate") // API
-    fun setMeasurementIdentifier(measurementIdentifier: Long) {
-        Validate.isTrue(measurementIdentifier >= 0)
-
         this.measurementIdentifier = measurementIdentifier
     }
 
@@ -117,10 +91,10 @@ class MeasurementIdentifier : Comparable<MeasurementIdentifier>, Serializable {
     }
 
     override fun compareTo(other: MeasurementIdentifier): Int {
-        val deviceIdentifierComparison = getDeviceIdentifier()!!
-            .compareTo(other.getDeviceIdentifier()!!)
-        return if (deviceIdentifierComparison == 0) this.getMeasurementIdentifier()
-            .compareTo(other.getMeasurementIdentifier())
+        val deviceIdentifierComparison = deviceIdentifier!!
+            .compareTo(other.deviceIdentifier!!)
+        return if (deviceIdentifierComparison == 0) this.measurementIdentifier
+            .compareTo(other.measurementIdentifier)
         else deviceIdentifierComparison
     }
 
