@@ -36,8 +36,6 @@ buildscript {
 plugins {
   id 'eclipse'
   id 'idea'
-  //noinspection SpellCheckingInspection
-  id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
   id "com.github.spotbugs" version "4.7.5" apply false
   // Plugin to display the Gradle task graph
   //noinspection SpellCheckingInspection
