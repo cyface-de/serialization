@@ -320,7 +320,16 @@ public class Measurement implements Serializable {
     /**
      * Exports this measurement as Json <b>without sensor data</b>.
      *
-     * @param username The name of the user who uploaded the data
+     * @param handler A handler that gets the Json as string
+     */
+    public void asJson(final Consumer<String> handler) {
+        asJson(null, handler);
+    }
+
+    /**
+     * Exports this measurement as Json <b>without sensor data</b>.
+     *
+     * @param username The name of the user who uploaded the data or {@code null} to omit this field
      * @param handler A handler that gets the Json as string
      */
     public void asJson(final String username, final Consumer<String> handler) {
@@ -346,7 +355,7 @@ public class Measurement implements Serializable {
     private Json.JsonObject asJson(final String username, final MetaData metaData) {
         return jsonObject(
                 jsonKeyValue("userId", metaData.getUserId().toString()),
-                jsonKeyValue("username", username),
+                username != null ? jsonKeyValue("username", username) : null,
                 jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()),
                 jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()),
                 jsonKeyValue("length", metaData.getLength()));
