@@ -151,8 +151,8 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
             }
 
             final var metaData = queryForMetaData(connection, measurementNumber);
-            final var locations = queryForLocations(connection, metaData.getIdentifier());
-            final var events = queryForEvents(connection, metaData.getIdentifier());
+            final var locations = queryForLocations(connection, metaData.identifier);
+            final var events = queryForEvents(connection, metaData.identifier);
 
             final var accelerations = readBinaryData(accelerationsFilePaths, measurementNumber);
             final var rotations = readBinaryData(rotationsFilePaths, measurementNumber);

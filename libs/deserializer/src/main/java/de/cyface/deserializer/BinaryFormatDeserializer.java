@@ -101,13 +101,13 @@ public class BinaryFormatDeserializer implements Deserializer {
                     .directions(measurement.getDirectionsBinary().getDirectionsList());
             final var builder = new TrackBuilder();
             final var tracks = builder.build(locations, events, accelerations, rotations, directions,
-                    metaData.getIdentifier());
+                    metaData.identifier);
             return new Measurement(metaData, tracks);
         }
     }
 
     @Override
     public List<MeasurementIdentifier> peakIntoDatabase() {
-        return Collections.singletonList(metaData.getIdentifier());
+        return Collections.singletonList(metaData.identifier);
     }
 }

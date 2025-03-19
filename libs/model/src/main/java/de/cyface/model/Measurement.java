@@ -307,10 +307,10 @@ public class Measurement implements Serializable {
         handler.accept(tracksCoordinates);
         handler.accept("},");
 
-        final var deviceId = jsonKeyValue("deviceId", getMetaData().getIdentifier().getDeviceIdentifier());
+        final var deviceId = jsonKeyValue("deviceId", getMetaData().identifier.getDeviceIdentifier());
         final var measurementId = jsonKeyValue("measurementId",
-                getMetaData().getIdentifier().getMeasurementIdentifier());
-        final var length = jsonKeyValue("length", getMetaData().getLength());
+                getMetaData().identifier.getMeasurementIdentifier());
+        final var length = jsonKeyValue("length", getMetaData().length);
         final var properties = jsonObject(deviceId, measurementId, length);
         handler.accept(jsonKeyValue("properties", properties).getStringValue());
 
@@ -354,11 +354,11 @@ public class Measurement implements Serializable {
 
     private Json.JsonObject asJson(final String username, final MetaData metaData) {
         return jsonObject(
-                jsonKeyValue("userId", metaData.getUserId().toString()),
+                jsonKeyValue("userId", metaData.userId.toString()),
                 username != null ? jsonKeyValue("username", username) : null,
-                jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()),
-                jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()),
-                jsonKeyValue("length", metaData.getLength()));
+                jsonKeyValue("deviceId", metaData.identifier.getDeviceIdentifier()),
+                jsonKeyValue("measurementId", metaData.identifier.getMeasurementIdentifier()),
+                jsonKeyValue("length", metaData.length));
     }
 
     /**
@@ -525,9 +525,9 @@ public class Measurement implements Serializable {
             final int trackId, final double modalityTypeDistance, final double totalDistance,
             final long modalityTypeTravelTime, final long totalTravelTime) {
 
-        final var userId = metaData.getUserId();
-        final var deviceId = metaData.getIdentifier().getDeviceIdentifier();
-        final var measurementId = String.valueOf(metaData.getIdentifier().getMeasurementIdentifier());
+        final var userId = metaData.userId;
+        final var deviceId = metaData.identifier.getDeviceIdentifier();
+        final var measurementId = String.valueOf(metaData.identifier.getMeasurementIdentifier());
 
         final var elements = new ArrayList<String>();
         if (options.getIncludeUserId()) {
@@ -552,9 +552,9 @@ public class Measurement implements Serializable {
             final Point3DImpl pointRecord,
             final int trackId) {
 
-        final var userId = metaData.getUserId();
-        final var deviceId = metaData.getIdentifier().getDeviceIdentifier();
-        final var measurementId = String.valueOf(metaData.getIdentifier().getMeasurementIdentifier());
+        final var userId = metaData.userId;
+        final var deviceId = metaData.identifier.getDeviceIdentifier();
+        final var measurementId = String.valueOf(metaData.identifier.getMeasurementIdentifier());
 
         final var elements = new ArrayList<String>();
         if (options.getIncludeUserId()) {

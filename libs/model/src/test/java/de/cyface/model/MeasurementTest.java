@@ -103,7 +103,7 @@ public class MeasurementTest {
         final var point3DS = new ArrayList<Point3DImpl>();
         point3DS.add(new Point3DImpl(1.0f, -2.0f, 3.0f, 1_000L));
         final var metaData = metaData();
-        final var identifier = metaData.getIdentifier();
+        final var identifier = metaData.identifier;
         final var tracks = Arrays.asList(
                 new Track(
                         Collections.singletonList(new RawRecord(identifier, 1_000L, latitude(1), longitude(1), null,
@@ -149,7 +149,7 @@ public class MeasurementTest {
         final var point3DS = new ArrayList<Point3DImpl>();
         point3DS.add(new Point3DImpl(1.0f, -2.0f, 3.0f, 1_000L));
         final var metaData = metaData();
-        final var identifier = metaData.getIdentifier();
+        final var identifier = metaData.identifier;
         final var tracks = Arrays.asList(
                 new Track(
                         Arrays.asList(
@@ -207,7 +207,7 @@ public class MeasurementTest {
         final var point3DS = new ArrayList<Point3DImpl>();
         point3DS.add(new Point3DImpl(1.0f, -2.0f, 3.0f, 1_000L));
         final var metaData = metaData();
-        final var identifier = metaData.getIdentifier();
+        final var identifier = metaData.identifier;
         final var tracks = Arrays.asList(
                 new Track(
                         Arrays.asList(
@@ -240,7 +240,7 @@ public class MeasurementTest {
         final var point3DS = new ArrayList<Point3DImpl>();
         point3DS.add(new Point3DImpl(1.0f, -2.0f, 3.0f, 1_000L));
         final var metaData = metaData();
-        final var identifier = metaData.getIdentifier();
+        final var identifier = metaData.identifier;
         final var tracks = Collections.singletonList(
                 new Track(Collections.singletonList(
                         new RawRecord(identifier, 1_000L, latitude(1), longitude(1), null, accuracy(1),
@@ -341,7 +341,7 @@ public class MeasurementTest {
         Validate.isTrue(numberOfTrackBuckets <= 3, "Not implemented for larger data sets");
 
         final var metaData = metaData();
-        final var identifier = metaData.getIdentifier();
+        final var identifier = metaData.identifier;
 
         final var locations = new ArrayList<RawRecord>();
         locations.add(new RawRecord(identifier, 1608650009000L, 51.075295000000004, 13.772176666666667, null, 27.04,
@@ -375,7 +375,7 @@ public class MeasurementTest {
         Validate.isTrue(modalities.length <= 2, "Not implemented");
 
         final var expectedMetaData = metaData();
-        final var measurementIdentifier = metaData().getIdentifier();
+        final var measurementIdentifier = metaData().identifier;
         final var expectedTracks = new ArrayList<Track>();
         for (int i = 0; i < numberOfTracks; i++) {
             final var modality = modalities.length == 1 ? modalities[0] : i == 0 ? modalities[0] : modalities[1];
