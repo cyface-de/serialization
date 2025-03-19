@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Cyface GmbH
+ * Copyright 2020-2025 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -19,15 +19,12 @@
 package de.cyface.model
 
 import java.io.Serializable
+import java.util.Date
 import java.util.Objects
 import java.util.UUID
 
 /**
  * The context of a deserialized `Measurement`.
- *
- * @author Armin Schnabel
- * @version 3.0.0
- * @since 1.2.0
  */
 class MetaData : Serializable {
     /**
@@ -84,6 +81,13 @@ class MetaData : Serializable {
      */
     @JvmField
     var version: String? = null
+    /**
+     * The upload date when the `Measurement` was uploaded to the collector.
+     *
+     * The setter is required by Apache Flink.
+     */
+    @JvmField
+    var uploadDate: Date? = null
 
     /**
      * Creates new completely initialized `MetaData`.
@@ -95,15 +99,17 @@ class MetaData : Serializable {
      * @param length The length of the measurement in meters.
      * @param userId The id of the user who has uploaded this measurement.
      * @param version The format version in which the `Measurement` was deserialized, e.g. "2.0.0".
+     * @param uploadDate The upload date when the `Measurement` was uploaded to the collector.
      */
     constructor(
         identifier: MeasurementIdentifier?,
-        deviceType: String?,
-        osVersion: String?,
-        appVersion: String?,
+        deviceType: String,
+        osVersion: String,
+        appVersion: String,
         length: Double,
-        userId: UUID?,
+        userId: UUID,
         version: String,
+        uploadDate: Date,
     ) {
         require(version.matches(SUPPORTED_VERSIONS.toRegex())) { "Unsupported version: $version" }
         this.identifier = identifier
@@ -113,6 +119,7 @@ class MetaData : Serializable {
         this.length = length
         this.userId = userId
         this.version = version
+        this.uploadDate = uploadDate
     }
 
     /**
@@ -130,6 +137,7 @@ class MetaData : Serializable {
                 ", length=" + length +
                 ", userId='" + userId + '\'' +
                 ", version='" + version + '\'' +
+                ", uploadDate='" + uploadDate + '\'' +
                 '}'
     }
 
@@ -143,30 +151,30 @@ class MetaData : Serializable {
                 osVersion == metaData.osVersion &&
                 appVersion == metaData.appVersion &&
                 userId == metaData.userId &&
-                version == metaData.version
+                version == metaData.version &&
+                uploadDate == metaData.uploadDate
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(identifier, deviceType, osVersion, appVersion, length, userId, version)
+        return Objects.hash(identifier, deviceType, osVersion, appVersion, length, userId, version, uploadDate)
     }
 
     companion object {
         /**
          * The current version of the deserialized measurement model.
          *
-         *
          * To be able to read measurements deserialized by different deserializer versions.
          */
-        const val CURRENT_VERSION: String = "3.0.0"
+        const val CURRENT_VERSION: String = "3.1.0"
 
         /**
          * Regex of supported [MetaData] versions of this class.
          */
-        const val SUPPORTED_VERSIONS: String = "3.0.0"
+        const val SUPPORTED_VERSIONS: String = "3.1.0" // FIXME: Can/Should we support 3.0.0 and 3.1.0?
 
         /**
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
          */
-        private const val serialVersionUID = -2781311916778609965L
+        private const  val serialVersionUID = -15050L
     }
 }
