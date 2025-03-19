@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -68,6 +69,10 @@ public class MeasurementTest {
      * The id of the user to add test data for.
      */
     private static final UUID TEST_USER_ID = UUID.randomUUID();
+    /**
+     * The date when the data was uploaded.
+     */
+    private static final Date uploadDate = new Date();
 
     /**
      * Tests that writing the CSV header produces the correct output.
@@ -429,6 +434,6 @@ public class MeasurementTest {
     private static MetaData metaData() {
         return new MetaData(new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER),
                 "Android SDK built for x86", "Android 8.0.0",
-                "2.7.0-beta1", 0.0, TEST_USER_ID, MetaData.CURRENT_VERSION);
+                "2.7.0-beta1", 0.0, TEST_USER_ID, MetaData.CURRENT_VERSION, uploadDate);
     }
 }

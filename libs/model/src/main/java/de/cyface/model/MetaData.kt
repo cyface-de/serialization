@@ -137,7 +137,7 @@ class MetaData : Serializable {
                 ", length=" + length +
                 ", userId='" + userId + '\'' +
                 ", version='" + version + '\'' +
-                ", uploadDate='" + uploadDate + '\'' +
+                ", uploadDate='" + uploadDate?.time + '\'' +
                 '}'
     }
 
