@@ -123,13 +123,13 @@ class BinaryFormatDeserializerTest {
 
             // Assert
             assertThat(result, notNullValue());
-            assertThat(result.getMetaData().identifier, is(identifier));
-            assertThat(result.getMetaData().deviceType, is("Pixel 3"));
-            assertThat(result.getMetaData().osVersion, is("Android 9.0.0"));
-            assertThat(result.getMetaData().appVersion, is("1.2.0-beta1"));
-            assertThat(result.getMetaData().length, is(500.5));
-            assertThat(result.getMetaData().userId, is(TEST_USER_ID));
-            assertThat(result.getMetaData().version, is(MetaData.CURRENT_VERSION));
+            assertThat(result.metaData.identifier, is(identifier));
+            assertThat(result.metaData.deviceType, is("Pixel 3"));
+            assertThat(result.metaData.osVersion, is("Android 9.0.0"));
+            assertThat(result.metaData.appVersion, is("1.2.0-beta1"));
+            assertThat(result.metaData.length, is(500.5));
+            assertThat(result.metaData.userId, is(TEST_USER_ID));
+            assertThat(result.metaData.version, is(MetaData.CURRENT_VERSION));
 
             final var resultTracks = result.getTracks();
             assertThat(resultTracks, hasSize(3));

@@ -79,7 +79,7 @@ class MeasurementTest {
         point3DS.add(Point3DImpl(1.0f, -2.0f, 3.0f, 1000L))
         val metaData = metaData()
         val identifier = metaData.identifier
-        val tracks = Arrays.asList(
+        val tracks = listOf(
             Track(
                 mutableListOf(
                     RawRecord(
@@ -99,7 +99,7 @@ class MeasurementTest {
                 point3DS, point3DS, point3DS
             )
         )
-        val measurement = Measurement(metaData, tracks)
+        val measurement = Measurement(metaData, tracks.toMutableList())
         val expectedOutput = ("""
      userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime [ms],travelTime [ms]
      $TEST_USER_ID,$TEST_USER_USERNAME,$DEVICE_IDENTIFIER,$MEASUREMENT_IDENTIFIER,0,1000,${
@@ -215,9 +215,9 @@ class MeasurementTest {
         point3DS.add(Point3DImpl(1.0f, -2.0f, 3.0f, 1000L))
         val metaData = metaData()
         val identifier = metaData.identifier
-        val tracks = Arrays.asList(
+        val tracks = listOf(
             Track(
-                Arrays.asList(
+                mutableListOf(
                     RawRecord(
                         identifier, 1000L, latitude(1), longitude(1), null, accuracy(1),
                         speed(1), Modality.UNKNOWN
@@ -239,7 +239,7 @@ class MeasurementTest {
                 point3DS, point3DS, point3DS
             )
         )
-        val measurement = Measurement(metaData, tracks)
+        val measurement = Measurement(metaData, tracks.toMutableList())
         val expectedOutput = ("{\"type\":\"Feature\",\"geometry\":{\"type\":\"MultiLineString\",\"coordinates\":"
                 + "[[[13.1,51.1],[13.2,51.2]],[[13.3,51.3]]]},\"properties\":{\"deviceId\":\""
                 + identifier!!.deviceIdentifier + "\"," + "\"measurementId\":"

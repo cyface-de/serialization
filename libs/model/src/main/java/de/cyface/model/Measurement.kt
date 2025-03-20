@@ -59,7 +59,7 @@ class Measurement : Serializable {
     /**
      * The data collected for this `Measurement` in `Track`-slices, ordered by timestamp.
      */
-    private var tracks: MutableList<Track> = mutableListOf()
+    var tracks: MutableList<Track> = mutableListOf()
         get() = Collections.unmodifiableList(field)
 
     /**
@@ -506,8 +506,7 @@ class Measurement : Serializable {
     private fun convertToLineStringCoordinates(tracks: List<Track>): String {
         // Each track is a LineString
         val coordinates = tracks.map { track ->
-            Json.jsonArray(track.locationRecords.map { geoJsonCoordinates(it).stringValue }.toTypedArray().toString())
-                .stringValue
+            "[${track.locationRecords.joinToString(",") { geoJsonCoordinates(it).stringValue }}]"
         }
         return "[${coordinates.joinToString(",")}]"
     }
