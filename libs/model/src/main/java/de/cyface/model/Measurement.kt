@@ -84,7 +84,7 @@ class Measurement : Serializable {
 
     constructor(buckets: List<TrackBucket>) {
         require(buckets.isNotEmpty()) { "Cannot create a measurement from 0 buckets!" }
-        this.metaData = buckets[0].getMetaData().also { requireNotNull(metaData) }
+        this.metaData = buckets[0].getMetaData().also { requireNotNull(it) }
         this.tracks = tracks(buckets).toMutableList()
     }
 
