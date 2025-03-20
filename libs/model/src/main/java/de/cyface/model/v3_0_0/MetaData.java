@@ -16,8 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.model;
+package de.cyface.model.v3_0_0;
 
+import de.cyface.model.MeasurementIdentifier;
 import org.apache.commons.lang3.Validate;
 
 import java.io.Serializable;
@@ -31,6 +32,7 @@ import java.util.UUID;
  * @version 3.0.0
  * @since 1.2.0
  */
+@SuppressWarnings("unused") // Part of the API
 public class MetaData implements Serializable {
 
     /**
@@ -87,8 +89,9 @@ public class MetaData implements Serializable {
      * @param userId The id of the user who has uploaded this measurement.
      * @param version The format version in which the {@code Measurement} was deserialized, e.g. "2.0.0".
      */
+    @SuppressWarnings("unused") // Part of the API
     public MetaData(final MeasurementIdentifier identifier, final String deviceType, final String osVersion,
-            final String appVersion, final double length, final UUID userId, final String version) {
+                    final String appVersion, final double length, final UUID userId, final String version) {
 
         Validate.isTrue(version.matches(SUPPORTED_VERSIONS), "Unsupported version: %s", version);
         this.identifier = identifier;
@@ -118,6 +121,7 @@ public class MetaData implements Serializable {
     /**
      * @return The type of device uploading the data, such as "Pixel 3" or "iPhone 6 Plus".
      */
+    @SuppressWarnings("unused") // Part of the API
     public String getDeviceType() {
         return deviceType;
     }
@@ -125,6 +129,7 @@ public class MetaData implements Serializable {
     /**
      * @return The operating system version, such as "Android 9.0.0" or "iOS 11.2".
      */
+    @SuppressWarnings("unused") // Part of the API
     public String getOsVersion() {
         return osVersion;
     }
@@ -132,6 +137,7 @@ public class MetaData implements Serializable {
     /**
      * @return The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
      */
+    @SuppressWarnings("unused") // Part of the API
     public String getAppVersion() {
         return appVersion;
     }
@@ -146,6 +152,7 @@ public class MetaData implements Serializable {
     /**
      * @return The id of the user who has uploaded this measurement.
      */
+    @SuppressWarnings("unused") // Part of the API
     public UUID getUserId() {
         return userId;
     }

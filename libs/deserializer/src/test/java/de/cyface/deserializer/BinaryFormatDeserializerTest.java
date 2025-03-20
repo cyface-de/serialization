@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -114,7 +115,7 @@ class BinaryFormatDeserializerTest {
         try (final var testData = testData(identifier)) {
             final var metaData = new MetaData(identifier, "Pixel 3", "Android 9.0.0", "1.2.0-beta1", 500.5,
                     TEST_USER_ID,
-                    MetaData.CURRENT_VERSION);
+                    MetaData.CURRENT_VERSION, new Date());
             final var reader = new BinaryFormatDeserializer(metaData, testData);
 
             // Act
@@ -122,13 +123,13 @@ class BinaryFormatDeserializerTest {
 
             // Assert
             assertThat(result, notNullValue());
-            assertThat(result.getMetaData().getIdentifier(), is(identifier));
-            assertThat(result.getMetaData().getDeviceType(), is("Pixel 3"));
-            assertThat(result.getMetaData().getOsVersion(), is("Android 9.0.0"));
-            assertThat(result.getMetaData().getAppVersion(), is("1.2.0-beta1"));
-            assertThat(result.getMetaData().getLength(), is(500.5));
-            assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID));
-            assertThat(result.getMetaData().getVersion(), is(MetaData.CURRENT_VERSION));
+            assertThat(result.metaData.identifier, is(identifier));
+            assertThat(result.metaData.deviceType, is("Pixel 3"));
+            assertThat(result.metaData.osVersion, is("Android 9.0.0"));
+            assertThat(result.metaData.appVersion, is("1.2.0-beta1"));
+            assertThat(result.metaData.length, is(500.5));
+            assertThat(result.metaData.userId, is(TEST_USER_ID));
+            assertThat(result.metaData.version, is(MetaData.CURRENT_VERSION));
 
             final var resultTracks = result.getTracks();
             assertThat(resultTracks, hasSize(3));
@@ -337,7 +338,7 @@ class BinaryFormatDeserializerTest {
                 .directions(parsedMeasurement.getDirectionsBinary().getDirectionsList());
         final var trackBuilder = new TrackBuilder();
         final var metaData = new MetaData(identifier, "Pixel 3", "Android 12.0.0", "3.0.2", 0.0,
-                TEST_USER_ID, MetaData.CURRENT_VERSION);
+                TEST_USER_ID, MetaData.CURRENT_VERSION, new Date());
         final var tracks = trackBuilder.build(deserializedLocations, deserializedEvents, accelerations, rotations,
                 directions, identifier);
         final var deserializedMeasurement = new de.cyface.model.Measurement(metaData, tracks);

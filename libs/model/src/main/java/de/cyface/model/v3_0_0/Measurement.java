@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.model;
+package de.cyface.model.v3_0_0;
 
 import static de.cyface.model.Json.jsonArray;
 import static de.cyface.model.Json.jsonKeyValue;
@@ -37,6 +37,14 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import de.cyface.model.DataType;
+import de.cyface.model.ExportOptions;
+import de.cyface.model.Json;
+import de.cyface.model.Modality;
+import de.cyface.model.Point3DImpl;
+import de.cyface.model.RawRecord;
+import de.cyface.model.TimestampNotFound;
+import de.cyface.model.Track;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,8 +283,8 @@ public class Measurement implements Serializable {
             // Iterate through sensor points
             final var points = options.getType().equals(DataType.ACCELERATION) ? track.getAccelerations()
                     : options.getType().equals(DataType.ROTATION) ? track.getRotations()
-                            : options.getType().equals(DataType.DIRECTION) ? track.getDirections()
-                                    : null;
+                    : options.getType().equals(DataType.DIRECTION) ? track.getDirections()
+                    : null;
             Validate.notNull(points, "Unsupported type: " + options.getType());
             for (final var point : points) {
                 handler.accept(csvSensorRow(options, username, getMetaData(), point, trackId));
@@ -353,12 +361,15 @@ public class Measurement implements Serializable {
     }
 
     private Json.JsonObject asJson(final String username, final MetaData metaData) {
-        return jsonObject(
-                jsonKeyValue("userId", metaData.getUserId().toString()),
-                username != null ? jsonKeyValue("username", username) : null,
-                jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()),
-                jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()),
-                jsonKeyValue("length", metaData.getLength()));
+        List<Json.KeyValuePair> jsonElements = new ArrayList<>();
+        jsonElements.add(jsonKeyValue("userId", metaData.getUserId().toString()));
+        if (username != null) {
+            jsonElements.add(jsonKeyValue("username", username));
+        }
+        jsonElements.add(jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()));
+        jsonElements.add(jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()));
+        jsonElements.add(jsonKeyValue("length", metaData.getLength()));
+        return jsonObject(jsonElements.toArray(new Json.KeyValuePair[0]));
     }
 
     /**
@@ -521,9 +532,9 @@ public class Measurement implements Serializable {
      * @return the csv row as String
      */
     private String csvRow(ExportOptions options, final String username, final MetaData metaData,
-            final RawRecord locationRecord,
-            final int trackId, final double modalityTypeDistance, final double totalDistance,
-            final long modalityTypeTravelTime, final long totalTravelTime) {
+                          final RawRecord locationRecord,
+                          final int trackId, final double modalityTypeDistance, final double totalDistance,
+                          final long modalityTypeTravelTime, final long totalTravelTime) {
 
         final var userId = metaData.getUserId();
         final var deviceId = metaData.getIdentifier().getDeviceIdentifier();
@@ -549,8 +560,8 @@ public class Measurement implements Serializable {
     }
 
     private String csvSensorRow(ExportOptions options, final String username, final MetaData metaData,
-            final Point3DImpl pointRecord,
-            final int trackId) {
+                                final Point3DImpl pointRecord,
+                                final int trackId) {
 
         final var userId = metaData.getUserId();
         final var deviceId = metaData.getIdentifier().getDeviceIdentifier();
