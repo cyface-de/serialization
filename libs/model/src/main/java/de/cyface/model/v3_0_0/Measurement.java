@@ -361,12 +361,15 @@ public class Measurement implements Serializable {
     }
 
     private Json.JsonObject asJson(final String username, final MetaData metaData) {
-        return jsonObject(
-                jsonKeyValue("userId", metaData.getUserId().toString()),
-                username != null ? jsonKeyValue("username", username) : null,
-                jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()),
-                jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()),
-                jsonKeyValue("length", metaData.getLength()));
+        List<Json.KeyValuePair> jsonElements = new ArrayList<>();
+        jsonElements.add(jsonKeyValue("userId", metaData.getUserId().toString()));
+        if (username != null) {
+            jsonElements.add(jsonKeyValue("username", username));
+        }
+        jsonElements.add(jsonKeyValue("deviceId", metaData.getIdentifier().getDeviceIdentifier()));
+        jsonElements.add(jsonKeyValue("measurementId", metaData.getIdentifier().getMeasurementIdentifier()));
+        jsonElements.add(jsonKeyValue("length", metaData.getLength()));
+        return jsonObject(jsonElements.toArray(new Json.KeyValuePair[0]));
     }
 
     /**
