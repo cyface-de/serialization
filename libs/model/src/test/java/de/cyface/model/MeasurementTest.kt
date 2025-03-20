@@ -126,7 +126,9 @@ class MeasurementTest {
         measurement.asCsv(options, TEST_USER_USERNAME) { str: String? -> csvOutput.append(str) }
 
         // Assert
-        MatcherAssert.assertThat(csvOutput.toString(), Matchers.`is`(Matchers.equalTo(expectedOutput)))
+        MatcherAssert.assertThat(
+            csvOutput.toString().replace("\r\n", "\n"), Matchers.`is`(Matchers.equalTo(expectedOutput))
+        )
     }
 
     /**
@@ -205,7 +207,9 @@ class MeasurementTest {
         measurement.asCsv(options, TEST_USER_USERNAME) { str: String? -> csvOutput.append(str) }
 
         // Assert
-        MatcherAssert.assertThat(csvOutput.toString(), Matchers.`is`(Matchers.equalTo(expectedOutput)))
+        MatcherAssert.assertThat(
+            csvOutput.toString().replace("\r\n", "\n"), Matchers.`is`(Matchers.equalTo(expectedOutput))
+        )
     }
 
     @Test
