@@ -20,6 +20,7 @@ package de.cyface.model
 
 import de.cyface.model.Json.JsonArray
 import de.cyface.model.Json.JsonObject
+import de.cyface.model.Json.jsonArray
 import org.apache.commons.lang3.Validate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -302,7 +303,7 @@ class Measurement : Serializable {
     }
 
     private fun geoJsonPointFeatures(list: List<RawRecord>): JsonArray =
-        Json.jsonArray(list.map { geoJsonPointFeature(it).stringValue }.toTypedArray().toString())
+        jsonArray(list.joinToString(",") { geoJsonPointFeature(it).stringValue })
 
     private fun geoJsonPointFeature(record: RawRecord): JsonObject {
         val type = Json.jsonKeyValue("type", "Feature")
