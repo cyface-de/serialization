@@ -130,13 +130,13 @@ class BinaryFormatDeserializerTest {
 
             // Assert
             assertThat(result, notNullValue());
-            assertThat(result.metaData.getIdentifier(), is(identifier));
-            assertThat(result.metaData.getDeviceType(), is("Pixel 3"));
-            assertThat(result.metaData.getOsVersion(), is("Android 9.0.0"));
-            assertThat(result.metaData.getAppVersion(), is("1.2.0-beta1"));
-            assertThat(result.metaData.getLength(), is(500.5));
-            assertThat(result.metaData.getUserId(), is(TEST_USER_ID));
-            assertThat(result.metaData.getVersion(), is(MetaData.CURRENT_VERSION));
+            assertThat(result.getMetaData().getIdentifier(), is(identifier));
+            assertThat(result.getMetaData().getDeviceType(), is("Pixel 3"));
+            assertThat(result.getMetaData().getOsVersion(), is("Android 9.0.0"));
+            assertThat(result.getMetaData().getAppVersion(), is("1.2.0-beta1"));
+            assertThat(result.getMetaData().getLength(), is(500.5));
+            assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID));
+            assertThat(result.getMetaData().getVersion(), is(MetaData.CURRENT_VERSION));
 
             final var resultTracks = result.getTracks();
             assertThat(resultTracks, hasSize(3));
@@ -356,7 +356,7 @@ class BinaryFormatDeserializerTest {
         );
         final var tracks = trackBuilder.build(deserializedLocations, deserializedEvents, accelerations, rotations,
                 directions, identifier);
-        final var deserializedMeasurement = new de.cyface.model.Measurement(metaData, tracks);
+        final var deserializedMeasurement = de.cyface.model.Measurement.create(metaData, tracks);
 
         // Assert
         assertThat(parsedMeasurement.getFormatVersion(), is(equalTo(3)));

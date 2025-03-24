@@ -102,7 +102,7 @@ public class BinaryFormatDeserializer implements Deserializer {
             final var builder = new TrackBuilder();
             final var tracks = builder.build(locations, events, accelerations, rotations, directions,
                     metaData.getIdentifier());
-            return new Measurement(metaData, tracks);
+            return Measurement.Companion.create(metaData, tracks);
         }
     }
 

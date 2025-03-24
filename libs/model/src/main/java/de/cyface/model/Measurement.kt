@@ -47,74 +47,18 @@ import kotlin.math.min
  * @version 3.0.0
  * @since 1.0.0
  */
-class Measurement : Serializable {
-    /**
-     * The context of this `Measurement`.
-     *
-     * Setter required for Apache Flink.
-     */
-    @JvmField
+@NoArg
+class Measurement private constructor(
     @set:Suppress("unused")
-    var metaData: MetaData? = null
+    var metaData: MetaData,
+): Serializable {
 
     /**
      * The data collected for this `Measurement` in `Track`-slices, ordered by timestamp.
      */
+    @set:Suppress("unused")
     var tracks: MutableList<Track> = mutableListOf()
         get() = Collections.unmodifiableList(field)
-
-    /**
-     * Creates a new uninitialized `Measurement`. This is only necessary for Flink serialisation and should never
-     * be called from your own code.
-     */
-    constructor() {
-        // Nothing to do here.
-    }
-
-    /**
-     * Creates a new completely initialized `Measurement`.
-     *
-     * @param metaData The context of this `Measurement`.
-     * @param tracks The data collected for this `Measurement` in `Track`-slices, ordered by timestamp.
-     */
-    constructor(metaData: MetaData, tracks: MutableList<Track>) {
-        this.metaData = metaData
-        this.tracks = tracks.toMutableList()
-    }
-
-    constructor(buckets: List<TrackBucket>) {
-        require(buckets.isNotEmpty()) { "Cannot create a measurement from 0 buckets!" }
-        this.metaData = buckets[0].getMetaData().also { requireNotNull(it) }
-        this.tracks = tracks(buckets).toMutableList()
-    }
-
-    /**
-     * Merges [TrackBucket]s into [Track]s.
-     *
-     * @param trackBuckets the data to merge
-     * @return the tracks
-     */
-    private fun tracks(trackBuckets: List<TrackBucket>): List<Track> {
-        // Group by trackId
-        val groupedBuckets = trackBuckets.groupBy { it.getTrackId() }
-
-        // Sort bucket groups by trackId
-        val sortedBucketGroups = groupedBuckets.toSortedMap()
-
-        // Convert buckets to Track
-        val tracks = mutableListOf<Track>()
-        sortedBucketGroups.forEach { (_, bucketGroup) ->
-            // Sort buckets
-            val sortedBuckets = bucketGroup.sortedBy { it.bucket }
-            // Merge buckets
-            val locations = sortedBuckets.flatMap { it.track.locationRecords }.toMutableList()
-            val accelerations = sortedBuckets.flatMap { it.track.accelerations }.toMutableList()
-            val rotations = sortedBuckets.flatMap { it.track.rotations }.toMutableList()
-            val directions = sortedBuckets.flatMap { it.track.directions }.toMutableList()
-            tracks.add(Track(locations, accelerations, rotations, directions))
-        }
-        return tracks
-    }
 
     /**
      * Exports this measurement as a CSV file.
@@ -545,6 +489,55 @@ class Measurement : Serializable {
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
          */
         private const val serialVersionUID = 4195718001652533383L
+
+        /**
+         * Factory to create a Measurement instance with tracks.
+         */
+        @JvmStatic
+        fun create(
+            metaData: MetaData,
+            tracks: List<Track>
+        ): Measurement {
+            require(tracks.isNotEmpty()) { "Tracks list must not be empty." }
+            return Measurement(metaData).apply {
+                this.tracks = tracks.toMutableList()
+            }
+        }
+
+        fun fromBuckets(buckets: List<TrackBucket>): Measurement {
+            require(buckets.isNotEmpty()) { "Cannot create a measurement from 0 buckets!" }
+            val meta = requireNotNull(buckets[0].getMetaData())
+            val tracks = tracks(buckets)
+            return create(meta, tracks)
+        }
+
+        /**
+         * Merges [TrackBucket]s into [Track]s.
+         *
+         * @param trackBuckets the data to merge
+         * @return the tracks
+         */
+        private fun tracks(trackBuckets: List<TrackBucket>): List<Track> {
+            // Group by trackId
+            val groupedBuckets = trackBuckets.groupBy { it.getTrackId() }
+
+            // Sort bucket groups by trackId
+            val sortedBucketGroups = groupedBuckets.toSortedMap()
+
+            // Convert buckets to Track
+            val tracks = mutableListOf<Track>()
+            sortedBucketGroups.forEach { (_, bucketGroup) ->
+                // Sort buckets
+                val sortedBuckets = bucketGroup.sortedBy { it.bucket }
+                // Merge buckets
+                val locations = sortedBuckets.flatMap { it.track.locationRecords }.toMutableList()
+                val accelerations = sortedBuckets.flatMap { it.track.accelerations }.toMutableList()
+                val rotations = sortedBuckets.flatMap { it.track.rotations }.toMutableList()
+                val directions = sortedBuckets.flatMap { it.track.directions }.toMutableList()
+                tracks.add(Track(locations, accelerations, rotations, directions))
+            }
+            return tracks
+        }
 
         /**
          * Creates a CSV header for this measurement.

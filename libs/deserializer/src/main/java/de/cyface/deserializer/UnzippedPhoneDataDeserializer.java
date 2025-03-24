@@ -173,7 +173,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
             final var trackBuilder = new TrackBuilder();
             final var tracks = trackBuilder.build(locations, events, accelerations, rotations, directions);
 
-            return new Measurement(metaData, tracks);
+            return Measurement.Companion.create(metaData, tracks);
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }

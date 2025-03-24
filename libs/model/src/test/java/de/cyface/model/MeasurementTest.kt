@@ -98,7 +98,7 @@ class MeasurementTest {
                 point3DS, point3DS, point3DS
             )
         )
-        val measurement = Measurement(metaData, tracks.toMutableList())
+        val measurement = Measurement.Companion.create(metaData, tracks.toMutableList())
         val expectedOutput = ("""
      userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime [ms],travelTime [ms]
      $TEST_USER_ID,$TEST_USER_USERNAME,$DEVICE_IDENTIFIER,$MEASUREMENT_IDENTIFIER,0,1000,${
@@ -168,7 +168,7 @@ class MeasurementTest {
                 point3DS, point3DS, point3DS
             )
         )
-        val measurement = Measurement(metaData, tracks.toMutableList())
+        val measurement = Measurement.Companion.create(metaData, tracks.toMutableList())
 
         val expectedOutput = ("""
      userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime [ms],travelTime [ms]
@@ -242,10 +242,10 @@ class MeasurementTest {
                 point3DS, point3DS, point3DS
             )
         )
-        val measurement = Measurement(metaData, tracks.toMutableList())
+        val measurement = Measurement.Companion.create(metaData, tracks.toMutableList())
         val expectedOutput = ("{\"type\":\"Feature\",\"geometry\":{\"type\":\"MultiLineString\",\"coordinates\":"
                 + "[[[13.1,51.1],[13.2,51.2]],[[13.3,51.3]]]},\"properties\":{\"deviceId\":\""
-                + identifier!!.deviceIdentifier + "\"," + "\"measurementId\":"
+                + identifier.deviceIdentifier + "\"," + "\"measurementId\":"
                 + identifier.measurementIdentifier + ",\"length\":0.0}}")
 
         // Act
@@ -274,10 +274,10 @@ class MeasurementTest {
                 point3DS, point3DS, point3DS
             )
         )
-        val measurement = Measurement(metaData, tracks.toMutableList())
+        val measurement = Measurement.create(metaData, tracks.toMutableList())
         val expectedOutput = ("{\"metaData\":{\"userId\":\"" + TEST_USER_ID
                 + "\",\"username\":\"guest\",\"deviceId\":\""
-                + identifier!!.deviceIdentifier + "\",\"measurementId\":" + identifier.measurementIdentifier
+                + identifier.deviceIdentifier + "\",\"measurementId\":" + identifier.measurementIdentifier
                 + ",\"length\":0.0},\"tracks\":[{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\","
                 + "\"geometry\":{\"type\":\"Point\",\"coordinates\":[13.1,51.1]},\"properties\":{\"timestamp\":1000,"
                 + "\"speed\":0.1,\"accuracy\":10.0,\"modality\":\"UNKNOWN\"}}]}]}")
@@ -306,7 +306,7 @@ class MeasurementTest {
         buckets.sortedBy { it.bucket }.reversed()
 
         // Act
-        val oocut = Measurement(buckets)
+        val oocut = Measurement.fromBuckets(buckets)
 
         // Assert
         val expectedTrack = generateMeasurement(1, arrayOf(Modality.BICYCLE)).tracks[0]
@@ -325,7 +325,7 @@ class MeasurementTest {
         buckets.addAll(generateTrackBuckets(0, 1, Modality.WALKING))
 
         // Act
-        val oocut = Measurement(buckets)
+        val oocut = Measurement.fromBuckets(buckets)
 
         // Assert
         val expectedTracks: List<Track> = generateMeasurement(2, arrayOf(Modality.WALKING, Modality.BICYCLE))
@@ -340,7 +340,7 @@ class MeasurementTest {
     @MethodSource("provideTrackBucketsForMeasurements")
     fun testMeasurement(buckets: List<TrackBucket>, expectedMeasurement: Measurement) {
         // Act
-        val oocut = Measurement(buckets)
+        val oocut = Measurement.fromBuckets(buckets)
 
         // Assert
         MatcherAssert.assertThat(oocut, CoreMatchers.`is`(CoreMatchers.equalTo(expectedMeasurement)))
@@ -508,7 +508,7 @@ class MeasurementTest {
                 )
                 expectedTracks.add(Track(expectedLocations, ArrayList(), ArrayList(), ArrayList()))
             }
-            return Measurement(expectedMetaData, expectedTracks)
+            return Measurement.Companion.create(expectedMetaData, expectedTracks)
         }
 
         /**

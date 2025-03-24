@@ -75,7 +75,7 @@ public class UnzippedPhoneDataDeserializerTest {
         final var result = oocut.read();
 
         // Assert
-        final var identifier = result.metaData.getIdentifier();
+        final var identifier = result.getMetaData().getIdentifier();
         assertThat(identifier, is(equalTo(new MeasurementIdentifier("2aec8af8-08a9-40e7-a86c-e490d33f48d9", mid))));
         assertThat(result, hasProperty("tracks", hasSize(2)));
         assertThat(result.getTracks().get(0), hasProperty("locationRecords", hasSize(6)));
