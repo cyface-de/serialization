@@ -61,16 +61,21 @@ public class UnzippedPhoneDataDeserializerTest {
         final var directionsLocation = path(folder + mid + ".cyfd");
         final var rotationsLocation = path(folder + mid + ".cyfr");
 
-        final var oocut = new UnzippedPhoneDataDeserializer(UUID.randomUUID(), databaseLocation,
-                List.of(accelerationsLocation), List.of(rotationsLocation), List.of(directionsLocation),
-                new Date());
+        final var oocut = new UnzippedPhoneDataDeserializer(
+                UUID.randomUUID(),
+                databaseLocation,
+                List.of(accelerationsLocation),
+                List.of(rotationsLocation),
+                List.of(directionsLocation),
+                new Date()
+        );
 
         // Act
         oocut.setMeasurementNumber(mid);
         final var result = oocut.read();
 
         // Assert
-        final var identifier = result.metaData.identifier;
+        final var identifier = result.metaData.getIdentifier();
         assertThat(identifier, is(equalTo(new MeasurementIdentifier("2aec8af8-08a9-40e7-a86c-e490d33f48d9", mid))));
         assertThat(result, hasProperty("tracks", hasSize(2)));
         assertThat(result.getTracks().get(0), hasProperty("locationRecords", hasSize(6)));

@@ -94,8 +94,14 @@ public final class DeserializerFactory {
      * @param uploadDate The upload date when the `Measurement`s were uploaded to the collector.
      * @return A {@link UnzippedPhoneDataDeserializer} to read measurements from an unzipped phone export
      */
-    public static UnzippedPhoneDataDeserializer create(final UUID userId, final Path measuresDatabase,
-                                                       final List<Path> accelerationFiles, final List<Path> rotationFiles, final List<Path> directionFiles, final Date uploadDate) {
+    public static UnzippedPhoneDataDeserializer create(
+            final UUID userId,
+            final Path measuresDatabase,
+            final List<Path> accelerationFiles,
+            final List<Path> rotationFiles,
+            final List<Path> directionFiles,
+            final Date uploadDate
+    ) {
         return new UnzippedPhoneDataDeserializer(userId, measuresDatabase, accelerationFiles, rotationFiles, directionFiles, uploadDate);
     }
 }

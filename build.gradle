@@ -42,6 +42,12 @@ plugins {
   id 'org.barfuin.gradle.taskinfo' version '2.1.0'
   // protobuf plugin 0.9.0-2 fail: https://github.com/google/protobuf-gradle-plugin/issues/686
   id 'com.google.protobuf' version '0.8.19' apply false // Maybe keep in sync with `plugins` in `protos/build.gradle
+  // To generate no-arg constructors for Apache Flink
+  id("org.jetbrains.kotlin.plugin.noarg") version "1.9.0"
+}
+
+noArg {
+  annotation("de.cyface.model.NoArg")
 }
 
 allprojects {
@@ -60,7 +66,10 @@ subprojects {
   apply plugin: 'kotlin'
 
   group = 'de.cyface'
-  version = "0.0.0" // Automatically overwritten by CI
+  // FIXME: This should probably be 4.0.0 as this will breaks the API:
+  // - existing 3.0.0 deserialized data cannot be read anymore
+  // - the API of the MetaData class changed
+  version = "3.5.0-alpha5" // Automatically overwritten by CI
 
   tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

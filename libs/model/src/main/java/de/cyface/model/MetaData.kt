@@ -25,120 +25,50 @@ import java.util.UUID
 
 /**
  * The context of a deserialized `Measurement`.
+ *
+ * The [NoArg] constructor and property setters are required for Apache Flink.
+ *
+ * @property identifier The worldwide unique identifier of the measurement.
+ * @property deviceType The type of device uploading the data, such as "Pixel 3" or "iPhone 6 Plus".
+ * @property osVersion The operating system version, such as "Android 9.0.0" or "iOS 11.2".
+ * @property appVersion The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
+ * @property length The length of the measurement in meters.
+ * @property userId The id of the user who has uploaded this measurement.
+ * @property version The format version in which the `Measurement` was deserialized, e.g. "1.2.3".
+ * @property uploadDate The upload date when the `Measurement` was uploaded to the collector.
  */
-class MetaData : Serializable {
-    /**
-     * The worldwide unique identifier of the measurement.
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
-    var identifier: MeasurementIdentifier? = null
-    /**
-     * The type of device uploading the data, such as "Pixel 3" or "iPhone 6 Plus".
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
+@NoArg
+class MetaData private constructor(
+    var identifier: MeasurementIdentifier,
     @set:Suppress("unused")
-    var deviceType: String? = null
-    /**
-     * The operating system version, such as "Android 9.0.0" or "iOS 11.2".
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
+    var deviceType: String,
     @set:Suppress("unused")
-    var osVersion: String? = null
-    /**
-     * The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
+    var osVersion: String,
     @set:Suppress("unused")
-    var appVersion: String? = null
-    /**
-     * The length of the measurement in meters.
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
+    var appVersion: String,
     @set:Suppress("unused")
-    var length: Double = 0.0
-    /**
-     * The id of the user who has uploaded this measurement.
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
+    var length: Double,
     @set:Suppress("unused")
-    var userId: UUID? = null
-    /**
-     * The format version in which the `Measurement` was deserialized, e.g. "1.2.3".
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
-    var version: String? = null
-    /**
-     * The upload date when the `Measurement` was uploaded to the collector.
-     *
-     * The setter is required by Apache Flink.
-     */
-    @JvmField
-    var uploadDate: Date? = null
+    var userId: UUID,
+    var version: String,
+    var uploadDate: Date,
+) : Serializable {
 
-    /**
-     * Creates new completely initialized `MetaData`.
-     *
-     * @param identifier The worldwide unique identifier of the measurement.
-     * @param deviceType The type of device uploading the data, such as "Pixel 3" or "iPhone 6 Plus".
-     * @param osVersion The operating system version, such as "Android 9.0.0" or "iOS 11.2".
-     * @param appVersion The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
-     * @param length The length of the measurement in meters.
-     * @param userId The id of the user who has uploaded this measurement.
-     * @param version The format version in which the `Measurement` was deserialized, e.g. "2.0.0".
-     * @param uploadDate The upload date when the `Measurement` was uploaded to the collector.
-     */
-    constructor(
-        identifier: MeasurementIdentifier?,
-        deviceType: String,
-        osVersion: String,
-        appVersion: String,
-        length: Double,
-        userId: UUID,
-        version: String,
-        uploadDate: Date,
-    ) {
+    fun validate() {
         require(version.matches(SUPPORTED_VERSIONS.toRegex())) { "Unsupported version: $version" }
-        this.identifier = identifier
-        this.deviceType = deviceType
-        this.osVersion = osVersion
-        this.appVersion = appVersion
-        this.length = length
-        this.userId = userId
-        this.version = version
-        this.uploadDate = uploadDate
     }
-
-    /**
-     * No argument constructor as required by Apache Flink. Do not use this in your own code.
-     */
-    @Suppress("unused")
-    constructor()
 
     override fun toString(): String {
         return "MetaData{" +
-                "identifier=" + identifier +
-                ", deviceType='" + deviceType + '\'' +
-                ", osVersion='" + osVersion + '\'' +
-                ", appVersion='" + appVersion + '\'' +
-                ", length=" + length +
-                ", userId='" + userId + '\'' +
-                ", version='" + version + '\'' +
-                ", uploadDate='" + uploadDate?.time + '\'' +
-                '}'
+            "identifier=" + identifier +
+            ", deviceType='" + deviceType + '\'' +
+            ", osVersion='" + osVersion + '\'' +
+            ", appVersion='" + appVersion + '\'' +
+            ", length=" + length +
+            ", userId='" + userId + '\'' +
+            ", version='" + version + '\'' +
+            ", uploadDate='" + uploadDate.time + '\'' +
+            '}'
     }
 
     override fun equals(other: Any?): Boolean {
@@ -146,7 +76,7 @@ class MetaData : Serializable {
         if (other == null || javaClass != other.javaClass) return false
         val metaData = other as MetaData
         return metaData.length.compareTo(length) == 0 &&
-                identifier!! == metaData.identifier &&
+                identifier == metaData.identifier &&
                 deviceType == metaData.deviceType &&
                 osVersion == metaData.osVersion &&
                 appVersion == metaData.appVersion &&
@@ -175,6 +105,24 @@ class MetaData : Serializable {
         /**
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
          */
-        private const  val serialVersionUID = -15050L
+        private const val serialVersionUID = -22272L
+
+        /**
+         * Factory which ensures the `validate` is called during initialization.
+         *
+         * We cannot use `init{}` because of the no-arg constructor required for Apache Flink.
+         */
+        fun create(
+            identifier: MeasurementIdentifier,
+            deviceType: String,
+            osVersion: String,
+            appVersion: String,
+            length: Double,
+            userId: UUID,
+            version: String,
+            uploadDate: Date,
+        ) = MetaData(identifier, deviceType, osVersion, appVersion, length, userId, version, uploadDate).apply {
+            validate()
+        }
     }
 }

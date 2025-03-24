@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Arrays
 import java.util.Date
 import java.util.UUID
 import java.util.stream.Stream
@@ -516,10 +515,15 @@ class MeasurementTest {
          * @return A static set of metadata to be used by test [Measurement] instances
          */
         private fun metaData(): MetaData {
-            return MetaData(
+            return MetaData.Companion.create(
                 MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER),
-                "Android SDK built for x86", "Android 8.0.0",
-                "2.7.0-beta1", 0.0, TEST_USER_ID, MetaData.CURRENT_VERSION, uploadDate
+                "Android SDK built for x86",
+                "Android 8.0.0",
+                "2.7.0-beta1",
+                0.0,
+                TEST_USER_ID,
+                MetaData.CURRENT_VERSION,
+                uploadDate,
             )
         }
     }

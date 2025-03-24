@@ -135,8 +135,14 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
             this.directionPaths = unzip(directionsFilePath);
             isUnzipped = true;
         }
-        final var phoneDataDeserializer = new UnzippedPhoneDataDeserializer(userId, databaseFile, accelerationPaths,
-                rotationPaths, directionPaths, uploadDate);
+        final var phoneDataDeserializer = new UnzippedPhoneDataDeserializer(
+                userId,
+                databaseFile,
+                accelerationPaths,
+                rotationPaths,
+                directionPaths,
+                uploadDate
+        );
         phoneDataDeserializer.setMeasurementNumber(measurementNumber);
 
         return phoneDataDeserializer.read();

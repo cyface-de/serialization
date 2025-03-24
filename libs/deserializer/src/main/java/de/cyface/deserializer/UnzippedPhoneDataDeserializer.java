@@ -126,10 +126,14 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * @param directionsFilePaths The files containing the compass sensor data
      * @param uploadDate The upload date when the `Measurement`s were uploaded to the collector.
      */
-    UnzippedPhoneDataDeserializer(final UUID userId, final Path sqliteDatabasePath,
-                                  final List<Path> accelerationsFilePaths,
-                                  final List<Path> rotationsFilePaths, final List<Path> directionsFilePaths,
-                                  final Date uploadDate) {
+    UnzippedPhoneDataDeserializer(
+            final UUID userId,
+            final Path sqliteDatabasePath,
+            final List<Path> accelerationsFilePaths,
+            final List<Path> rotationsFilePaths,
+            final List<Path> directionsFilePaths,
+            final Date uploadDate
+    ) {
         Validate.isTrue(Files.exists(sqliteDatabasePath));
         Validate.isTrue(accelerationsFilePaths.stream().map(Files::exists)
                 .reduce((first, second) -> first || second).orElseThrow());
@@ -159,8 +163,8 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
             }
 
             final var metaData = queryForMetaData(connection, measurementNumber);
-            final var locations = queryForLocations(connection, metaData.identifier);
-            final var events = queryForEvents(connection, metaData.identifier);
+            final var locations = queryForLocations(connection, metaData.getIdentifier());
+            final var events = queryForEvents(connection, metaData.getIdentifier());
 
             final var accelerations = readBinaryData(accelerationsFilePaths, measurementNumber);
             final var rotations = readBinaryData(rotationsFilePaths, measurementNumber);
@@ -276,7 +280,16 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
         final var lengthResultSet = lengthQuery.executeQuery();
         lengthResultSet.next();
         final var length = lengthResultSet.getDouble(1);
-        return new MetaData(measurementIdentifier, deviceType, osVersion, appVersion, length, userId, MetaData.CURRENT_VERSION, uploadDate);
+        return MetaData.Companion.create(
+            measurementIdentifier,
+            deviceType,
+            osVersion,
+            appVersion,
+            length,
+            userId,
+            MetaData.CURRENT_VERSION,
+            uploadDate
+        );
     }
 
     /**
