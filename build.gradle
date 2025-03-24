@@ -69,7 +69,7 @@ subprojects {
   // FIXME: This should probably be 4.0.0 as this will breaks the API:
   // - existing 3.0.0 deserialized data cannot be read anymore
   // - the API of the MetaData class changed
-  version = "3.5.0-alpha5" // Automatically overwritten by CI
+  version = "0.0.0" // Automatically overwritten by CI
 
   tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

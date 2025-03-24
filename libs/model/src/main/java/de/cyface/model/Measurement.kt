@@ -42,13 +42,15 @@ import kotlin.math.min
  * part of Apache Flink Pipelines, which require public setters and a no argument constructor to transfer objects
  * between cluster nodes.
  *
+ * The class is `open` as required by `de.cyface.flink.model.CalibratedMeasurement` (see backend).
+ *
  * @author Armin Schnabel
  * @author Klemens Muthmann
  * @version 3.0.0
  * @since 1.0.0
  */
 @NoArg
-class Measurement private constructor(
+open class Measurement private constructor(
     @set:Suppress("unused")
     var metaData: MetaData,
 ): Serializable {
