@@ -21,6 +21,7 @@ package de.cyface.deserializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,12 +70,14 @@ public final class DeserializerFactory {
      * @param accelerationsArchive The archive containing the accelerations from the accelerometer
      * @param rotationsArchive The archive containing rotations from the gyroscope
      * @param directionsArchive The archive containing directions from the compass
+     * @param uploadDate The upload date when the `Measurement`s were uploaded to the collector.
      * @return A {@link ZippedPhoneDataDeserializer} to read measurements from a phone export
      */
     public static ZippedPhoneDataDeserializer create(final UUID userId, final Path measuresArchive,
-            final Path accelerationsArchive, final Path rotationsArchive, final Path directionsArchive) {
+            final Path accelerationsArchive, final Path rotationsArchive, final Path directionsArchive,
+            final Date uploadDate) {
         return new ZippedPhoneDataDeserializer(userId, measuresArchive, accelerationsArchive, rotationsArchive,
-                directionsArchive);
+                directionsArchive, uploadDate);
     }
 
     /**
@@ -88,10 +91,17 @@ public final class DeserializerFactory {
      * @param accelerationFiles The files containing the accelerations from the accelerometer for each measurement
      * @param rotationFiles The files containing the rotations from the gyroscope for each measurement
      * @param directionFiles The files containing the directions from the compass for each measurement
+     * @param uploadDate The upload date when the `Measurement`s were uploaded to the collector.
      * @return A {@link UnzippedPhoneDataDeserializer} to read measurements from an unzipped phone export
      */
-    public static UnzippedPhoneDataDeserializer create(final UUID userId, final Path measuresDatabase,
-                                                       final List<Path> accelerationFiles, final List<Path> rotationFiles, final List<Path> directionFiles) {
-        return new UnzippedPhoneDataDeserializer(userId, measuresDatabase, accelerationFiles, rotationFiles, directionFiles);
+    public static UnzippedPhoneDataDeserializer create(
+            final UUID userId,
+            final Path measuresDatabase,
+            final List<Path> accelerationFiles,
+            final List<Path> rotationFiles,
+            final List<Path> directionFiles,
+            final Date uploadDate
+    ) {
+        return new UnzippedPhoneDataDeserializer(userId, measuresDatabase, accelerationFiles, rotationFiles, directionFiles, uploadDate);
     }
 }

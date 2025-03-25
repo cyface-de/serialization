@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -105,6 +106,10 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * the correct one here, but a user id is often necessary for further processing steps.
      */
     private final UUID userId;
+    /**
+     * The upload date when the `Measurement`s were uploaded to the collector.
+     */
+    private final Date uploadDate;
 
     /**
      * Create a new {@link Deserializer} for phone data. Before calling read on an instance of this class
@@ -119,10 +124,16 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
      * @param accelerationsFilePaths The files containing the accelerometer sensor data
      * @param rotationsFilePaths The files containing the gyroscope sensor data
      * @param directionsFilePaths The files containing the compass sensor data
+     * @param uploadDate The upload date when the `Measurement`s were uploaded to the collector.
      */
-    UnzippedPhoneDataDeserializer(final UUID userId, final Path sqliteDatabasePath,
-                                  final List<Path> accelerationsFilePaths,
-                                  final List<Path> rotationsFilePaths, final List<Path> directionsFilePaths) {
+    UnzippedPhoneDataDeserializer(
+            final UUID userId,
+            final Path sqliteDatabasePath,
+            final List<Path> accelerationsFilePaths,
+            final List<Path> rotationsFilePaths,
+            final List<Path> directionsFilePaths,
+            final Date uploadDate
+    ) {
         Validate.isTrue(Files.exists(sqliteDatabasePath));
         Validate.isTrue(accelerationsFilePaths.stream().map(Files::exists)
                 .reduce((first, second) -> first || second).orElseThrow());
@@ -137,6 +148,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
         this.rotationsFilePaths = rotationsFilePaths;
         this.directionsFilePaths = directionsFilePaths;
         this.userId = userId;
+        this.uploadDate = uploadDate;
     }
 
     @Override
@@ -161,7 +173,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
             final var trackBuilder = new TrackBuilder();
             final var tracks = trackBuilder.build(locations, events, accelerations, rotations, directions);
 
-            return new Measurement(metaData, tracks);
+            return Measurement.Companion.create(metaData, tracks);
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
@@ -268,7 +280,16 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
         final var lengthResultSet = lengthQuery.executeQuery();
         lengthResultSet.next();
         final var length = lengthResultSet.getDouble(1);
-        return new MetaData(measurementIdentifier, deviceType, osVersion, appVersion, length, userId, MetaData.CURRENT_VERSION);
+        return MetaData.Companion.create(
+            measurementIdentifier,
+            deviceType,
+            osVersion,
+            appVersion,
+            length,
+            userId,
+            MetaData.CURRENT_VERSION,
+            uploadDate
+        );
     }
 
     /**

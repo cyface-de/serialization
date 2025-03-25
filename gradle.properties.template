@@ -1,2 +1,4 @@
 gpr.user=<GITHUB_USERNAME>
 gpr.key=<GITHUB_ACCESS_TOKEN>
+# To ensure `gradlew` uses the same JDK as specified in `build.gradle` and `github/workflows`:
+#org.gradle.java.home=/usr/lib/jvm/java-11-openjdk-amd64

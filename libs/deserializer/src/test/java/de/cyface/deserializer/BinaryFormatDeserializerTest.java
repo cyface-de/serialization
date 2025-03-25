@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -112,9 +113,16 @@ class BinaryFormatDeserializerTest {
         // Arrange
         final var identifier = new MeasurementIdentifier("test", 1);
         try (final var testData = testData(identifier)) {
-            final var metaData = new MetaData(identifier, "Pixel 3", "Android 9.0.0", "1.2.0-beta1", 500.5,
+            final var metaData = MetaData.Companion.create(
+                    identifier,
+                    "Pixel 3",
+                    "Android 9.0.0",
+                    "1.2.0-beta1",
+                    500.5,
                     TEST_USER_ID,
-                    MetaData.CURRENT_VERSION);
+                    MetaData.CURRENT_VERSION,
+                    new Date()
+            );
             final var reader = new BinaryFormatDeserializer(metaData, testData);
 
             // Act
@@ -336,11 +344,19 @@ class BinaryFormatDeserializerTest {
         final var directions = Point3DDeserializer
                 .directions(parsedMeasurement.getDirectionsBinary().getDirectionsList());
         final var trackBuilder = new TrackBuilder();
-        final var metaData = new MetaData(identifier, "Pixel 3", "Android 12.0.0", "3.0.2", 0.0,
-                TEST_USER_ID, MetaData.CURRENT_VERSION);
+        final var metaData = MetaData.Companion.create(
+                identifier,
+                "Pixel 3",
+                "Android 12.0.0",
+                "3.0.2",
+                0.0,
+                TEST_USER_ID,
+                MetaData.CURRENT_VERSION,
+                new Date()
+        );
         final var tracks = trackBuilder.build(deserializedLocations, deserializedEvents, accelerations, rotations,
                 directions, identifier);
-        final var deserializedMeasurement = new de.cyface.model.Measurement(metaData, tracks);
+        final var deserializedMeasurement = de.cyface.model.Measurement.create(metaData, tracks);
 
         // Assert
         assertThat(parsedMeasurement.getFormatVersion(), is(equalTo(3)));

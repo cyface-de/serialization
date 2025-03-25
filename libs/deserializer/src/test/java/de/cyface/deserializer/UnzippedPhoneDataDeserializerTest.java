@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.not;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,16 +61,22 @@ public class UnzippedPhoneDataDeserializerTest {
         final var directionsLocation = path(folder + mid + ".cyfd");
         final var rotationsLocation = path(folder + mid + ".cyfr");
 
-        final var oocut = new UnzippedPhoneDataDeserializer(UUID.randomUUID(), databaseLocation,
-                List.of(accelerationsLocation), List.of(rotationsLocation), List.of(directionsLocation));
+        final var oocut = new UnzippedPhoneDataDeserializer(
+                UUID.randomUUID(),
+                databaseLocation,
+                List.of(accelerationsLocation),
+                List.of(rotationsLocation),
+                List.of(directionsLocation),
+                new Date()
+        );
 
         // Act
         oocut.setMeasurementNumber(mid);
         final var result = oocut.read();
 
         // Assert
-        assertThat(result, hasProperty("metaData", hasProperty("identifier",
-                is(equalTo(new MeasurementIdentifier("2aec8af8-08a9-40e7-a86c-e490d33f48d9", mid))))));
+        final var identifier = result.getMetaData().getIdentifier();
+        assertThat(identifier, is(equalTo(new MeasurementIdentifier("2aec8af8-08a9-40e7-a86c-e490d33f48d9", mid))));
         assertThat(result, hasProperty("tracks", hasSize(2)));
         assertThat(result.getTracks().get(0), hasProperty("locationRecords", hasSize(6)));
         assertThat(result.getTracks().get(0), hasProperty("accelerations", is(not(empty()))));
@@ -93,7 +100,7 @@ public class UnzippedPhoneDataDeserializerTest {
         final var directions = path(folder + "cyface-directions" + suffix);
         final var rotations = path(folder + "cyface-rotations" + suffix);
         final var oocut = new ZippedPhoneDataDeserializer(UUID.randomUUID(), databaseLocation, accelerations, directions,
-                rotations);
+                rotations, new Date());
 
         // Act
         oocut.setMeasurementNumber(mid);
