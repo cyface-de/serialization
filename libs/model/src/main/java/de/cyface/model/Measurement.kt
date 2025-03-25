@@ -125,7 +125,7 @@ open class Measurement private constructor(
 
                 handler.accept(
                     csvRow(
-                        options, username, metaData!!, locationRecord, trackId,
+                        options, username, metaData, locationRecord, trackId,
                         modalityTypeDistance, totalDistance,
                         modalityTypeTravelTime, totalTravelTime
                     )
@@ -148,7 +148,7 @@ open class Measurement private constructor(
                 else -> throw IllegalArgumentException("Unsupported type: ${options.type}")
             }
             points.forEach { point ->
-                handler.accept(csvSensorRow(options, username, metaData!!, point, trackId))
+                handler.accept(csvSensorRow(options, username, metaData, point, trackId))
                 handler.accept("\r\n")
             }
         }
@@ -177,13 +177,13 @@ open class Measurement private constructor(
         handler.accept(tracksCoordinates)
         handler.accept("},")
 
-        val deviceId = Json.jsonKeyValue("deviceId", metaData!!.identifier!!.deviceIdentifier)
+        val deviceId = Json.jsonKeyValue("deviceId", metaData.identifier.deviceIdentifier!!)
         val measurementId = Json.jsonKeyValue(
             "measurementId",
-            metaData!!.identifier!!.measurementIdentifier
+            metaData.identifier.measurementIdentifier
         )
-        val length = Json.jsonKeyValue("length", metaData!!.length)
-        val properties = Json.jsonObject(deviceId, measurementId, length)
+        val length = Json.jsonKeyValue("length", metaData.length)
+        val properties = Json.jsonObject(listOf(deviceId, measurementId, length))
         handler.accept(Json.jsonKeyValue("properties", properties).stringValue)
 
         handler.accept("}")
@@ -209,7 +209,7 @@ open class Measurement private constructor(
         // We decided to generate a String instead of using a JSON library to avoid dependencies in the model library
         handler.accept("{")
 
-        handler.accept(Json.jsonKeyValue("metaData", asJson(username, metaData!!)).stringValue)
+        handler.accept(Json.jsonKeyValue("metaData", asJson(username, metaData)).stringValue)
         handler.accept(",")
 
         handler.accept("\"tracks\":[")
@@ -226,13 +226,15 @@ open class Measurement private constructor(
     }
 
     private fun asJson(username: String?, metaData: MetaData): JsonObject {
-        return Json.jsonObject(
-            Json.jsonKeyValue("userId", metaData.userId.toString()),
-            if (username != null) Json.jsonKeyValue("username", username) else null,
-            Json.jsonKeyValue("deviceId", metaData.identifier!!.deviceIdentifier),
-            Json.jsonKeyValue("measurementId", metaData.identifier!!.measurementIdentifier),
-            Json.jsonKeyValue("length", metaData.length)
-        )
+        val keyValuePairs = buildList {
+            add(Json.jsonKeyValue("userId", metaData.userId.toString()))
+            if (username != null) add(Json.jsonKeyValue("username", username))
+            add(Json.jsonKeyValue("deviceId", metaData.identifier.deviceIdentifier!!))
+            add(Json.jsonKeyValue("measurementId", metaData.identifier.measurementIdentifier))
+            add(Json.jsonKeyValue("length", metaData.length))
+        }
+
+        return Json.jsonObject(keyValuePairs)
     }
 
     /**
@@ -245,11 +247,11 @@ open class Measurement private constructor(
         val points = geoJsonPointFeatures(track.locationRecords)
         val type = Json.jsonKeyValue("type", "FeatureCollection")
         val features = Json.jsonKeyValue("features", points)
-        return Json.jsonObject(type, features)
+        return Json.jsonObject(listOf(type, features))
     }
 
     private fun geoJsonPointFeatures(list: List<RawRecord>): JsonArray =
-        jsonArray(list.joinToString(",") { geoJsonPointFeature(it).stringValue })
+        jsonArray(listOf(list.joinToString(",") { geoJsonPointFeature(it).stringValue }))
 
     private fun geoJsonPointFeature(record: RawRecord): JsonObject {
         val type = Json.jsonKeyValue("type", "Feature")
@@ -257,16 +259,16 @@ open class Measurement private constructor(
         val geometryType = Json.jsonKeyValue("type", "Point")
         val lat = record.latitude.toString()
         val lon = record.longitude.toString()
-        val coordinates = Json.jsonKeyValue("coordinates", Json.jsonArray(lon, lat))
-        val geometry = Json.jsonKeyValue("geometry", Json.jsonObject(geometryType, coordinates))
+        val coordinates = Json.jsonKeyValue("coordinates", jsonArray(listOf(lon, lat)))
+        val geometry = Json.jsonKeyValue("geometry", Json.jsonObject(listOf(geometryType, coordinates)))
 
         val timestamp = Json.jsonKeyValue("timestamp", record.timestamp)
         val speed = Json.jsonKeyValue("speed", record.speed)
         val accuracy = Json.jsonKeyValue("accuracy", record.accuracy)
         val modality = Json.jsonKeyValue("modality", record.modality.databaseIdentifier)
-        val properties = Json.jsonKeyValue("properties", Json.jsonObject(timestamp, speed, accuracy, modality))
+        val properties = Json.jsonKeyValue("properties", Json.jsonObject(listOf(timestamp, speed, accuracy, modality)))
 
-        return Json.jsonObject(type, geometry, properties)
+        return Json.jsonObject(listOf(type, geometry, properties))
     }
 
     /**
@@ -348,7 +350,7 @@ open class Measurement private constructor(
                 "Max timestamp for index {} is {} ({}).", i,
                 SimpleDateFormat.getDateTimeInstance().format(Date(maxTrackTimestamp)), maxTrackTimestamp
             )
-            if (timestamp >= minTrackTimestamp && timestamp <= maxTrackTimestamp) {
+            if (timestamp in minTrackTimestamp..maxTrackTimestamp) {
                 LOGGER.trace("Selected index {}.", i)
                 return i
             }
@@ -389,8 +391,8 @@ open class Measurement private constructor(
         totalTravelTime: Long,
     ): String {
         val userId = metaData.userId
-        val deviceId = metaData.identifier!!.deviceIdentifier
-        val measurementId = metaData.identifier!!.measurementIdentifier.toString()
+        val deviceId = metaData.identifier.deviceIdentifier
+        val measurementId = metaData.identifier.measurementIdentifier.toString()
 
         val elements = ArrayList<String?>()
         if (options.includeUserId) {
@@ -401,7 +403,7 @@ open class Measurement private constructor(
             elements.add(username)
         }
         elements.addAll(
-            java.util.List.of(
+            listOf(
                 deviceId, measurementId, trackId.toString(),
                 locationRecord.timestamp.toString(),
                 locationRecord.latitude.toString(),
@@ -421,8 +423,8 @@ open class Measurement private constructor(
         trackId: Int
     ): String {
         val userId = metaData.userId
-        val deviceId = metaData.identifier!!.deviceIdentifier
-        val measurementId = metaData.identifier!!.measurementIdentifier.toString()
+        val deviceId = metaData.identifier.deviceIdentifier
+        val measurementId = metaData.identifier.measurementIdentifier.toString()
 
         val elements = ArrayList<String?>()
         if (options.includeUserId) {
@@ -459,7 +461,7 @@ open class Measurement private constructor(
     }
 
     private fun geoJsonCoordinates(record: RawRecord): JsonArray {
-        return Json.jsonArray(record.longitude.toString(), record.latitude.toString())
+        return jsonArray(listOf(record.longitude.toString(), record.latitude.toString()))
     }
 
     override fun toString(): String {
@@ -473,8 +475,7 @@ open class Measurement private constructor(
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val that = other as Measurement
-        return metaData!! == that.metaData &&
-                tracks == that.tracks
+        return metaData == that.metaData && tracks == that.tracks
     }
 
     override fun hashCode(): Int {

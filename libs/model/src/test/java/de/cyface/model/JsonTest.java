@@ -50,6 +50,6 @@ public class JsonTest {
         // Assert
         //noinspection SpellCheckingInspection
         final var expected = "\"name\":\"Gewerbegebiet 'Bahnhofstraße'\"";
-        assertThat(result.getStringValue(), is(equalTo(expected)));
+        assertThat(result.stringValue, is(equalTo(expected)));
     }
 }
