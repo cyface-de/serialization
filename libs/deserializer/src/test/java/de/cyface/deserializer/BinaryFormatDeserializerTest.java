@@ -136,7 +136,7 @@ class BinaryFormatDeserializerTest {
             assertThat(result.getMetaData().getOsVersion(), is("Android 9.0.0"));
             assertThat(result.getMetaData().getAppVersion(), is("1.2.0-beta1"));
             assertThat(result.getMetaData().getLength(), is(500.5));
-            assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID));
+            assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID.toString()));
             assertThat(result.getMetaData().getVersion(), is(MetaData.CURRENT_VERSION));
             assertThat(result.getMetaData().getUploadDate(), is(uploadDate));
 

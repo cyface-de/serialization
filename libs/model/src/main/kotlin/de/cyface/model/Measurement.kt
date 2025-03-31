@@ -62,7 +62,12 @@ open class Measurement: Serializable {
      * The data collected for this `Measurement` in `Track`-slices, ordered by timestamp.
      */
     var tracks: MutableList<Track> = mutableListOf()
-        get() = Collections.unmodifiableList(field)
+        // `get() = Collections.unmodifiableList(field)` not usable as Flink then assumes a non-standard or hidden type
+
+    /**
+     * @return an immutable version of the [tracks] list.
+     */
+    fun getUnmodifiableTracks(): List<Track> = Collections.unmodifiableList(tracks)
 
     /**
      * Exports this measurement as a CSV file.
@@ -229,7 +234,7 @@ open class Measurement: Serializable {
 
     private fun asJson(username: String?, metaData: MetaData): JsonObject {
         val keyValuePairs = buildList {
-            add(Json.jsonKeyValue("userId", metaData.userId.toString()))
+            add(Json.jsonKeyValue("userId", metaData.userId))
             if (username != null) add(Json.jsonKeyValue("username", username))
             add(Json.jsonKeyValue("deviceId", metaData.identifier.deviceIdentifier!!))
             add(Json.jsonKeyValue("measurementId", metaData.identifier.measurementIdentifier))
@@ -398,7 +403,7 @@ open class Measurement: Serializable {
 
         val elements = ArrayList<String?>()
         if (options.includeUserId) {
-            elements.add(userId.toString())
+            elements.add(userId)
         }
         if (options.includeUsername) {
             Validate.notNull(username)
@@ -430,7 +435,7 @@ open class Measurement: Serializable {
 
         val elements = ArrayList<String?>()
         if (options.includeUserId) {
-            elements.add(userId.toString())
+            elements.add(userId)
         }
         if (options.includeUsername) {
             Validate.notNull(username)

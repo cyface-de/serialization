@@ -33,7 +33,7 @@ import java.util.UUID
  * @property osVersion The operating system version, such as "Android 9.0.0" or "iOS 11.2".
  * @property appVersion The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
  * @property length The length of the measurement in meters.
- * @property userId The id of the user who has uploaded this measurement.
+ * @property userId The id of the user who has uploaded this measurement. This needs to be in the UUID-format.
  * @property version The format version in which the `Measurement` was deserialized, e.g. "1.2.3".
  * @property uploadDate The upload date when the `Measurement` was uploaded to the collector.
  */
@@ -47,12 +47,15 @@ class MetaData: Serializable {
     lateinit var osVersion: String
     lateinit var appVersion: String
     var length: Double? = null
-    lateinit var userId: UUID
+    lateinit var userId: String // Cannot use `UUID` type as it is not serializable by Flink (GenericType warning)
     lateinit var version: String
     lateinit var uploadDate: Date
 
     fun validate() {
         require(version.matches(SUPPORTED_VERSIONS.toRegex())) { "Unsupported version: $version" }
+        require(runCatching { UUID.fromString(userId) }.isSuccess) {
+            "userId must be a valid UUID string, was: $userId"
+        }
     }
 
     override fun toString(): String {
@@ -124,7 +127,7 @@ class MetaData: Serializable {
             this.osVersion = osVersion
             this.appVersion = appVersion
             this.length = length
-            this.userId = userId
+            this.userId = userId.toString()
             this.version = version
             this.uploadDate = uploadDate
             validate()
