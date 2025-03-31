@@ -100,7 +100,7 @@ class MetaData private constructor(
         /**
          * Regex of supported [MetaData] versions of this class.
          */
-        const val SUPPORTED_VERSIONS: String = "3.1.0" // FIXME: Can/Should we support 3.0.0 and 3.1.0?
+        const val SUPPORTED_VERSIONS: String = "3.1.0"
 
         /**
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
