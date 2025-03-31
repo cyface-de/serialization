@@ -68,12 +68,6 @@ subprojects {
     targetCompatibility = JavaVersion.VERSION_11
   }
 
-  tasks.register("sourcesJar", Jar) {
-    dependsOn classes
-    archiveClassifier.set("sources")
-    from sourceSets.main.allSource
-  }
-
   ext {
     slf4jVersion = '1.7.36' // major version available but breaks `backend.LocationMatchOperatorTest`
     commonsLangVersion = '3.12.0'
@@ -145,12 +139,6 @@ subprojects {
       maven {
         name = 'local'
         url = "file://${rootProject.buildDir}/repo"
-      }
-    }
-    publications {
-      create("mavenJava", MavenPublication) {
-        from components.java
-        artifact tasks.named("sourcesJar")
       }
     }
   }

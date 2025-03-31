@@ -96,8 +96,11 @@ tasks.named("processResources") {
 tasks.named("processTestResources") {
   dependsOn tasks.named("downloadAndUnzipProto")
 }
-tasks.named("sourcesJar") {
-  dependsOn("downloadAndUnzipProto", "generateProto")
+// See libs/build.gradle - the sourcesJar is also registered "delayed"
+afterEvaluate {
+  tasks.named("sourcesJar") {
+    dependsOn("downloadAndUnzipProto", "generateProto")
+  }
 }
 // preBuild does not exist: preBuild.dependsOn downloadAndUnzipProto
 assemble.dependsOn downloadAndUnzipProto
