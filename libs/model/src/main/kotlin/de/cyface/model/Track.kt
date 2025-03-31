@@ -69,7 +69,7 @@ class Track(
     fun clearFor(location: RawRecord): Track {
         // Find the index of the location to remove
         val locationIndex = locationRecords.indexOf(location)
-        if (locationIndex == -1) throw IllegalStateException("Location not found: $location") //return this
+        if (locationIndex == -1) error("Location not found: $location") //return this
 
         // Determine the timestamp range for which sensor data should be removed
         val startTimestamp = if (locationIndex > 0) locationRecords[locationIndex - 1].timestamp else 0L
@@ -100,7 +100,8 @@ class Track(
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val track = other as Track
-        return locationRecords == track.locationRecords && accelerations == track.accelerations && rotations == track.rotations && directions == track.directions
+        return locationRecords == track.locationRecords && accelerations == track.accelerations &&
+                rotations == track.rotations && directions == track.directions
     }
 
     override fun hashCode(): Int {
