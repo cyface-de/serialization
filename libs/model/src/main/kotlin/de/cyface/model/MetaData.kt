@@ -26,7 +26,7 @@ import java.util.UUID
 /**
  * The context of a deserialized `Measurement`.
  *
- * The [NoArg] constructor and property setters are required for Apache Flink.
+ * The no-arg constructor and property setters are required for Apache Flink.
  *
  * @property identifier The worldwide unique identifier of the measurement.
  * @property deviceType The type of device uploading the data, such as "Pixel 3" or "iPhone 6 Plus".
@@ -37,22 +37,19 @@ import java.util.UUID
  * @property version The format version in which the `Measurement` was deserialized, e.g. "1.2.3".
  * @property uploadDate The upload date when the `Measurement` was uploaded to the collector.
  */
-@NoArg
-class MetaData private constructor(
-    var identifier: MeasurementIdentifier,
-    @set:Suppress("unused")
-    var deviceType: String,
-    @set:Suppress("unused")
-    var osVersion: String,
-    @set:Suppress("unused")
-    var appVersion: String,
-    @set:Suppress("unused")
-    var length: Double,
-    @set:Suppress("unused")
-    var userId: UUID,
-    var version: String,
-    var uploadDate: Date,
-) : Serializable {
+// @NoArg The kotlin no-arg plugin (together with all-open) does not add a no-argument constructor to the generated
+// MetaData.class file, so we have to add the no-argument constructor manually for Apache Flink.
+@SuppressWarnings("LongParameterList")
+class MetaData: Serializable {
+
+    lateinit var identifier: MeasurementIdentifier
+    lateinit var deviceType: String
+    lateinit var osVersion: String
+    lateinit var appVersion: String
+    var length: Double? = null
+    lateinit var userId: UUID
+    lateinit var version: String
+    lateinit var uploadDate: Date
 
     fun validate() {
         require(version.matches(SUPPORTED_VERSIONS.toRegex())) { "Unsupported version: $version" }
@@ -75,7 +72,7 @@ class MetaData private constructor(
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val metaData = other as MetaData
-        return metaData.length.compareTo(length) == 0 &&
+        return metaData.length!!.compareTo(length!!) == 0 &&
                 identifier == metaData.identifier &&
                 deviceType == metaData.deviceType &&
                 osVersion == metaData.osVersion &&
@@ -121,7 +118,15 @@ class MetaData private constructor(
             userId: UUID,
             version: String,
             uploadDate: Date,
-        ) = MetaData(identifier, deviceType, osVersion, appVersion, length, userId, version, uploadDate).apply {
+        ) = MetaData().apply {
+            this.identifier = identifier
+            this.deviceType = deviceType
+            this.osVersion = osVersion
+            this.appVersion = appVersion
+            this.length = length
+            this.userId = userId
+            this.version = version
+            this.uploadDate = uploadDate
             validate()
         }
     }

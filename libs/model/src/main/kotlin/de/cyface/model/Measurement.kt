@@ -49,16 +49,18 @@ import kotlin.math.min
  * @version 3.0.0
  * @since 1.0.0
  */
-@NoArg
-open class Measurement private constructor(
-    @set:Suppress("unused")
-    var metaData: MetaData,
-): Serializable {
+// @NoArg The kotlin no-arg plugin (together with all-open) does not add a no-argument constructor to the generated
+// Measurement.class file, so we have to add the no-argument constructor manually for Apache Flink.
+open class Measurement: Serializable {
+
+    /**
+     * Has to be nullable and setter required for default no-arg constructor required by Apache Flink.
+     */
+    lateinit var metaData: MetaData
 
     /**
      * The data collected for this `Measurement` in `Track`-slices, ordered by timestamp.
      */
-    @set:Suppress("unused")
     var tracks: MutableList<Track> = mutableListOf()
         get() = Collections.unmodifiableList(field)
 
@@ -182,7 +184,7 @@ open class Measurement private constructor(
             "measurementId",
             metaData.identifier.measurementIdentifier
         )
-        val length = Json.jsonKeyValue("length", metaData.length)
+        val length = Json.jsonKeyValue("length", metaData.length!!)
         val properties = Json.jsonObject(listOf(deviceId, measurementId, length))
         handler.accept(Json.jsonKeyValue("properties", properties).stringValue)
 
@@ -231,7 +233,7 @@ open class Measurement private constructor(
             if (username != null) add(Json.jsonKeyValue("username", username))
             add(Json.jsonKeyValue("deviceId", metaData.identifier.deviceIdentifier!!))
             add(Json.jsonKeyValue("measurementId", metaData.identifier.measurementIdentifier))
-            add(Json.jsonKeyValue("length", metaData.length))
+            add(Json.jsonKeyValue("length", metaData.length!!))
         }
 
         return Json.jsonObject(keyValuePairs)
@@ -502,7 +504,8 @@ open class Measurement private constructor(
             tracks: List<Track>
         ): Measurement {
             require(tracks.isNotEmpty()) { "Tracks list must not be empty." }
-            return Measurement(metaData).apply {
+            return Measurement().apply {
+                this.metaData = metaData
                 this.tracks = tracks.toMutableList()
             }
         }
