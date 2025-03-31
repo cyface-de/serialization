@@ -22,7 +22,7 @@
  * @author Armin Schnabel
  */
 buildscript {
-  ext.kotlin_version = "1.7.10"
+  ext.kotlin_version = "2.1.20" // use same version as kotlin plugins below
 
   repositories {
     mavenCentral()
@@ -89,7 +89,7 @@ subprojects {
     slf4jVersion = '1.7.36' // major version available but breaks `backend.LocationMatchOperatorTest`
     commonsLangVersion = '3.12.0'
     sqliteDriverVersion = '3.40.1.0'
-    gradleWrapperVersion = '7.6.1'
+    gradleWrapperVersion = '8.13'
     protobufVersion = '3.22.2' // Keep in sync with protobufVersion in `protos/build.gradle`
     cyfaceProtosVersion = '2.2.0'
 
