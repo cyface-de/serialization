@@ -68,15 +68,10 @@ subprojects {
     targetCompatibility = JavaVersion.VERSION_11
   }
 
-    checkstyle {
-      toolVersion = '8.31'
-      // use one common config file for all subprojects
-      configFile = project(':').file("config/checkstyle/checkstyle.xml")
-      //noinspection SpellCheckingInspection
-      configProperties = ["suppressionFile": project(':').file("config/checkstyle/suppressions.xml")]
-      ignoreFailures = true
-      showViolations = true
-    }
+  tasks.register("sourcesJar", Jar) {
+    dependsOn classes
+    archiveClassifier.set("sources")
+    from sourceSets.main.allSource
   }
 
   ext {
@@ -150,6 +145,12 @@ subprojects {
       maven {
         name = 'local'
         url = "file://${rootProject.buildDir}/repo"
+      }
+    }
+    publications {
+      create("mavenJava", MavenPublication) {
+        from components.java
+        artifact tasks.named("sourcesJar")
       }
     }
   }

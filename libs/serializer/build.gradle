@@ -61,10 +61,10 @@ protobuf {
   }
   generateProtoTasks {
     //noinspection GroovyAssignabilityCheck
-    all().each { task ->
+    all().configureEach { task ->
       // Explicit dependency or else Gradle 7 shows a warning (implicit dependency)
-      task.dependsOn downloadAndUnzipProto
-      task.builtins {
+      dependsOn downloadAndUnzipProto
+      builtins {
         java {
           option "lite"
         }
@@ -89,6 +89,15 @@ tasks.register("downloadAndUnzipProto", Copy) {
   dependsOn "downloadProto"
   from zipTree(downloadProto.dest)
   into buildDir
+}
+tasks.named("processResources") {
+  dependsOn("downloadAndUnzipProto")
+}
+tasks.named("processTestResources") {
+  dependsOn tasks.named("downloadAndUnzipProto")
+}
+tasks.named("sourcesJar") {
+  dependsOn("downloadAndUnzipProto", "generateProto")
 }
 // preBuild does not exist: preBuild.dependsOn downloadAndUnzipProto
 assemble.dependsOn downloadAndUnzipProto
