@@ -60,6 +60,12 @@ open class Measurement: Serializable {
 
     /**
      * The data collected for this `Measurement` in `Track`-slices, ordered by timestamp.
+     *
+     * Use [getUnmodifiableTracks] to get an immutable version of the list.
+     *
+     * *GenericType Warning:
+     * Can be ignored for [tracks] as Flink seems to treat all List types as GenericType, even with POJO elements.
+     * This is expected and harmless unless you rely on schema evolution or state access.
      */
     var tracks: MutableList<Track> = mutableListOf()
         // `get() = Collections.unmodifiableList(field)` not usable as Flink then assumes a non-standard or hidden type
@@ -67,6 +73,7 @@ open class Measurement: Serializable {
     /**
      * @return an immutable version of the [tracks] list.
      */
+    @Suppress("MemberVisibilityCanBePrivate")
     fun getUnmodifiableTracks(): List<Track> = Collections.unmodifiableList(tracks)
 
     /**
