@@ -22,32 +22,23 @@
  * @author Armin Schnabel
  */
 buildscript {
-  ext.kotlin_version = "1.7.10"
+  ext.kotlin_version = "2.1.20"
 
   repositories {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.5"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
 
 plugins {
-  id 'eclipse'
   id 'idea'
-  id "com.github.spotbugs" version "4.7.5" apply false
   // Plugin to display the Gradle task graph
   //noinspection SpellCheckingInspection
   id 'org.barfuin.gradle.taskinfo' version '2.1.0'
   // protobuf plugin 0.9.0-2 fail: https://github.com/google/protobuf-gradle-plugin/issues/686
   id 'com.google.protobuf' version '0.8.19' apply false // Maybe keep in sync with `plugins` in `protos/build.gradle
-  // To generate no-arg constructors for Apache Flink
-  id("org.jetbrains.kotlin.plugin.noarg") version "1.9.0"
-}
-
-noArg {
-  annotation("de.cyface.model.NoArg")
 }
 
 allprojects {
@@ -58,10 +49,6 @@ allprojects {
 
 subprojects {
   apply plugin: 'maven-publish'
-  apply plugin: 'com.github.spotbugs'
-  apply plugin: 'jacoco'
-  apply plugin: 'checkstyle'
-  apply plugin: 'pmd'
   apply plugin: 'java'
   apply plugin: 'kotlin'
 
@@ -73,23 +60,13 @@ subprojects {
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
-
-    checkstyle {
-      toolVersion = '8.31'
-      // use one common config file for all subprojects
-      configFile = project(':').file("config/checkstyle/checkstyle.xml")
-      //noinspection SpellCheckingInspection
-      configProperties = ["suppressionFile": project(':').file("config/checkstyle/suppressions.xml")]
-      ignoreFailures = true
-      showViolations = true
-    }
   }
 
   ext {
     slf4jVersion = '1.7.36' // major version available but breaks `backend.LocationMatchOperatorTest`
     commonsLangVersion = '3.12.0'
     sqliteDriverVersion = '3.40.1.0'
-    gradleWrapperVersion = '7.6.1'
+    gradleWrapperVersion = '8.13'
     protobufVersion = '3.22.2' // Keep in sync with protobufVersion in `protos/build.gradle`
     cyfaceProtosVersion = '2.2.0'
 
@@ -97,11 +74,6 @@ subprojects {
     junitVersion = '5.9.2'
     mockitoVersion = '5.2.0'
     hamcrestVersion = '2.2'
-
-    jacocoVersion = '0.8.9'
-    spotBugsPluginVersion = '1.12.0'
-    spotbugsToolsVersion = '4.7.3'
-    pmdToolsVersion = '6.55.0'
   }
 
   wrapper {
@@ -130,8 +102,6 @@ subprojects {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
-
-    spotbugsPlugins "com.h3xstream.findsecbugs:findsecbugs-plugin:$spotBugsPluginVersion"
   }
 
   test {
@@ -146,46 +116,6 @@ subprojects {
       showStackTraces false
       showStandardStreams = false
     }
-  }
-
-  jacoco {
-    toolVersion = "$jacocoVersion"
-    reportsDir = file("$buildDir/reports/jacoco")
-  }
-
-  jacocoTestReport {
-    reports {
-      xml.enabled true
-      csv.enabled true
-      html.destination file("${buildDir}/reports/jacocoHtml")
-    }
-  }
-
-  spotbugs {
-    toolVersion = "$spotbugsToolsVersion"
-    ignoreFailures = true
-    excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
-  }
-
-  // After hours of trying to fix local `./gradlew check` execution only this helped [DAT-803]
-  // (https://github.com/spotbugs/spotbugs-gradle-plugin/issues/32#issuecomment-779661275)
-  gradle.taskGraph.beforeTask { task ->
-    if (task.name.toLowerCase().contains('spotbugs')) {
-      task.reports {
-        xml.enabled = false
-        html.enabled = true
-      }
-    }
-  }
-
-  pmd {
-    toolVersion = "$pmdToolsVersion"
-    incrementalAnalysis = true
-    ruleSetFiles = project(':').files('config/pmd.xml')
-    rulesMinimumPriority = 4
-    ruleSets = []
-    // There are so many violations and currently it is not really important in this application.
-    ignoreFailures = true
   }
 
   // Definitions for the maven-publish Plugin

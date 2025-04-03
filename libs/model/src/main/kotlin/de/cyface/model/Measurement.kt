@@ -49,18 +49,32 @@ import kotlin.math.min
  * @version 3.0.0
  * @since 1.0.0
  */
-@NoArg
-open class Measurement private constructor(
-    @set:Suppress("unused")
-    var metaData: MetaData,
-): Serializable {
+// @NoArg The kotlin no-arg plugin (together with all-open) does not add a no-argument constructor to the generated
+// Measurement.class file, so we have to add the no-argument constructor manually for Apache Flink.
+open class Measurement: Serializable {
+
+    /**
+     * Has to be nullable and setter required for default no-arg constructor required by Apache Flink.
+     */
+    lateinit var metaData: MetaData
 
     /**
      * The data collected for this `Measurement` in `Track`-slices, ordered by timestamp.
+     *
+     * Use [getUnmodifiableTracks] to get an immutable version of the list.
+     *
+     * *GenericType Warning:
+     * Can be ignored for [tracks] as Flink seems to treat all List types as GenericType, even with POJO elements.
+     * This is expected and harmless unless you rely on schema evolution or state access.
      */
-    @set:Suppress("unused")
     var tracks: MutableList<Track> = mutableListOf()
-        get() = Collections.unmodifiableList(field)
+        // `get() = Collections.unmodifiableList(field)` not usable as Flink then assumes a non-standard or hidden type
+
+    /**
+     * @return an immutable version of the [tracks] list.
+     */
+    @Suppress("MemberVisibilityCanBePrivate")
+    fun getUnmodifiableTracks(): List<Track> = Collections.unmodifiableList(tracks)
 
     /**
      * Exports this measurement as a CSV file.
@@ -182,7 +196,7 @@ open class Measurement private constructor(
             "measurementId",
             metaData.identifier.measurementIdentifier
         )
-        val length = Json.jsonKeyValue("length", metaData.length)
+        val length = Json.jsonKeyValue("length", metaData.length!!)
         val properties = Json.jsonObject(listOf(deviceId, measurementId, length))
         handler.accept(Json.jsonKeyValue("properties", properties).stringValue)
 
@@ -227,11 +241,11 @@ open class Measurement private constructor(
 
     private fun asJson(username: String?, metaData: MetaData): JsonObject {
         val keyValuePairs = buildList {
-            add(Json.jsonKeyValue("userId", metaData.userId.toString()))
+            add(Json.jsonKeyValue("userId", metaData.userId))
             if (username != null) add(Json.jsonKeyValue("username", username))
             add(Json.jsonKeyValue("deviceId", metaData.identifier.deviceIdentifier!!))
             add(Json.jsonKeyValue("measurementId", metaData.identifier.measurementIdentifier))
-            add(Json.jsonKeyValue("length", metaData.length))
+            add(Json.jsonKeyValue("length", metaData.length!!))
         }
 
         return Json.jsonObject(keyValuePairs)
@@ -274,7 +288,6 @@ open class Measurement private constructor(
     /**
      * Clears the data within this measurement starting at the provided `timestamp` in milliseconds since the
      * 01.01.1970 (UNIX Epoch).
-     *
      *
      * This call modifies the called measurement.
      *
@@ -396,7 +409,7 @@ open class Measurement private constructor(
 
         val elements = ArrayList<String?>()
         if (options.includeUserId) {
-            elements.add(userId.toString())
+            elements.add(userId)
         }
         if (options.includeUsername) {
             Validate.notNull(username)
@@ -428,7 +441,7 @@ open class Measurement private constructor(
 
         val elements = ArrayList<String?>()
         if (options.includeUserId) {
-            elements.add(userId.toString())
+            elements.add(userId)
         }
         if (options.includeUsername) {
             Validate.notNull(username)
@@ -502,7 +515,8 @@ open class Measurement private constructor(
             tracks: List<Track>
         ): Measurement {
             require(tracks.isNotEmpty()) { "Tracks list must not be empty." }
-            return Measurement(metaData).apply {
+            return Measurement().apply {
+                this.metaData = metaData
                 this.tracks = tracks.toMutableList()
             }
         }

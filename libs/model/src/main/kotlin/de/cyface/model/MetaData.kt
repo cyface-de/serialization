@@ -26,36 +26,37 @@ import java.util.UUID
 /**
  * The context of a deserialized `Measurement`.
  *
- * The [NoArg] constructor and property setters are required for Apache Flink.
+ * The no-arg constructor and property setters are required for Apache Flink.
  *
  * @property identifier The worldwide unique identifier of the measurement.
  * @property deviceType The type of device uploading the data, such as "Pixel 3" or "iPhone 6 Plus".
  * @property osVersion The operating system version, such as "Android 9.0.0" or "iOS 11.2".
  * @property appVersion The version of the app that transmitted the measurement, such as "1.2.0" or "1.2.0-beta1".
  * @property length The length of the measurement in meters.
- * @property userId The id of the user who has uploaded this measurement.
+ * @property userId The id of the user who has uploaded this measurement. This needs to be in the UUID-format.
  * @property version The format version in which the `Measurement` was deserialized, e.g. "1.2.3".
  * @property uploadDate The upload date when the `Measurement` was uploaded to the collector.
  */
-@NoArg
-class MetaData private constructor(
-    var identifier: MeasurementIdentifier,
-    @set:Suppress("unused")
-    var deviceType: String,
-    @set:Suppress("unused")
-    var osVersion: String,
-    @set:Suppress("unused")
-    var appVersion: String,
-    @set:Suppress("unused")
-    var length: Double,
-    @set:Suppress("unused")
-    var userId: UUID,
-    var version: String,
-    var uploadDate: Date,
-) : Serializable {
+// @NoArg The kotlin no-arg plugin (together with all-open) does not add a no-argument constructor to the generated
+// MetaData.class file, so we have to add the no-argument constructor manually for Apache Flink.
+@SuppressWarnings("LongParameterList")
+class MetaData: Serializable {
+
+    lateinit var identifier: MeasurementIdentifier
+    lateinit var deviceType: String
+    lateinit var osVersion: String
+    lateinit var appVersion: String
+    var length: Double = -1.0 // Default value required for no-arg constructor (Flink). Validated in [validate()]
+    lateinit var userId: String // Cannot use `UUID` type as it is not serializable by Flink (GenericType warning)
+    lateinit var version: String
+    lateinit var uploadDate: Date
 
     fun validate() {
         require(version.matches(SUPPORTED_VERSIONS.toRegex())) { "Unsupported version: $version" }
+        require(length != -1.0) { "Length must be set before usage" }
+        require(runCatching { UUID.fromString(userId) }.isSuccess) {
+            "userId must be a valid UUID string, was: $userId"
+        }
     }
 
     override fun toString(): String {
@@ -100,7 +101,7 @@ class MetaData private constructor(
         /**
          * Regex of supported [MetaData] versions of this class.
          */
-        const val SUPPORTED_VERSIONS: String = "3.1.0" // FIXME: Can/Should we support 3.0.0 and 3.1.0?
+        const val SUPPORTED_VERSIONS: String = "3.1.0"
 
         /**
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
@@ -121,7 +122,15 @@ class MetaData private constructor(
             userId: UUID,
             version: String,
             uploadDate: Date,
-        ) = MetaData(identifier, deviceType, osVersion, appVersion, length, userId, version, uploadDate).apply {
+        ) = MetaData().apply {
+            this.identifier = identifier
+            this.deviceType = deviceType
+            this.osVersion = osVersion
+            this.appVersion = appVersion
+            this.length = length
+            this.userId = userId.toString()
+            this.version = version
+            this.uploadDate = uploadDate
             validate()
         }
     }

@@ -113,6 +113,7 @@ class BinaryFormatDeserializerTest {
         // Arrange
         final var identifier = new MeasurementIdentifier("test", 1);
         try (final var testData = testData(identifier)) {
+            final var uploadDate = new Date();
             final var metaData = MetaData.Companion.create(
                     identifier,
                     "Pixel 3",
@@ -121,7 +122,7 @@ class BinaryFormatDeserializerTest {
                     500.5,
                     TEST_USER_ID,
                     MetaData.CURRENT_VERSION,
-                    new Date()
+                    uploadDate
             );
             final var reader = new BinaryFormatDeserializer(metaData, testData);
 
@@ -135,8 +136,9 @@ class BinaryFormatDeserializerTest {
             assertThat(result.getMetaData().getOsVersion(), is("Android 9.0.0"));
             assertThat(result.getMetaData().getAppVersion(), is("1.2.0-beta1"));
             assertThat(result.getMetaData().getLength(), is(500.5));
-            assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID));
+            assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID.toString()));
             assertThat(result.getMetaData().getVersion(), is(MetaData.CURRENT_VERSION));
+            assertThat(result.getMetaData().getUploadDate(), is(uploadDate));
 
             final var resultTracks = result.getTracks();
             assertThat(resultTracks, hasSize(3));
