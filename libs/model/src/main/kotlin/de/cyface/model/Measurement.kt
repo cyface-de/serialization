@@ -289,7 +289,6 @@ open class Measurement: Serializable {
      * Clears the data within this measurement starting at the provided `timestamp` in milliseconds since the
      * 01.01.1970 (UNIX Epoch).
      *
-     *
      * This call modifies the called measurement.
      *
      * @param timestamp The timestamp in milliseconds since the first of January 1970 to begin clearing the data at

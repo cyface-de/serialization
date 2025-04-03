@@ -46,13 +46,14 @@ class MetaData: Serializable {
     lateinit var deviceType: String
     lateinit var osVersion: String
     lateinit var appVersion: String
-    var length: Double? = null
+    var length: Double = -1.0 // Default value required for no-arg constructor (Flink). Validated in [validate()]
     lateinit var userId: String // Cannot use `UUID` type as it is not serializable by Flink (GenericType warning)
     lateinit var version: String
     lateinit var uploadDate: Date
 
     fun validate() {
         require(version.matches(SUPPORTED_VERSIONS.toRegex())) { "Unsupported version: $version" }
+        require(length != -1.0) { "Length must be set before usage" }
         require(runCatching { UUID.fromString(userId) }.isSuccess) {
             "userId must be a valid UUID string, was: $userId"
         }
@@ -75,7 +76,7 @@ class MetaData: Serializable {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val metaData = other as MetaData
-        return metaData.length!!.compareTo(length!!) == 0 &&
+        return metaData.length.compareTo(length) == 0 &&
                 identifier == metaData.identifier &&
                 deviceType == metaData.deviceType &&
                 osVersion == metaData.osVersion &&
