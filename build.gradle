@@ -68,7 +68,7 @@ subprojects {
     sqliteDriverVersion = '3.40.1.0'
     gradleWrapperVersion = '8.13'
     protobufVersion = '3.22.2' // Keep in sync with protobufVersion in `protos/build.gradle`
-    cyfaceProtosVersion = '2.2.0'
+    cyfaceProtosVersion = '2.3.0'
 
     // Versions of testing dependencies
     junitVersion = '5.9.2'
