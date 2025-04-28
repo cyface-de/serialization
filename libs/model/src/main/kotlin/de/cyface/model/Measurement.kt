@@ -144,7 +144,6 @@ open class Measurement: Serializable {
                         modalityTypeTravelTime, totalTravelTime
                     )
                 )
-                handler.accept("\r\n")
 
                 lastLocation = locationRecord
             }
@@ -163,7 +162,6 @@ open class Measurement: Serializable {
             }
             points.forEach { point ->
                 handler.accept(csvSensorRow(options, username, metaData, point, trackId))
-                handler.accept("\r\n")
             }
         }
     }
