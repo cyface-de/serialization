@@ -21,7 +21,10 @@ package de.cyface.model
 import de.cyface.model.Measurement.Companion.csvHeader
 import org.apache.commons.lang3.Validate
 import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert
+import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -49,7 +52,7 @@ class MeasurementTest {
         // Arrange
         val expectedHeader = ("userId,username,deviceId,measurementId,trackId,timestamp [ms],latitude,longitude,"
                 + "speed [m/s],accuracy [m],modalityType,modalityTypeDistance [m],distance [m],modalityTypeTravelTime"
-                + " [ms],travelTime [ms]\r\n")
+                + " [ms],travelTime [ms]")
 
         // Act
         val csvOutput = StringBuilder()
@@ -104,6 +107,53 @@ class MeasurementTest {
             lines.none { it.isBlank() },
             CoreMatchers.`is`(true)
         )
+    }
+
+    /**
+     * Reproducer: CSV-Export may not contain empty lines.
+     */
+    @Test
+    fun testAsCsv_noEmptyLines() {
+        // Arrange
+        val point3DS = arrayListOf(Point3DImpl(1f, 2f, 3f, 1000L))
+        val metaData = metaData()
+        val track = Track(
+            mutableListOf(
+                RawRecord(metaData.identifier, 1000L, latitude(1), longitude(1), null, accuracy(1), speed(1), Modality.UNKNOWN),
+                RawRecord(metaData.identifier, 2000L, latitude(2), longitude(2), null, accuracy(2), speed(2), Modality.UNKNOWN)
+            ),
+            point3DS, point3DS, point3DS
+        )
+        val measurement = Measurement.create(metaData, listOf(track))
+
+        val sb = StringBuilder()
+        val options = ExportOptions()
+            .format(DataFormat.CSV)
+            .type(DataType.LOCATION)
+            .includeHeader(true)
+            .includeUserId(true)
+            .includeUsername(false)
+
+        // Act
+        measurement.asCsv(options, null) { chunk ->
+            sb.append(chunk).append("\n")
+        }
+
+        // Normalize
+        val lines = sb.toString()
+            .replace("\r\n", "\n")
+            .split("\n")
+            .filter { it.isNotEmpty() }
+
+        // Assert
+        // No empty lines
+        assertThat(lines.any { it.isBlank() }, `is`(equalTo(false)))
+        // Header once
+        val header = lines.first()
+        val headerCount = lines.count { it == header }
+        assertThat(headerCount, `is`(equalTo(1)))
+        // Two data lines
+        assertThat(lines.size - 1, `is`(equalTo(2)))
     }
 
     /**
