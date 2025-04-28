@@ -62,6 +62,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(true)
+            .includeModalityType(true)
+            .includeModalityTypeDistance(true)
+            .includeTotalDistance(true)
+            .includeModalityTypeTravelTime(true)
+            .includeTotalTravelTime(true)
         csvHeader(
             options
         ) { str: String? -> csvOutput.append(str) }
@@ -133,6 +138,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(false)
+            .includeModalityType(true)
+            .includeModalityTypeDistance(true)
+            .includeTotalDistance(true)
+            .includeModalityTypeTravelTime(true)
+            .includeTotalTravelTime(true)
 
         // Act
         measurement.asCsv(options, null) { chunk ->
@@ -211,6 +221,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(true)
+            .includeModalityType(true)
+            .includeModalityTypeDistance(true)
+            .includeTotalDistance(true)
+            .includeModalityTypeTravelTime(true)
+            .includeTotalTravelTime(true)
         measurement.asCsv(options, TEST_USER_USERNAME) { str: String? ->
             if (!str.isNullOrBlank()) {
                 csvOutput.append(str).append("\n")
@@ -296,6 +311,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(true)
+            .includeModalityType(true)
+            .includeModalityTypeDistance(true)
+            .includeTotalDistance(true)
+            .includeModalityTypeTravelTime(true)
+            .includeTotalTravelTime(true)
         measurement.asCsv(options, TEST_USER_USERNAME) { str: String? ->
             if (!str.isNullOrBlank()) {
                 csvOutput.append(str).append("\n")
