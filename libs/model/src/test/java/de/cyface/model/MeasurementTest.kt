@@ -67,6 +67,45 @@ class MeasurementTest {
         MatcherAssert.assertThat(csvOutput.toString(), Matchers.`is`(Matchers.equalTo(expectedHeader)))
     }
 
+    @Test
+    fun testWriteLocationAsCsvRows_checkForEmptyLines() {
+        // Arrange
+        val point3DS = arrayListOf(Point3DImpl(1.0f, -2.0f, 3.0f, 1000L))
+        val metaData = metaData()
+        val identifier = metaData.identifier
+        val tracks = listOf(
+            Track(
+                mutableListOf(
+                    RawRecord(identifier, 1000L, latitude(1), longitude(1), null, accuracy(1), speed(1), Modality.UNKNOWN),
+                    RawRecord(identifier, 2000L, latitude(2), longitude(2), null, accuracy(2), speed(2), Modality.UNKNOWN)
+                ),
+                point3DS, point3DS, point3DS
+            )
+        )
+        val measurement = Measurement.create(metaData, tracks)
+
+        val csvOutput = StringBuilder()
+        val options = ExportOptions()
+            .format(DataFormat.CSV)
+            .type(DataType.LOCATION)
+            .includeHeader(true)
+            .includeUserId(true)
+            .includeUsername(false)
+
+        // Act
+        measurement.asCsv(options, null) { str: String? -> csvOutput.append(str) }
+
+        // Normalize line breaks for easier checking
+        val lines = csvOutput.toString().replace("\r\n", "\n").split("\n")
+
+        // Assert
+        // No empty lines expected
+        MatcherAssert.assertThat(
+            lines.none { it.isBlank() },
+            CoreMatchers.`is`(true)
+        )
+    }
+
     /**
      * Tests that a [Measurement] without any modality also works. The initial Modality was in this test case
      * deleted by the user
@@ -122,7 +161,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(true)
-        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? -> csvOutput.append(str) }
+        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? ->
+            if (!str.isNullOrBlank()) {
+                csvOutput.append(str).append("\n")
+            }
+        }
 
         // Assert
         MatcherAssert.assertThat(
@@ -203,7 +246,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(true)
-        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? -> csvOutput.append(str) }
+        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? ->
+            if (!str.isNullOrBlank()) {
+                csvOutput.append(str).append("\n")
+            }
+        }
 
         // Assert
         MatcherAssert.assertThat(
