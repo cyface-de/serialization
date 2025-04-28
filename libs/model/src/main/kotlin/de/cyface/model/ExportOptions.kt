@@ -37,6 +37,11 @@ class ExportOptions {
     var includeHeader: Boolean = false
     var includeUserId: Boolean = false
     var includeUsername: Boolean = false
+    var includeModalityType: Boolean = false
+    var includeModalityTypeDistance: Boolean = false
+    var includeTotalDistance: Boolean = false
+    var includeModalityTypeTravelTime: Boolean = false
+    var includeTotalTravelTime: Boolean = false
 
     fun format(format: DataFormat): ExportOptions {
         this.format = format
@@ -61,6 +66,31 @@ class ExportOptions {
 
     fun includeUsername(includeUsername: Boolean): ExportOptions {
         this.includeUsername = includeUsername
+        return this
+    }
+
+    fun includeModalityType(include: Boolean): ExportOptions {
+        this.includeModalityType = include
+        return this
+    }
+
+    fun includeModalityTypeDistance(include: Boolean): ExportOptions {
+        this.includeModalityTypeDistance = include
+        return this
+    }
+
+    fun includeTotalDistance(include: Boolean): ExportOptions {
+        this.includeTotalDistance = include
+        return this
+    }
+
+    fun includeModalityTypeTravelTime(include: Boolean): ExportOptions {
+        this.includeModalityTypeTravelTime = include
+        return this
+    }
+
+    fun includeTotalTravelTime(include: Boolean): ExportOptions {
+        this.includeTotalTravelTime = include
         return this
     }
 }
