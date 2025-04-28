@@ -586,7 +586,6 @@ open class Measurement: Serializable {
 
             val csvHeaderRow = java.lang.String.join(",", elements)
             handler.accept(csvHeaderRow)
-            handler.accept("\r\n")
         }
     }
 }
