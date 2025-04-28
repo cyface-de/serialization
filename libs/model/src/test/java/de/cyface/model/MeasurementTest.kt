@@ -161,7 +161,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(true)
-        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? -> csvOutput.append(str) }
+        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? ->
+            if (!str.isNullOrBlank()) {
+                csvOutput.append(str).append("\n")
+            }
+        }
 
         // Assert
         MatcherAssert.assertThat(
@@ -242,7 +246,11 @@ class MeasurementTest {
             .includeHeader(true)
             .includeUserId(true)
             .includeUsername(true)
-        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? -> csvOutput.append(str) }
+        measurement.asCsv(options, TEST_USER_USERNAME) { str: String? ->
+            if (!str.isNullOrBlank()) {
+                csvOutput.append(str).append("\n")
+            }
+        }
 
         // Assert
         MatcherAssert.assertThat(
