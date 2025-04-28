@@ -415,16 +415,21 @@ open class Measurement: Serializable {
         }
         elements.addAll(
             listOf(
-                deviceId, measurementId, trackId.toString(),
+                deviceId,
+                measurementId,
+                trackId.toString(),
                 locationRecord.timestamp.toString(),
                 locationRecord.latitude.toString(),
-                locationRecord.longitude.toString(), locationRecord.speed.toString(),
+                locationRecord.longitude.toString(),
+                locationRecord.speed.toString(),
                 locationRecord.accuracy.toString(),
-                locationRecord.modality.databaseIdentifier,
-                modalityTypeDistance.toString(), totalDistance.toString(),
-                modalityTypeTravelTime.toString(), totalTravelTime.toString()
             )
         )
+        if (options.includeModalityType) elements.add(locationRecord.modality.databaseIdentifier)
+        if (options.includeModalityTypeDistance) elements.add(modalityTypeDistance.toString())
+        if (options.includeTotalDistance) elements.add(totalDistance.toString())
+        if (options.includeModalityTypeTravelTime) elements.add(modalityTypeTravelTime.toString())
+        if (options.includeTotalTravelTime) elements.add(totalTravelTime.toString())
         return java.lang.String.join(",", elements)
     }
 
@@ -570,14 +575,16 @@ open class Measurement: Serializable {
             }
             elements.addAll(listOf("deviceId", "measurementId", "trackId", "timestamp [ms]"))
             when (options.type) {
-                DataType.LOCATION -> elements.addAll(
-                    listOf(
-                        "latitude", "longitude",
-                        "speed [m/s]", "accuracy [m]", "modalityType", "modalityTypeDistance [m]", "distance [m]",
-                        "modalityTypeTravelTime [ms]", "travelTime [ms]"
+                DataType.LOCATION -> {
+                    elements.addAll(
+                        listOf("latitude", "longitude", "speed [m/s]", "accuracy [m]")
                     )
-                )
-
+                    if (options.includeModalityType) elements.add("modalityType")
+                    if (options.includeModalityTypeDistance) elements.add("modalityTypeDistance [m]")
+                    if (options.includeTotalDistance) elements.add("distance [m]")
+                    if (options.includeModalityTypeTravelTime) elements.add("modalityTypeTravelTime [ms]")
+                    if (options.includeTotalTravelTime) elements.add("travelTime [ms]")
+                }
                 DataType.ACCELERATION -> elements.addAll(listOf("x [m/s^2]", "y [m/s^2]", "z [m/s^2]"))
                 DataType.ROTATION -> elements.addAll(listOf("x [rad/s]", "y [rad/s]", "z [rad/s]"))
                 DataType.DIRECTION -> elements.addAll(listOf("x [uT]", "y [uT]", "z [uT]"))
