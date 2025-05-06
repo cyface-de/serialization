@@ -23,9 +23,12 @@ import static de.cyface.model.Modality.WALKING;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
@@ -194,6 +197,46 @@ public class TrackBuilderTest {
         // moveIteratorToLastBefore() moves the iterator to "last before the event" so .next() gives the "first after"
         final var firstLocationAfterResumeEvent = geoLocationIterator.next();
         assertThat(firstLocationAfterResumeEvent, is(equalTo(expectedLocation)));
+    }
+
+    /**
+     * Reproduced two crashes which occur when we collect no sensor data [STAD-712].
+     */
+    @Test
+    void testBuild_withEmptyAccelerationList_shouldNotThrow() throws InvalidLifecycleEvents {
+        // Arrange
+        final var identifier = new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER);
+        final var locationRecords = generateLocationRecords(
+                4, new Long[]{1_000L, 1_400L, 2_100L, 2_400L}, identifier
+        );
+
+        final var events = List.of(
+                new Event(Event.EventType.LIFECYCLE_START, 1_000L, null),
+                new Event(Event.EventType.LIFECYCLE_PAUSE, 1_500L, null),
+                new Event(Event.EventType.LIFECYCLE_RESUME, 2_000L, null),
+                new Event(Event.EventType.LIFECYCLE_STOP, 2_500L, null)
+        );
+        final var empty = List.<Point3DImpl>of(); // triggers .next() on empty list
+
+        // Act
+        final var result = oocut.build(locationRecords, events, empty, empty, empty);
+
+        // Assert
+        assertThat(result.size(), is(2));
+
+        // First track: before pause
+        final var track1 = result.get(0);
+        assertThat(track1.getLocationRecords().size(), is(2));
+        assertThat(track1.getAccelerations().isEmpty(), is(true));
+        assertThat(track1.getRotations().isEmpty(), is(true));
+        assertThat(track1.getDirections().isEmpty(), is(true));
+
+        // Second track: after resume
+        final var track2 = result.get(1);
+        assertThat(track2.getLocationRecords().size(), is(2));
+        assertThat(track2.getAccelerations().isEmpty(), is(true));
+        assertThat(track2.getRotations().isEmpty(), is(true));
+        assertThat(track2.getDirections().isEmpty(), is(true));
     }
 
     /**
