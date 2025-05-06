@@ -26,6 +26,7 @@ import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
 import de.cyface.deserializer.exceptions.NoSuchMeasurement;
 import de.cyface.model.Measurement;
 import de.cyface.model.MeasurementIdentifier;
+import de.cyface.model.NoTracksRecorded;
 
 /**
  * Reads {@link Measurement} from the Cyface binary format.
@@ -49,7 +50,7 @@ public interface Deserializer extends Serializable {
      *             a <code>Measurement</code> from a source providing multiple <code>Measurement</code>s.
      * @throws UnsupportedFileVersion If the binary file is from a deprecated or not yet supported file format version.
      */
-    Measurement read() throws IOException, InvalidLifecycleEvents, NoSuchMeasurement, UnsupportedFileVersion;
+    Measurement read() throws IOException, InvalidLifecycleEvents, NoSuchMeasurement, UnsupportedFileVersion, NoTracksRecorded;
     /**
      * @return A list with all the valid <code>{@link MeasurementIdentifier}</code> within the deserializable data.
      * @throws IOException If reading data fails

@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import de.cyface.model.NoTracksRecorded;
 import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ public class UnzippedPhoneDataDeserializerTest {
 
     @Test
     @DisplayName("Test on some unzipped example data")
-    void test_unzipped() throws InvalidLifecycleEvents, URISyntaxException, NoSuchMeasurement {
+    void test_unzipped() throws InvalidLifecycleEvents, URISyntaxException, NoSuchMeasurement, NoTracksRecorded {
         // Arrange
         final var folder = "/phone-data-export/unzipped/";
         final var mid = 1;
@@ -90,7 +91,7 @@ public class UnzippedPhoneDataDeserializerTest {
 
     @Test
     @DisplayName("Test on some zipped example data")
-    void test_zipped() throws URISyntaxException, InvalidLifecycleEvents, IOException, NoSuchMeasurement {
+    void test_zipped() throws URISyntaxException, InvalidLifecycleEvents, IOException, NoSuchMeasurement, NoTracksRecorded {
         // Arrange
         final var folder = "/phone-data-export/zipped/";
         final var mid = 1;

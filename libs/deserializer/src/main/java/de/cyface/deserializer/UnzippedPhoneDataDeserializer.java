@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import de.cyface.model.NoTracksRecorded;
 import org.apache.commons.lang3.Validate;
 
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
@@ -152,7 +153,7 @@ public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
     }
 
     @Override
-    public Measurement read() throws InvalidLifecycleEvents, NoSuchMeasurement {
+    public Measurement read() throws InvalidLifecycleEvents, NoSuchMeasurement, NoTracksRecorded {
         try (final var connection = createConnection()) {
             PreparedStatement measurementExistsStatement = connection.prepareStatement(MEASUREMENT_QUERY);
             measurementExistsStatement.setLong(1, measurementNumber);

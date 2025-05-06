@@ -50,6 +50,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import de.cyface.model.NoTracksRecorded;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -109,7 +110,7 @@ class BinaryFormatDeserializerTest {
      */
     @Test
     @DisplayName("Happy Path")
-    void test() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion {
+    void test() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
         // Arrange
         final var identifier = new MeasurementIdentifier("test", 1);
         try (final var testData = testData(identifier)) {
@@ -223,7 +224,7 @@ class BinaryFormatDeserializerTest {
      */
     @DisplayName("Happy Path test for the serialization and deserialization of 3d points.")
     @Test
-    void testSerializeDeserialize() throws IOException, InvalidLifecycleEvents {
+    void testSerializeDeserialize() throws IOException, InvalidLifecycleEvents, NoTracksRecorded {
 
         // Arrange - Events: start, stop (1 track)
         final var batches = 100;
