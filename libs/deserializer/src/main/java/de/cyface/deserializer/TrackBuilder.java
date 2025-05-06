@@ -274,6 +274,7 @@ final class TrackBuilder {
     private <T extends DataPoint> List<T> collectUntil(final Long pauseEventTime,
             final ListIterator<T> iterator) {
         List<T> collection = new ArrayList<>();
+        if (!iterator.hasNext()) return collection;
         T entry = iterator.next();
         while (entry != null && entry.getTimestamp() <= pauseEventTime) {
             collection.add(entry);
@@ -296,6 +297,7 @@ final class TrackBuilder {
      * @param resumeEventTime the Unix timestamp, e.g. of {@link Event.EventType#LIFECYCLE_RESUME}
      */
     <T extends DataPoint> void moveIteratorToLastBefore(final ListIterator<T> iterator, final long resumeEventTime) {
+        if (!iterator.hasPrevious()) return;
         iterator.previous();
         DataPoint point = iterator.next();
 
