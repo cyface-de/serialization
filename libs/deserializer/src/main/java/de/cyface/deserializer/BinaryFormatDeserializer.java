@@ -30,6 +30,7 @@ import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
 import de.cyface.model.Measurement;
 import de.cyface.model.MeasurementIdentifier;
 import de.cyface.model.MetaData;
+import de.cyface.model.NoTracksRecorded;
 
 /**
  * A {@link Deserializer} for a file in Cyface binary format. Constructs a new measurement from a ZLIB compressed
@@ -83,7 +84,7 @@ public class BinaryFormatDeserializer implements Deserializer {
     }
 
     @Override
-    public Measurement read() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion {
+    public Measurement read() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
         try (InflaterInputStream uncompressedInput = new InflaterInputStream(compressedData, new Inflater(NOWRAP))) {
             final var version = BinaryFormatParser.readShort(uncompressedInput);
             if (version != TRANSFER_FILE_FORMAT_VERSION) {

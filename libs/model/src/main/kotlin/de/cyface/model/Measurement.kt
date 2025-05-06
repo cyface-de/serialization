@@ -513,11 +513,17 @@ open class Measurement: Serializable {
          * Factory to create a Measurement instance with tracks.
          */
         @JvmStatic
+        @Throws(NoTracksRecorded::class)
         fun create(
             metaData: MetaData,
             tracks: List<Track>
         ): Measurement {
-            require(tracks.isNotEmpty()) { "Tracks list must not be empty." }
+            if (tracks.isEmpty()) {
+                // This is a known bug, for a reproducer see `TrackBuilderTest.testTrackBuilderWithShortFinalSegment`
+                // you just need to delete one location, it fails with 2, but succeeds with 3. As we only loose
+                // one location for subsequent tracks, we don't fix this during a running campaign [STAD-720].
+                throw NoTracksRecorded(metaData.length)
+            }
             return Measurement().apply {
                 this.metaData = metaData
                 this.tracks = tracks.toMutableList()
@@ -596,3 +602,6 @@ open class Measurement: Serializable {
         }
     }
 }
+
+class NoTracksRecorded(measurementLength: Double)
+    : Exception("No tracks for measurement with length $measurementLength")

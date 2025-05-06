@@ -18,23 +18,32 @@
  */
 package de.cyface.deserializer;
 
+import static de.cyface.model.Event.EventType.LIFECYCLE_PAUSE;
+import static de.cyface.model.Event.EventType.LIFECYCLE_RESUME;
+import static de.cyface.model.Event.EventType.LIFECYCLE_START;
+import static de.cyface.model.Event.EventType.LIFECYCLE_STOP;
+import static de.cyface.model.Event.EventType.MODALITY_TYPE_CHANGE;
+import static de.cyface.model.MetaData.SUPPORTED_VERSIONS;
 import static de.cyface.model.Modality.BICYCLE;
 import static de.cyface.model.Modality.WALKING;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
+import de.cyface.model.Measurement;
+import de.cyface.model.MetaData;
+import de.cyface.model.NoTracksRecorded;
 import de.cyface.model.Point3DImpl;
+import de.cyface.serializer.GeoLocation;
 import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import de.cyface.model.Event;
@@ -81,12 +90,12 @@ public class TrackBuilderTest {
         final var locationRecords = generateLocationRecords(numberOfLocations,
                 new Long[] {1000L, 1500L, 3500L, 4000L}, identifier);
         final var events = new ArrayList<Event>();
-        events.add(new Event(Event.EventType.LIFECYCLE_START, 1000L, null));
-        events.add(new Event(Event.EventType.MODALITY_TYPE_CHANGE, 1000L, WALKING.getDatabaseIdentifier()));
-        events.add(new Event(Event.EventType.LIFECYCLE_PAUSE, 2000L, null));
-        events.add(new Event(Event.EventType.MODALITY_TYPE_CHANGE, 2500L, BICYCLE.getDatabaseIdentifier()));
-        events.add(new Event(Event.EventType.LIFECYCLE_RESUME, 3000L, null));
-        events.add(new Event(Event.EventType.LIFECYCLE_STOP, 4000L, null));
+        events.add(new Event(LIFECYCLE_START, 1000L, null));
+        events.add(new Event(MODALITY_TYPE_CHANGE, 1000L, WALKING.getDatabaseIdentifier()));
+        events.add(new Event(LIFECYCLE_PAUSE, 2000L, null));
+        events.add(new Event(MODALITY_TYPE_CHANGE, 2500L, BICYCLE.getDatabaseIdentifier()));
+        events.add(new Event(LIFECYCLE_RESUME, 3000L, null));
+        events.add(new Event(LIFECYCLE_STOP, 4000L, null));
         final var point3DS = new ArrayList<Point3DImpl>();
         point3DS.add(new Point3DImpl(1.0f, -2.0f, 3.0f, 1010L));
         // All points >= LIFECYCLE_RESUME should be in the track, no matter when the first GPS point is captured
@@ -211,10 +220,10 @@ public class TrackBuilderTest {
         );
 
         final var events = List.of(
-                new Event(Event.EventType.LIFECYCLE_START, 1_000L, null),
-                new Event(Event.EventType.LIFECYCLE_PAUSE, 1_500L, null),
-                new Event(Event.EventType.LIFECYCLE_RESUME, 2_000L, null),
-                new Event(Event.EventType.LIFECYCLE_STOP, 2_500L, null)
+                new Event(LIFECYCLE_START, 1_000L, null),
+                new Event(LIFECYCLE_PAUSE, 1_500L, null),
+                new Event(LIFECYCLE_RESUME, 2_000L, null),
+                new Event(LIFECYCLE_STOP, 2_500L, null)
         );
         final var empty = List.<Point3DImpl>of(); // triggers .next() on empty list
 
@@ -238,6 +247,73 @@ public class TrackBuilderTest {
         assertThat(track2.getRotations().isEmpty(), is(true));
         assertThat(track2.getDirections().isEmpty(), is(true));
     }
+
+    /**
+     * Reproduced a crash which occurred in SR-2025 campaign on an Android device [STAD-712].
+     *      osVersion: 'Android 11',
+     *       deviceType: 'SM-A505FN',
+     *       appVersion: '3.3.25042964', (SR app,  cyface_sdk_version = "7.13.12")
+     *       formatVersion: 3,
+     *       length: 0,
+     *       locationCount: Long('2'),
+     *  <p>
+     *  Instead of fixing the location iterator in the middle of a campaign, we just make this error fail softly
+     *  and make it fail as INFO when we have very few locations:
+     *  - e.g. no resume: <= (1+0+1)*2 locations => INFO
+     *  - e.g. 1 resume: <= (1+1+1)**2 locations => INFO
+     *  As soon as one track has > 3 locations this error should not occur.
+     *  <p>
+     *  (1+1+1) because: with 1 resume and 2*2+1 locations it's possible, that
+     *  - track 1: 2 location, in-between: 1 locations, track 2: 2 locations, after stop: 1 location
+     *  <p>
+     *  If there are much more locations than resume events, this must be logged as WARN at least. (or crash)
+     *  (and show the number of locations and resume events involved)
+     */
+    @Test
+    @DisplayName("TrackBuilder creates one track for short final lifecycle segment")
+    void testTrackBuilderWithShortFinalSegment() throws InvalidLifecycleEvents, NoTracksRecorded {
+        // Given
+        final var identifier = new MeasurementIdentifier("test", 1);
+        final var events = List.of(
+                new Event(LIFECYCLE_START, 1746429259640L, ""),
+                new Event(MODALITY_TYPE_CHANGE, 1746429259640L, "BICYCLE"),
+                new Event(LIFECYCLE_PAUSE, 1746429328310L, ""),
+                new Event(LIFECYCLE_RESUME, 1746445158656L, ""),
+                new Event(LIFECYCLE_PAUSE, 1746445161947L, ""),
+                new Event(LIFECYCLE_RESUME, 1746518861627L, ""),
+                new Event(LIFECYCLE_STOP, 1746518872724L, "")
+        );
+
+        final var locations = List.of(
+                // This narrow case with only 2 locations produces the crash as we always loose the first location
+                new GeoLocation(48.123509, 11.372924, 1746518871000L, 1.35f, 29.5f),
+                new GeoLocation(48.123484, 11.372941, 1746518872000L, 1.77f, 27.0f),
+                // But with only 3 more location this does not happen, as 2 locations form a track
+                new GeoLocation(48.123485, 11.372942, 1746518872001L, 1.77f, 27.0f)
+        );
+
+        // No sensor data for this test
+        final var accelerations = List.<Point3DImpl>of();
+        final var rotations = List.<Point3DImpl>of();
+        final var directions = List.<Point3DImpl>of();
+
+        final var builder = new TrackBuilder();
+
+        // When
+        final var tracks = builder.build(locations, events, accelerations, rotations, directions, identifier);
+        final var metaData = MetaData.Companion.create(
+                new MeasurementIdentifier("test", 1L),
+                "deviceType",
+                "osVersion",
+                "appVersion",
+                0,
+                UUID.randomUUID(),
+                SUPPORTED_VERSIONS,
+                new Date()
+        );
+        Measurement.Companion.create(metaData, tracks);
+    }
+
 
     /**
      * Generates GeoLocationRecords for testing.

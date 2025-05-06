@@ -30,6 +30,7 @@ import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import de.cyface.model.NoTracksRecorded;
 import org.apache.commons.lang3.Validate;
 
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
@@ -127,7 +128,7 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
     }
 
     @Override
-    public Measurement read() throws IOException, InvalidLifecycleEvents, NoSuchMeasurement {
+    public Measurement read() throws IOException, InvalidLifecycleEvents, NoSuchMeasurement, NoTracksRecorded {
         if (!isUnzipped) {
             this.databaseFile = unzipAndReturnMatching(sqliteDatabasePath, "/measures");
             this.accelerationPaths = unzip(accelerationsFilePath);
