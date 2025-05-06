@@ -76,8 +76,9 @@ public class GeoLocation {
         }
         if (speed < 0.) {
             // Occurred on Huawei 10 Mate Pro (RAD-51) and Huawei P30 Android 10 (2021/07)
-            // And still in the 2025 SR campaign `-1.000000`
-            LOGGER.warn(String.format(Locale.US, "Illegal value for speed. Is required to be positive but was %f.", speed));
+            // And still at least for one upload per minute and multiple locations in the 2025 SR campaign `-1.000000`
+            // Thus, we make this INFO as WARN did spam our log [STAD-712].
+            LOGGER.info(String.format(Locale.US, "Illegal value for speed. Is required to be positive but was %f.", speed));
         }
         if (accuracy < 0.) {
             throw new IllegalArgumentException(String.format(Locale.US,
