@@ -119,14 +119,47 @@ enum class DataFormat(
     /**
      * JSON format.
      */
-    @Suppress("unused") // Used
-    JSON("json");
+    @Suppress("unused") // Used by Provider
+    JSON("json"),
+
+    /**
+     * JSON-LINES format: a streamable text format consisting of one JSON document per line.
+     *
+     * Each line is a complete and valid JSON object. The format is designed for efficient streaming
+     * and incremental parsing, especially for large datasets. Unlike standard JSON arrays,
+     * this format avoids the need for opening/closing brackets or commas between elements.
+     *
+     * This format is widely supported by tools like jq, pandas, and many log processors.
+     *
+     * Common file extension: .jsonl
+     * MIME type: application/x-ndjson
+     *
+     * Note: Not a standard IANA-registered MIME type, but commonly used in APIs.
+     */
+    JSONL("jsonl"),
+
+    /**
+     * BSON-LINES format: a non-standard, streamable format consisting of
+     * multiple consecutive BSON documents written one after another.
+     *
+     * Each document is a valid standalone BSON object, prefixed with its
+     * own length. This format is analogous to JSON Lines (.jsonl), but
+     * uses BSON's binary encoding.
+     *
+     * Note: This is not compatible with mongodump/mongorestore.
+     * Consumers must read and parse each BSON document individually.
+     *
+     * Common file extension: .bsonl
+     * MIME type (non-standard): application/x-bsonl
+     */
+    @Suppress("unused", "SpellCheckingInspection") // Used by Provider
+    BSONL("bsonl");
 
     companion object {
         private val BY_PARAMETER_VALUE: MutableMap<String, DataFormat> = HashMap()
 
         init {
-            values().forEach { format ->
+            entries.forEach { format ->
                 BY_PARAMETER_VALUE[format.parameterValue] = format
             }
         }
@@ -182,7 +215,7 @@ enum class DataType(@Suppress("MemberVisibilityCanBePrivate") val parameterValue
         private val BY_PARAMETER_VALUE: MutableMap<String, DataType> = HashMap()
 
         init {
-            DataType.values().forEach { entry ->
+            entries.forEach { entry ->
                 BY_PARAMETER_VALUE[entry.parameterValue] = entry
             }
         }
