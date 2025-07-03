@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Cyface GmbH
+ * Copyright 2019-2025 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -18,13 +18,10 @@
  */
 package de.cyface.model.osm
 
-import org.apache.commons.lang3.Validate
 import java.util.Locale
 import java.util.Objects
 import java.util.Optional
 import java.util.stream.Collectors
-
-
 
 /**
  * A POJO representing an Open Street Map way.
@@ -46,18 +43,18 @@ class Way<T : MapTag> : Comparable<Way<out MapTag>> {
     var nodes: Array<Node> = emptyArray()
         get() = field.copyOf()
         set(value) {
-            Validate.notNull(value)
+            requireNotNull(value)
             field = value.copyOf()
         }
 
     var tags: Map<String, T> = emptyMap()
         set(value) {
-            Validate.notNull(value)
+            requireNotNull(value)
             field = value.toMap()
         }
 
     /**
-     * A no argument constructor as required by Apache flink
+     * A no argument constructor as required by Apache Flink
      */
     @Suppress("unused") // Part of the API
     constructor()
@@ -71,8 +68,8 @@ class Way<T : MapTag> : Comparable<Way<out MapTag>> {
      */
     @Suppress("unused") // Part of the API
     constructor(identifier: Long, nodes: Array<Node>, tags: Collection<T>) {
-        Validate.isTrue(identifier > 0L)
-        Validate.notNull(nodes)
+        require(identifier > 0L) { "Identifier must be > 0 but was $identifier" }
+        requireNotNull(nodes)
 
         this.identifier = identifier
         this.nodes = nodes
@@ -92,7 +89,7 @@ class Way<T : MapTag> : Comparable<Way<out MapTag>> {
      * @param tags The tags associated with the way. This might be an empty `Collection`
      */
     fun setTags(tags: Collection<T>) {
-        Validate.notNull(tags)
+        requireNotNull(tags)
 
         this.tags = tags.stream().collect(Collectors.toMap({ it.key }, { it }))
     }
@@ -102,7 +99,7 @@ class Way<T : MapTag> : Comparable<Way<out MapTag>> {
     }
 
     override fun compareTo(other: Way<out MapTag>): Int {
-        Validate.notNull(other)
+        requireNotNull(other)
         return this.identifier.compareTo(other.identifier)
     }
 
