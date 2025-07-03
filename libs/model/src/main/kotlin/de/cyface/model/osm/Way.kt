@@ -68,7 +68,8 @@ class Way<T : MapTag> : Comparable<Way<out MapTag>> {
      */
     @Suppress("unused") // Part of the API
     constructor(identifier: Long, nodes: Array<Node>, tags: Collection<T>) {
-        require(identifier > 0L) { "Identifier must be > 0 but was $identifier" }
+        // The RadSim Router (2025) generates ids starting at 0, including zero [BIK-1383]
+        require(identifier >= 0L) { "Identifier must be >= 0 but was $identifier" }
         requireNotNull(nodes)
 
         this.identifier = identifier
