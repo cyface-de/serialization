@@ -23,7 +23,6 @@ import static de.cyface.model.Event.EventType.LIFECYCLE_RESUME;
 import static de.cyface.model.Event.EventType.LIFECYCLE_START;
 import static de.cyface.model.Event.EventType.LIFECYCLE_STOP;
 import static de.cyface.model.Event.EventType.MODALITY_TYPE_CHANGE;
-import static de.cyface.model.MetaData.SUPPORTED_VERSIONS;
 import static de.cyface.model.Modality.BICYCLE;
 import static de.cyface.model.Modality.WALKING;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -308,7 +307,7 @@ public class TrackBuilderTest {
                 "appVersion",
                 0,
                 UUID.randomUUID(),
-                SUPPORTED_VERSIONS,
+                "3.1.0",
                 new Date()
         );
         Measurement.Companion.create(metaData, tracks);
