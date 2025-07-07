@@ -101,7 +101,7 @@ class MetaData: Serializable {
         /**
          * Regex of supported [MetaData] versions of this class.
          */
-        const val SUPPORTED_VERSIONS: String = "3.1.0"
+        const val SUPPORTED_VERSIONS: String = "^3\\.[01]\\.0$"
 
         /**
          * Used to serialize objects of this class. Only change this value if this classes attribute set changes.
