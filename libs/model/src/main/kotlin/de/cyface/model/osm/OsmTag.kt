@@ -18,8 +18,6 @@
  */
 package de.cyface.model.osm
 
-import org.apache.commons.lang3.Validate
-
 /**
  * Represents a single key,value paired Open Street Map (OSM) attribute.
  *
@@ -28,9 +26,12 @@ import org.apache.commons.lang3.Validate
  * @property value The value of the OSM attribute
  */
 class OsmTag(key: String?, val value: Any) : MapTag(key!!) {
+
+    // Before other types were injected by accident, like `TextNode`
     init {
-        // Before other types were injected by accident, like `TextNode`
-        Validate.isTrue(value is String || value is Double || value is Int)
+        require(value is String || value is Double || value is Int) {
+            "Invalid value type for OsmTag: ${value::class}"
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -42,9 +43,7 @@ class OsmTag(key: String?, val value: Any) : MapTag(key!!) {
     }
 
     override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + value.hashCode()
-        return result
+        return 31 * super.hashCode() + value.hashCode()
     }
 
     override fun toString(): String {

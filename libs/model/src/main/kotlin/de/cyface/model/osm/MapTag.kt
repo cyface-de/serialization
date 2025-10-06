@@ -18,7 +18,6 @@
  */
 package de.cyface.model.osm
 
-import org.apache.commons.lang3.Validate
 import java.util.Objects
 
 /**
@@ -27,14 +26,7 @@ import java.util.Objects
  * @author Armin Schnabel
  * @property key The key of the OSM attribute
  */
-abstract class MapTag(key: String) {
-    @JvmField
-    val key: String
-
-    init {
-        Validate.notNull(key)
-        this.key = key
-    }
+abstract class MapTag(val key: String) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
