@@ -43,6 +43,9 @@ public class Offsetter {
      * The first number "seen" is used as offset and returned as absolute number. Subsequent numbers are returned in the
      * diff-format, i.e. as the relative difference to the previous number passed.
      *
+     * TODO: When we support nullable elevations, we need to ensure we implement it the same as communicated in STAD-827.
+     * - 100, 101, null, 200, 201, null, null → 100, +1, null, 200, +1, null, null
+     *
      * @param absoluteNumber the number to be returned in the diff-format
      * @return the difference to the previous number or the absolute number for the first number.
      */

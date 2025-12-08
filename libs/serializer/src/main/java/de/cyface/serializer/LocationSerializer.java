@@ -51,6 +51,8 @@ public final class LocationSerializer {
                     l.getLongitude(), l.getSpeed(), l.getAccuracy());
             final Formatter.Location offsets = offsetter.offset(formatted);
 
+            // TODO: When we support nullable elevations, we need to ensure we implement it the same as communicated in STAD-827.
+            // - 100, 101, null, 200, 201, null, null → 100, +1, null, 200, +1, null, null
             builder.addTimestamp(offsets.getTimestamp())
                     .addLatitude(offsets.getLatitude())
                     .addLongitude(offsets.getLongitude())
