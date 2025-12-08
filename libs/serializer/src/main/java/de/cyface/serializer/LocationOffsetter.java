@@ -56,6 +56,9 @@ public class LocationOffsetter {
      * The first number "seen" is used as offset and returned as absolute number. Subsequent numbers are returned in the
      * diff-format, i.e. as the relative difference to the previous number passed.
      *
+     * TODO: When we support nullable elevations, we need to ensure we implement it the same as communicated in STAD-827.
+     * - 100, 101, null, 200, 201, null, null → 100, +1, null, 200, +1, null, null
+     *
      * @param location the data point to be converted.
      * @return the data point in the offset-format
      */
