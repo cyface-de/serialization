@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Cyface GmbH
+ * Copyright 2020-2026 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -50,7 +50,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import de.cyface.deserializer.exceptions.NoSuchMeasurement;
+import de.cyface.model.DataFormat;
+import de.cyface.model.DataType;
+import de.cyface.model.ExportOptions;
 import de.cyface.model.NoTracksRecorded;
+import kotlin.Unit;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,11 +80,6 @@ import de.cyface.serializer.Serializer;
 
 /**
  * Test for reading measurements from the Cyface binary format.
- *
- * @author Klemens Muthmann
- * @author Armin Schnabel
- * @version 1.0.1
- * @since 1.0.0
  */
 class BinaryFormatDeserializerTest {
 
@@ -100,6 +100,51 @@ class BinaryFormatDeserializerTest {
 
     private final static short PERSISTENCE_FILE_FORMAT_VERSION = 3;
 
+    @Test
+    @DisplayName("Unzipped V3 Data is Deserialized with")
+    void testDeserializeUnzippedData() throws NoSuchMeasurement, NoTracksRecorded, InvalidLifecycleEvents, IOException, UnsupportedFileVersion {
+        // Arrange
+        final var metaData = testMetaData(new Date());
+        final var inputStream = BinaryFormatDeserializerTest.class.getResourceAsStream("/mongo-export/export.cyf");
+        final var reader = new V3UncompressedBinaryFormatDeserializer(metaData, inputStream);
+
+        // Act
+        final var measurement = reader.read();
+
+        // Assert
+        final var tracks = measurement.getTracks();
+        assertThat(tracks.size(), is(1));
+        assertThat(tracks.get(0).getLocationRecords().size(), is(16));
+        assertThat(tracks.get(0).getLocationRecords().get(0),hasProperty("longitude", is(-122.445798)));
+        assertThat(tracks.get(0).getLocationRecords().get(1),hasProperty("longitude", is(-122.446742)));
+        assertThat(tracks.get(0).getLocationRecords().get(2),hasProperty("longitude", is(-122.447061)));
+        assertThat(tracks.get(0).getLocationRecords().get(3),hasProperty("longitude", is(-122.447368)));
+        assertThat(tracks.get(0).getLocationRecords().get(4),hasProperty("longitude", is( -122.447686)));
+        assertThat(tracks.get(0).getLocationRecords().get(5),hasProperty("longitude", is( -122.447991)));
+        assertThat(tracks.get(0).getLocationRecords().get(6),hasProperty("longitude", is( -122.448282)));
+        assertThat(tracks.get(0).getLocationRecords().get(7),hasProperty("longitude", is( -122.448568)));
+        assertThat(tracks.get(0).getLocationRecords().get(8),hasProperty("longitude", is( -122.44885)));
+        assertThat(tracks.get(0).getLocationRecords().get(9),hasProperty("longitude", is( -122.449105)));
+        assertThat(tracks.get(0).getLocationRecords().get(10),hasProperty("longitude", is( -122.449328)));
+        assertThat(tracks.get(0).getLocationRecords().get(11),hasProperty("longitude", is( -122.44955)));
+        assertThat(tracks.get(0).getLocationRecords().get(12),hasProperty("longitude", is( -122.449755)));
+        assertThat(tracks.get(0).getLocationRecords().get(13),hasProperty("longitude", is( -122.449955)));
+        assertThat(tracks.get(0).getLocationRecords().get(14),hasProperty("longitude", is( -122.450121)));
+        assertThat(tracks.get(0).getLocationRecords().get(15),hasProperty("longitude", is( -122.450279)));
+        assertThat(tracks.get(0).getAccelerations().size(), is(0));
+        assertThat(tracks.get(0).getDirections().size(), is(equalTo(0)));
+        assertThat(tracks.get(0).getRotations().size(), is(equalTo(0)));
+
+        final var exportOptions = new ExportOptions()
+                .format(DataFormat.CSV)
+                .type(DataType.LOCATION)
+                .includeHeader(true);
+        measurement.asCsv(exportOptions, (line) -> {
+            System.out.println(line);
+            return Unit.INSTANCE;
+        });
+    }
+
     /**
      * This test evaluates the general workings of reading some binary data from a very short file in the Cyface binary
      * format.
@@ -115,16 +160,7 @@ class BinaryFormatDeserializerTest {
         final var identifier = new MeasurementIdentifier("test", 1);
         try (final var testData = testData(identifier)) {
             final var uploadDate = new Date();
-            final var metaData = MetaData.Companion.create(
-                    identifier,
-                    "Pixel 3",
-                    "Android 9.0.0",
-                    "1.2.0-beta1",
-                    500.5,
-                    TEST_USER_ID,
-                    MetaData.CURRENT_VERSION,
-                    uploadDate
-            );
+            final var metaData = testMetaData(uploadDate);
             final var reader = new BinaryFormatDeserializer(metaData, testData);
 
             // Act
@@ -134,8 +170,8 @@ class BinaryFormatDeserializerTest {
             assertThat(result, notNullValue());
             assertThat(result.getMetaData().getIdentifier(), is(identifier));
             assertThat(result.getMetaData().getDeviceType(), is("Pixel 3"));
-            assertThat(result.getMetaData().getOsVersion(), is("Android 9.0.0"));
-            assertThat(result.getMetaData().getAppVersion(), is("1.2.0-beta1"));
+            assertThat(result.getMetaData().getOsVersion(), is("Android 12.0.0"));
+            assertThat(result.getMetaData().getAppVersion(), is("3.0.2"));
             assertThat(result.getMetaData().getLength(), is(500.5));
             assertThat(result.getMetaData().getUserId(), is(TEST_USER_ID.toString()));
             assertThat(result.getMetaData().getVersion(), is(MetaData.CURRENT_VERSION));
@@ -250,7 +286,6 @@ class BinaryFormatDeserializerTest {
                 .build());
 
         // Arrange - Locations: more than 0 or else there no track is generated by the deserialization
-        final var identifier = new MeasurementIdentifier("test", 1);
         final var locationBuilder = LocationRecords.newBuilder();
         final LocationOffsetter offsetter = new LocationOffsetter();
         // Location 1
@@ -347,18 +382,9 @@ class BinaryFormatDeserializerTest {
         final var directions = Point3DDeserializer
                 .directions(parsedMeasurement.getDirectionsBinary().getDirectionsList());
         final var trackBuilder = new TrackBuilder();
-        final var metaData = MetaData.Companion.create(
-                identifier,
-                "Pixel 3",
-                "Android 12.0.0",
-                "3.0.2",
-                0.0,
-                TEST_USER_ID,
-                MetaData.CURRENT_VERSION,
-                new Date()
-        );
+        final var metaData = testMetaData(new Date());
         final var tracks = trackBuilder.build(deserializedLocations, deserializedEvents, accelerations, rotations,
-                directions, identifier);
+                directions, metaData.identifier);
         final var deserializedMeasurement = de.cyface.model.Measurement.create(metaData, tracks);
 
         // Assert
@@ -434,6 +460,20 @@ class BinaryFormatDeserializerTest {
     private Matcher<?> between(final float lower, final float upper) {
         final var floatPrecision = 0.000001f;
         return is(both(greaterThanOrEqualTo(lower - floatPrecision)).and(lessThanOrEqualTo(upper + floatPrecision)));
+    }
+
+    MetaData testMetaData(final Date uploadDate) {
+        final var identifier = new MeasurementIdentifier("test", 1);
+        return MetaData.Companion.create(
+                identifier,
+                "Pixel 3",
+                "Android 12.0.0",
+                "3.0.2",
+                500.5,
+                TEST_USER_ID,
+                MetaData.CURRENT_VERSION,
+                uploadDate
+        );
     }
 
     /**
