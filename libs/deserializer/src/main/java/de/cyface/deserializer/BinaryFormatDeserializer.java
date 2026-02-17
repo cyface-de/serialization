@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Cyface GmbH
+ * Copyright 2020-2026 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -38,9 +38,6 @@ import de.cyface.model.NoTracksRecorded;
  * <p>
  * A {@link DeserializerFactory} is necessary to create such a <code>Deserializer</code>.
  * 
- * @author Klemens Muthmann
- * @since 1.0.0
- * @version 1.0.1
  * @see DeserializerFactory
  */
 public class BinaryFormatDeserializer implements Deserializer {
@@ -92,18 +89,7 @@ public class BinaryFormatDeserializer implements Deserializer {
                         String.format("Encountered data in invalid format version (%s).", version));
             }
 
-            final var measurement = de.cyface.protos.model.Measurement.parseFrom(uncompressedInput);
-            final var events = EventDeserializer.deserialize(measurement.getEventsList());
-            final var locations = LocationDeserializer.deserialize(measurement.getLocationRecords());
-            final var accelerations = Point3DDeserializer
-                    .accelerations(measurement.getAccelerationsBinary().getAccelerationsList());
-            final var rotations = Point3DDeserializer.rotations(measurement.getRotationsBinary().getRotationsList());
-            final var directions = Point3DDeserializer
-                    .directions(measurement.getDirectionsBinary().getDirectionsList());
-            final var builder = new TrackBuilder();
-            final var tracks = builder.build(locations, events, accelerations, rotations, directions,
-                    metaData.getIdentifier());
-            return Measurement.Companion.create(metaData, tracks);
+            return new V3UncompressedBinaryFormatDeserializer(metaData, uncompressedInput).read();
         }
     }
 
