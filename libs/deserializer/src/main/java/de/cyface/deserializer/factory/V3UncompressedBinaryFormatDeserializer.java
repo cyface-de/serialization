@@ -16,10 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.deserializer;
+package de.cyface.deserializer.factory;
 
+import de.cyface.deserializer.Deserializer;
+import de.cyface.deserializer.EventDeserializer;
+import de.cyface.deserializer.LocationDeserializer;
+import de.cyface.deserializer.Point3DDeserializer;
+import de.cyface.deserializer.UnsupportedFileVersion;
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
-import de.cyface.deserializer.exceptions.NoSuchMeasurement;
 import de.cyface.model.Measurement;
 import de.cyface.model.MeasurementIdentifier;
 import de.cyface.model.MetaData;
@@ -32,19 +36,18 @@ import java.util.List;
 
 /**
  * This may be used to deserialize an unzipped binary file in the Version 3 Cyface Format.
- *
  * Such files are usually the result of exporting files directly from GridFS (Mongo Raw Data Database).
  */
-public class V3UncompressedBinaryFormatDeserializer implements Deserializer{
+public class V3UncompressedBinaryFormatDeserializer implements Deserializer {
 
     /**
      * The Metadata associated with the binary data. This must be provided since it is not stored together with the binary.
      */
-    private MetaData metaData;
+    private final MetaData metaData;
     /**
      * An input stream providing the binary data to deserialize.
      */
-    private InputStream dataStream;
+    private final InputStream dataStream;
 
     /**
      * Create a new fully initialized <code>V3UncompressedBinaryFormatDeserializer</code>.

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.deserializer;
+package de.cyface.deserializer.factory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -175,7 +175,7 @@ final class TrackBuilder {
             final Track track = collectNextSubTrack(locationIterator, pauseEventTime, accelerationsIterator,
                     rotationsIterator, directionsIterator);
             // Add sub-track to track
-            if (track.getLocationRecords().size() > 0) {
+            if (!track.getLocationRecords().isEmpty()) {
                 tracks.add(track);
             }
 
@@ -195,7 +195,7 @@ final class TrackBuilder {
         // This is either the track between start[, pause] and stop or resume[, pause] and stop.
         final Track tail = collectTail(locationIterator, accelerationsIterator, rotationsIterator,
                 directionsIterator);
-        if (tail.getLocationRecords().size() > 0) {
+        if (!tail.getLocationRecords().isEmpty()) {
             tracks.add(tail);
         }
         return tracks;

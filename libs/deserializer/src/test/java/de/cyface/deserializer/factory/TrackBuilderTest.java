@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.deserializer;
+package de.cyface.deserializer.factory;
 
 import static de.cyface.model.Event.EventType.LIFECYCLE_PAUSE;
 import static de.cyface.model.Event.EventType.LIFECYCLE_RESUME;
