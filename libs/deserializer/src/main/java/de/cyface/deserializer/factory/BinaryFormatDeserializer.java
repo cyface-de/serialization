@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.deserializer;
+package de.cyface.deserializer.factory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +26,8 @@ import java.util.Objects;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import de.cyface.deserializer.Deserializer;
+import de.cyface.deserializer.UnsupportedFileVersion;
 import de.cyface.deserializer.exceptions.InvalidLifecycleEvents;
 import de.cyface.model.Measurement;
 import de.cyface.model.MeasurementIdentifier;
