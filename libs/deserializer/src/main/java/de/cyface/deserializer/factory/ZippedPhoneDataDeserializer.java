@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Cyface GmbH
+ * Copyright 2020-2026 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.deserializer;
+package de.cyface.deserializer.factory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +30,8 @@ import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import de.cyface.deserializer.Deserializer;
+import de.cyface.deserializer.PhoneDataDeserializer;
 import de.cyface.model.NoTracksRecorded;
 import org.apache.commons.lang3.Validate;
 
@@ -42,10 +44,6 @@ import de.cyface.model.MeasurementIdentifier;
  * A {@link Deserializer} for zipped phone data. This is the format as it is returned by the smartphone. This data comes
  * in the form of four zip archives. The first contains an SQLite database with the location information and some
  * metadata. The other three contain the sensor data from the accelerometer, the gyroscope and the compass.
- * 
- * @author Klemens Muthmann
- * @version 1.0.1
- * @since 1.0.0
  */
 public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
 
@@ -95,7 +93,7 @@ public class ZippedPhoneDataDeserializer extends PhoneDataDeserializer {
     /**
      * The upload date when the `Measurement`s were uploaded to the collector.
      */
-    private Date uploadDate;
+    private final Date uploadDate;
 
     /**
      * Create a new {@link Deserializer} for phone data. Before calling read on an instance of this class

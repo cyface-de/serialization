@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Cyface GmbH
+ * Copyright 2020-2026 Cyface GmbH
  *
  * This file is part of the Serialization.
  *
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Serialization. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.deserializer;
+package de.cyface.deserializer.factory;
 
 import static de.cyface.serializer.model.Point3DType.ACCELERATION;
 import static de.cyface.serializer.model.Point3DType.DIRECTION;
@@ -35,6 +35,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import de.cyface.deserializer.Deserializer;
+import de.cyface.deserializer.PhoneDataDeserializer;
+import de.cyface.deserializer.Point3DDeserializer;
 import de.cyface.model.NoTracksRecorded;
 import org.apache.commons.lang3.Validate;
 
@@ -56,10 +59,6 @@ import de.cyface.model.RawRecord;
  * <code>Measurement</code>. The sensors are the accelerometer (*.cyfa files), the gyroscope (*.cyfr files) and the
  * compass (*.cyfd files). The name of each file is the <code>Measurement</code> number, which can be used as a foreign
  * key into the database.
- * 
- * @author Klemens Muthmann
- * @version 1.0.2
- * @since 1.0.0
  */
 public class UnzippedPhoneDataDeserializer extends PhoneDataDeserializer {
     /**
