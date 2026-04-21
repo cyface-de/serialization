@@ -20,6 +20,7 @@ package de.cyface.deserializer.factory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -84,7 +85,22 @@ public class BinaryFormatDeserializer implements Deserializer {
 
     @Override
     public Measurement read() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
-        try (InflaterInputStream uncompressedInput = new InflaterInputStream(compressedData, new Inflater(NOWRAP))) {
+        // Peek at the first two bytes to detect whether the stream uses standard ZLIB format (nowrap=false)
+        // or raw DEFLATE (nowrap=true, the Cyface default).
+        // A valid ZLIB stream satisfies: (CMF & 0x0F) == 8  AND  (CMF * 256 + FLG) % 31 == 0.
+        // Data uploaded by external partners may use standard ZLIB even though the Cyface SDK uses raw DEFLATE.
+        final var pushback = new PushbackInputStream(compressedData, 2);
+        final var header = new byte[2];
+        final int bytesRead = pushback.read(header, 0, 2);
+        if (bytesRead > 0) {
+            pushback.unread(header, 0, bytesRead);
+        }
+        final boolean isZlibWrapped = bytesRead == 2
+                && (header[0] & 0x0F) == 8
+                && ((header[0] & 0xFF) * 256 + (header[1] & 0xFF)) % 31 == 0;
+        final boolean nowrap = !isZlibWrapped;
+
+        try (InflaterInputStream uncompressedInput = new InflaterInputStream(pushback, new Inflater(nowrap))) {
             final var version = BinaryFormatParser.readShort(uncompressedInput);
             if (version != TRANSFER_FILE_FORMAT_VERSION) {
                 throw new UnsupportedFileVersion(
