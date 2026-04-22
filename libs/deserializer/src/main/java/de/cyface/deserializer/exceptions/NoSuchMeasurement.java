@@ -29,4 +29,11 @@ import de.cyface.deserializer.Deserializer;
  * @author Klemens Muthmann
  */
 public class NoSuchMeasurement extends Throwable {
+
+    /**
+     * Creates a new instance with no detail message.
+     */
+    public NoSuchMeasurement() {
+        super();
+    }
 }

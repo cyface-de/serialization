@@ -24,6 +24,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * A geographical location captured by a mobile device, consisting of coordinates, timestamp, speed and accuracy.
+ *
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 5.0.0
+ */
 public class GeoLocation {
 
     /**
@@ -98,6 +105,8 @@ public class GeoLocation {
     }
 
     /**
+     * Returns the latitude of this location.
+     *
      * @return The captured latitude of this GeoLocation in decimal coordinates as a value between -90.0 (South Pole)
      *         and 90.0 (North Pole).
      */
@@ -106,6 +115,8 @@ public class GeoLocation {
     }
 
     /**
+     * Returns the longitude of this location.
+     *
      * @return The captured longitude of this {@code GeoLocation} in decimal coordinates as a value between -180.0 and
      *         180.0.
      */
@@ -114,6 +125,8 @@ public class GeoLocation {
     }
 
     /**
+     * Returns the time at which this location was captured.
+     *
      * @return The timestamp at which this <code>GeoLocation</code> was captured in milliseconds since 1.1.1970.
      */
     public long getTimestamp() {
@@ -121,6 +134,8 @@ public class GeoLocation {
     }
 
     /**
+     * Returns the speed of the measuring device at the time of capture.
+     *
      * @return The current speed of the measuring device according to its location sensor in meters per second.
      */
     public double getSpeed() {
@@ -128,6 +143,8 @@ public class GeoLocation {
     }
 
     /**
+     * Returns the location accuracy of the measuring device at the time of capture.
+     *
      * @return The current accuracy of the measuring device in meters.
      */
     public double getAccuracy() {

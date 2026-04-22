@@ -47,6 +47,13 @@ import de.cyface.serializer.model.Point3DType;
 public class Point3DSerializer {
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private Point3DSerializer() {
+        // Utility class
+    }
+
+    /**
      * The logger used to log messages from this class. Configure it using <tt>src/main/resources/logback.xml</tt>.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Point3DSerializer.class);

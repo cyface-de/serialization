@@ -30,6 +30,13 @@ import de.cyface.model.Measurement;
  * @since 1.0.0
  */
 public abstract class PhoneDataDeserializer implements Deserializer {
+
+    /**
+     * Creates a new instance. Subclasses must call this via {@code super()} where needed.
+     */
+    protected PhoneDataDeserializer() {
+        // Nothing to initialize here — subclasses set measurementNumber before calling read()
+    }
     /**
      * The running number of the {@link Measurement} to deserialize on the next call to {@link #read()}. Since each
      * export may contain multiple <code>Measurement</code>s, this information is required to know which one to

@@ -58,6 +58,13 @@ public final class Serializer {
     private static final boolean COMPRESSION_NOWRAP = true;
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private Serializer() {
+        // Utility class
+    }
+
+    /**
      * Writes compressed provided measurement data in the current format to a temp file, ready to
      * be transferred.
      *

@@ -87,6 +87,8 @@ public abstract class GeoLocationRecord extends GeoLocation implements DataPoint
     }
 
     /**
+     * Returns the measurement this record belongs to.
+     *
      * @return The worldwide unique identifier of the measurement, this {@link GeoLocationRecord} belongs to.
      */
     public final MeasurementIdentifier getMeasurementIdentifier() {
@@ -94,6 +96,8 @@ public abstract class GeoLocationRecord extends GeoLocation implements DataPoint
     }
 
     /**
+     * Sets the measurement this record belongs to.
+     *
      * @param measurementIdentifier The worldwide unique identifier of the measurement, this
      *            {@link GeoLocationRecord}
      *            belongs to.

@@ -35,6 +35,14 @@ import org.apache.commons.lang3.Validate;
 public class Formatter {
 
     /**
+     * Not meant to be instantiated directly. All top-level methods are static; use the inner classes
+     * {@link Location} and {@link Point3D} to hold formatted values.
+     */
+    private Formatter() {
+        // Utility class
+    }
+
+    /**
      * Converts the number into the format expected by the Cyface ProtoBuf serializer.
      *
      * @param coordinate the coordinate-part, e.g.: 51.012345 or 13.012300
@@ -155,6 +163,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the timestamp of this location in milliseconds since 1.1.1970.
+         *
          * @return The Unit timestamp in milliseconds.
          */
         public long getTimestamp() {
@@ -162,6 +172,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the latitude in the fixed-point integer format used by the Cyface ProtoBuf serializer.
+         *
          * @return The latitude coordinate in the format 51_012345 (i.e. 51.012345)
          */
         public int getLatitude() {
@@ -169,6 +181,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the longitude in the fixed-point integer format used by the Cyface ProtoBuf serializer.
+         *
          * @return The longitude coordinate in the format 13_012300 (i.e. 13.012300)
          */
         public int getLongitude() {
@@ -176,6 +190,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the speed in the fixed-point integer format used by the Cyface ProtoBuf serializer.
+         *
          * @return The speed in the format 11_00 cm/s (i.e. 11.0m/s)
          */
         public int getSpeed() {
@@ -183,6 +199,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the accuracy in the fixed-point integer format used by the Cyface ProtoBuf serializer.
+         *
          * @return The accuracy in cm.
          */
         public int getAccuracy() {
@@ -239,6 +257,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the timestamp of this sensor point in milliseconds since 1.1.1970.
+         *
          * @return the Unit timestamp in milliseconds.
          */
         public long getTimestamp() {
@@ -246,6 +266,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the x-axis value in the fixed-point integer format used by the Cyface ProtoBuf serializer.
+         *
          * @return the x-value of the sensor point. Format: e.g. 9_810 mm/s^2 (i.e. +9.81 m/s) for acceleration,
          *         83 rad/1000s (not /ms!) (i.e. 0.083 rad/s) for rotation, 67 µT/100 (i.e. 0.67 µT) for direction.
          */
@@ -254,6 +276,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the y-axis value in the fixed-point integer format used by the Cyface ProtoBuf serializer.
+         *
          * @return the y-value of the sensor point. Format: e.g. 9_810 mm/s^2 (i.e. +9.81 m/s) for acceleration,
          *         83 rad/1000s (not /ms!) (i.e. 0.083 rad/s) for rotation, 67 µT/100 (i.e. 0.67 µT) for direction.
          */
@@ -262,6 +286,8 @@ public class Formatter {
         }
 
         /**
+         * Returns the z-axis value in the fixed-point integer format used by the Cyface ProtoBuf serializer.
+         *
          * @return the z-value of the sensor point. Format: e.g. 9_810 mm/s^2 (i.e. +9.81 m/s) for acceleration,
          *         83 rad/1000s (not /ms!) (i.e. 0.083 rad/s) for rotation, 67 µT/100 (i.e. 0.67 µT) for direction.
          */

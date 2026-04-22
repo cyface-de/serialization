@@ -89,6 +89,8 @@ final public class Point3DImpl implements DataPoint, Point3D {
     }
 
     /**
+     * Returns the x component of this data point.
+     *
      * @return The x component of the data point
      */
     public float getX() {
@@ -96,6 +98,8 @@ final public class Point3DImpl implements DataPoint, Point3D {
     }
 
     /**
+     * Returns the y component of this data point.
+     *
      * @return The y component of the data point
      */
     public float getY() {
@@ -103,6 +107,8 @@ final public class Point3DImpl implements DataPoint, Point3D {
     }
 
     /**
+     * Returns the z component of this data point.
+     *
      * @return The z component of the data point
      */
     public float getZ() {
@@ -110,6 +116,8 @@ final public class Point3DImpl implements DataPoint, Point3D {
     }
 
     /**
+     * Sets the x component of this data point.
+     *
      * @param x The x component of the data point
      */
     public void setX(float x) {
@@ -117,6 +125,8 @@ final public class Point3DImpl implements DataPoint, Point3D {
     }
 
     /**
+     * Sets the y component of this data point.
+     *
      * @param y The y component of the data point
      */
     public void setY(float y) {
@@ -124,6 +134,8 @@ final public class Point3DImpl implements DataPoint, Point3D {
     }
 
     /**
+     * Sets the z component of this data point.
+     *
      * @param z The z component of the data point
      */
     public void setZ(float z) {

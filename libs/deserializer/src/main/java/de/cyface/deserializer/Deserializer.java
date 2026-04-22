@@ -49,9 +49,13 @@ public interface Deserializer extends Serializable {
      *             <code>Exception</code> can happen or not. Usually it is thrown if the <code>Deserializer</code> reads
      *             a <code>Measurement</code> from a source providing multiple <code>Measurement</code>s.
      * @throws UnsupportedFileVersion If the binary file is from a deprecated or not yet supported file format version.
+     * @throws NoTracksRecorded If the measurement contains no tracks, i.e. no locations were recorded.
      */
     Measurement read() throws IOException, InvalidLifecycleEvents, NoSuchMeasurement, UnsupportedFileVersion, NoTracksRecorded;
+
     /**
+     * Peeks at the available measurement identifiers without fully deserializing the data.
+     *
      * @return A list with all the valid <code>{@link MeasurementIdentifier}</code> within the deserializable data.
      * @throws IOException If reading data fails
      */

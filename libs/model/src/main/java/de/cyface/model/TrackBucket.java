@@ -63,6 +63,8 @@ public class TrackBucket {
     }
 
     /**
+     * Returns the position of this track within its parent measurement.
+     *
      * @return The track's position within the measurement.
      */
     public int getTrackId() {
@@ -70,6 +72,8 @@ public class TrackBucket {
     }
 
     /**
+     * Returns the time window this bucket covers.
+     *
      * @return The time "slice" of the bucket.
      */
     public Date getBucket() {
@@ -77,6 +81,8 @@ public class TrackBucket {
     }
 
     /**
+     * Returns the track data slice held by this bucket.
+     *
      * @return The track slice of the bucket.
      */
     public Track getTrack() {
@@ -84,6 +90,8 @@ public class TrackBucket {
     }
 
     /**
+     * Returns the metadata associated with this track bucket.
+     *
      * @return The {@link MetaData} of the track.
      */
     public MetaData getMetaData() {

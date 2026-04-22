@@ -53,6 +53,8 @@ public final class Event implements Serializable {
     private final long timestamp;
 
     /**
+     * Creates a new completely initialized {@link Event}.
+     *
      * @param value The free form <code>String</code> value of this event. This might be <code>null</code>, if the event
      *            has no such value
      * @param type The {@code EventType} collected by this {@link Event}
@@ -67,6 +69,8 @@ public final class Event implements Serializable {
     }
 
     /**
+     * Returns the optional free-form payload attached to this event.
+     *
      * @return The free form <code>String</code> value of this event. This might be <code>null</code>, if the event has
      *         no such value
      */
@@ -75,6 +79,8 @@ public final class Event implements Serializable {
     }
 
     /**
+     * Returns the type of this event.
+     *
      * @return The {@code EventType} collected by this {@link Event}
      */
     public EventType getType() {
@@ -82,6 +88,8 @@ public final class Event implements Serializable {
     }
 
     /**
+     * Returns the time at which this event was captured.
+     *
      * @return The timestamp at which this {@code Event} was captured in milliseconds since 1.1.1970
      */
     public long getTimestamp() {
@@ -164,6 +172,8 @@ public final class Event implements Serializable {
       }
 
       /**
+       * Returns the string identifier used to persist this event type in the database.
+       *
        * @return The event types identifier within the database
        */
       public String getDatabaseIdentifier() {
