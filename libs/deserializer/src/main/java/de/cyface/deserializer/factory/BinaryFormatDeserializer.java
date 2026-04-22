@@ -109,12 +109,28 @@ public class BinaryFormatDeserializer implements Deserializer {
             }
         }
 
+        // Four distinct formats are encountered in practice:
+        //
+        //  1. GZIP          — handled above.
+        //  2. ZLIB          — standard ZLIB wrapper; Inflater(nowrap=false).
+        //  3. Raw DEFLATE   — no header; Cyface/iOS SDK default; Inflater(nowrap=true).
+        //  4. Uncompressed  — raw protobuf bytes, no compression at all (observed from iOS partners).
+        //
+        // Try both DEFLATE modes first (ZLIB detection can be a false positive), then fall back to
+        // treating the bytes as an uncompressed protobuf stream.
         final boolean isZlibWrapped = isZlib(compressedBytes);
         try {
             return readDeflate(compressedBytes, isZlibWrapped);
-        } catch (ZipException e) {
-            return readDeflate(compressedBytes, !isZlibWrapped);
+        } catch (ZipException ignored) {
+            // fall through and retry with opposite nowrap mode
         }
+        try {
+            return readDeflate(compressedBytes, !isZlibWrapped);
+        } catch (ZipException ignored) {
+            // fall through and attempt uncompressed protobuf
+        }
+        // Last resort: the data was never compressed (e.g. certain iOS partner uploads).
+        return parseDecompressedStream(new ByteArrayInputStream(compressedBytes));
     }
 
     /** Returns true if the bytes start with the GZIP magic number 0x1F 0x8B. */
