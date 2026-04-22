@@ -123,8 +123,10 @@ public class BinaryFormatDeserializer implements Deserializer {
                     throw new UnsupportedFileVersion(
                             String.format("Encountered data in invalid format version (%s).", version));
                 }
-                //noinspection ResultOfMethodCallIgnored
-                decompressedPushback.skip(2); // discard the version header
+                // Discard the 2-byte version header and verify both bytes are consumed.
+                if (decompressedPushback.read() == -1 || decompressedPushback.read() == -1) {
+                    throw new IOException("Unexpected end of stream while discarding version header.");
+                }
             }
             // Whether the header was present or not, the stream now points at the raw protobuf payload.
             return new V3UncompressedBinaryFormatDeserializer(metaData, decompressedPushback).read();
