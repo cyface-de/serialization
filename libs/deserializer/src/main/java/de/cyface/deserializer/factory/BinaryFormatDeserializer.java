@@ -25,6 +25,7 @@ import java.io.PushbackInputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipException;
@@ -87,63 +88,109 @@ public class BinaryFormatDeserializer implements Deserializer {
 
     @Override
     public Measurement read() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
-        // Buffer the full compressed stream upfront so we can retry with the opposite decompression
-        // mode if the format detection from the first two bytes turns out to be a false positive.
-        // (A raw DEFLATE stream can accidentally satisfy the ZLIB header check and vice versa.)
+        // Buffer the full compressed stream upfront so we can retry with different decompression
+        // modes without re-reading from the source stream.
         final byte[] compressedBytes = compressedData.readAllBytes();
 
-        // Detect compression format: a valid ZLIB stream satisfies
-        // (CMF & 0x0F) == 8  AND  (CMF * 256 + FLG) % 31 == 0.
-        final boolean isZlibWrapped = compressedBytes.length >= 2
-                && (compressedBytes[0] & 0x0F) == 8
-                && ((compressedBytes[0] & 0xFF) * 256 + (compressedBytes[1] & 0xFF)) % 31 == 0;
+        // Three distinct compression formats are encountered in practice:
+        //
+        //  1. GZIP       — magic bytes 0x1F 0x8B; requires GZIPInputStream.
+        //  2. ZLIB       — satisfies (CMF & 0x0F) == 8 AND (CMF*256+FLG) % 31 == 0; Inflater(false).
+        //  3. Raw DEFLATE— no header; the Cyface SDK default; Inflater(true).
+        //
+        // Detection is best-effort: GZIP magic bytes are unambiguous, but a raw DEFLATE stream can
+        // accidentally satisfy the ZLIB header check, so we always retry on ZipException.
 
-        // Try the detected mode first; fall back to the opposite on ZipException.
+        if (isGzip(compressedBytes)) {
+            try {
+                return readGzip(compressedBytes);
+            } catch (ZipException e) {
+                // Unlikely, but fall through and try as DEFLATE/ZLIB below.
+            }
+        }
+
+        final boolean isZlibWrapped = isZlib(compressedBytes);
         try {
-            return readDecompressed(compressedBytes, isZlibWrapped);
+            return readDeflate(compressedBytes, isZlibWrapped);
         } catch (ZipException e) {
-            return readDecompressed(compressedBytes, !isZlibWrapped);
+            return readDeflate(compressedBytes, !isZlibWrapped);
+        }
+    }
+
+    /** Returns true if the bytes start with the GZIP magic number 0x1F 0x8B. */
+    private static boolean isGzip(final byte[] bytes) {
+        return bytes.length >= 2
+                && (bytes[0] & 0xFF) == 0x1F
+                && (bytes[1] & 0xFF) == 0x8B;
+    }
+
+    /**
+     * Returns true if the bytes start with a valid ZLIB header.
+     * A ZLIB stream satisfies: (CMF & 0x0F) == 8 AND (CMF * 256 + FLG) % 31 == 0.
+     */
+    private static boolean isZlib(final byte[] bytes) {
+        return bytes.length >= 2
+                && (bytes[0] & 0x0F) == 8
+                && ((bytes[0] & 0xFF) * 256 + (bytes[1] & 0xFF)) % 31 == 0;
+    }
+
+    /**
+     * Decompresses <code>compressedBytes</code> as GZIP and parses the result as a {@link Measurement}.
+     */
+    private Measurement readGzip(final byte[] compressedBytes)
+            throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
+        try (final var gzipStream = new GZIPInputStream(new ByteArrayInputStream(compressedBytes))) {
+            return parseDecompressedStream(gzipStream);
         }
     }
 
     /**
-     * Decompresses <code>compressedBytes</code> and parses the resulting stream as a {@link Measurement}.
+     * Decompresses <code>compressedBytes</code> using an {@link Inflater} and parses the result as a
+     * {@link Measurement}.
      *
-     * @param compressedBytes the raw compressed bytes
-     * @param isZlibWrapped   <code>true</code> to use standard ZLIB (nowrap=false),
-     *                        <code>false</code> to use raw DEFLATE (nowrap=true)
+     * @param isZlibWrapped <code>true</code> to use standard ZLIB (nowrap=false),
+     *                      <code>false</code> to use raw DEFLATE (nowrap=true)
      */
-    private Measurement readDecompressed(final byte[] compressedBytes, final boolean isZlibWrapped)
+    private Measurement readDeflate(final byte[] compressedBytes, final boolean isZlibWrapped)
             throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
         try (final var inflated = new InflaterInputStream(
                 new ByteArrayInputStream(compressedBytes), new Inflater(!isZlibWrapped))) {
-            // Peek at the first two decompressed bytes to detect whether the Cyface 2-byte version
-            // header is present. The high byte is always 0x00 for any supported version (< 256),
-            // while protobuf field tags can never start with 0x00 (field number 0 is illegal in
-            // protobuf), so the two formats are unambiguous.
-            final var decompressedPushback = new PushbackInputStream(inflated, 2);
-            final var firstTwoBytes = new byte[2];
-            final int dBytesRead = decompressedPushback.read(firstTwoBytes, 0, 2);
-            if (dBytesRead > 0) {
-                decompressedPushback.unread(firstTwoBytes, 0, dBytesRead);
-            }
-
-            if (dBytesRead >= 1 && firstTwoBytes[0] == 0x00) {
-                // Cyface format: validate the version and consume the 2-byte header.
-                final short version = dBytesRead == 2
-                        ? (short) (((firstTwoBytes[0] & 0xFF) << 8) | (firstTwoBytes[1] & 0xFF))
-                        : 0;
-                if (version != TRANSFER_FILE_FORMAT_VERSION) {
-                    throw new UnsupportedFileVersion(
-                            String.format("Encountered data in invalid format version (%s).", version));
-                }
-                if (decompressedPushback.read() == -1 || decompressedPushback.read() == -1) {
-                    throw new IOException("Unexpected end of stream while discarding version header.");
-                }
-            }
-            // Whether the header was present or not, the stream now points at the raw protobuf payload.
-            return new V3UncompressedBinaryFormatDeserializer(metaData, decompressedPushback).read();
+            return parseDecompressedStream(inflated);
         }
+    }
+
+    /**
+     * Parses a decompressed stream as a {@link Measurement}, handling both the Cyface format
+     * (which prepends a 2-byte version header) and the external format (raw protobuf, no header).
+     * <p>
+     * The Cyface version header always starts with 0x00 (high byte of a big-endian short for any
+     * version &lt; 256). Protobuf field tags can never start with 0x00 (field number 0 is illegal),
+     * so the two formats are unambiguous.
+     */
+    private Measurement parseDecompressedStream(final InputStream decompressedStream)
+            throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
+        final var pushback = new PushbackInputStream(decompressedStream, 2);
+        final var firstTwoBytes = new byte[2];
+        final int bytesRead = pushback.read(firstTwoBytes, 0, 2);
+        if (bytesRead > 0) {
+            pushback.unread(firstTwoBytes, 0, bytesRead);
+        }
+
+        if (bytesRead >= 1 && firstTwoBytes[0] == 0x00) {
+            // Cyface format: validate the version and consume the 2-byte header.
+            final short version = bytesRead == 2
+                    ? (short) (((firstTwoBytes[0] & 0xFF) << 8) | (firstTwoBytes[1] & 0xFF))
+                    : 0;
+            if (version != TRANSFER_FILE_FORMAT_VERSION) {
+                throw new UnsupportedFileVersion(
+                        String.format("Encountered data in invalid format version (%s).", version));
+            }
+            if (pushback.read() == -1 || pushback.read() == -1) {
+                throw new IOException("Unexpected end of stream while discarding version header.");
+            }
+        }
+        // Stream now points at the raw protobuf payload.
+        return new V3UncompressedBinaryFormatDeserializer(metaData, pushback).read();
     }
 
     @Override
