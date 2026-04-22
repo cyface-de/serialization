@@ -70,6 +70,8 @@ public final class LocationPair implements Serializable {
     }
 
     /**
+     * Returns the location that was captured first in this pair.
+     *
      * @return The {@link GeoLocationRecord} that has been captured first.
      */
     public RawRecord getEarlierLocation() {
@@ -87,6 +89,8 @@ public final class LocationPair implements Serializable {
     }
 
     /**
+     * Returns the location that was captured second in this pair.
+     *
      * @return The {@link GeoLocationRecord} that has been captured second.
      */
     public RawRecord getLaterLocation() {

@@ -73,6 +73,8 @@ public enum Modality {
     }
 
     /**
+     * Returns the string identifier used to persist this modality type in the database.
+     *
      * @return The modality types identifier within the database
      */
     public String getDatabaseIdentifier() {

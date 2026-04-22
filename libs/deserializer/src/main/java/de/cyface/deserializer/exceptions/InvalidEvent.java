@@ -44,6 +44,9 @@ public class InvalidEvent extends Exception {
     }
 
     /**
+     * Returns the numeric event type value from the binary format that could not be mapped to a known
+     * {@link de.cyface.model.Event.EventType}.
+     *
      * @return The unrecognized event type
      */
     public short getEventType() {

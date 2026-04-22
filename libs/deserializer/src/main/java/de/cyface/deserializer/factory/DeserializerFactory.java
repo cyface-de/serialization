@@ -43,6 +43,8 @@ public final class DeserializerFactory {
 
     /**
      * Start the builder for deserializers for compressed data.
+     *
+     * @return A {@link CompressedCreator} for building deserializers that handle compressed input.
      */
     public static CompressedCreator forCompressedData() {
         return new CompressedImpl();
@@ -50,11 +52,17 @@ public final class DeserializerFactory {
 
     /**
      * Start the builder for deserializers for uncompressed data.
+     *
+     * @return An {@link UncompressedCreator} for building deserializers that handle uncompressed input.
      */
     public static UncompressedCreator forUncompressedData() {
         return new UncompressedImpl();
     }
 
+    /**
+     * Base factory interface for creating {@link de.cyface.deserializer.Deserializer} instances from either
+     * MongoDB streams or phone export data.
+     */
     public interface Creator {
         /**
          * Create a new {@link Deserializer} for a {@link de.cyface.model.Measurement} in Cyface Binary data with its

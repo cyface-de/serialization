@@ -97,10 +97,19 @@ tasks.named("processTestResources") {
   dependsOn tasks.named("downloadAndUnzipProto")
 }
 // See libs/build.gradle - the sourcesJar is also registered "delayed"
+// duplicatesStrategy is required since protobuf-gradle-plugin 0.9.x registers generated sources
+// into the source set in a way that causes the sourcesJar task to see them twice.
 afterEvaluate {
   tasks.named("sourcesJar") {
     dependsOn("downloadAndUnzipProto", "generateProto")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 }
+// Exclude protoc-generated sources from Javadoc — they are auto-generated on every build and
+// cannot be given hand-written documentation. Attempting to document them would be futile.
+javadoc {
+  exclude "de/cyface/protos/**"
+}
+
 // preBuild does not exist: preBuild.dependsOn downloadAndUnzipProto
 assemble.dependsOn downloadAndUnzipProto

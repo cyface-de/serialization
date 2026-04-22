@@ -33,6 +33,13 @@ import de.cyface.model.Event;
 public final class EventSerializer {
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private EventSerializer() {
+        // Utility class
+    }
+
+    /**
      * Converts events to the class supported by the {@code Protobuf} generated serializer classes.
      *
      * @param data the locations to convert

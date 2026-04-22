@@ -26,5 +26,10 @@ package de.cyface.serializer.model;
  * @since 5.0.0
  */
 public enum Point3DType {
-    ACCELERATION, ROTATION, DIRECTION
+    /** Accelerometer data measured in m/s². */
+    ACCELERATION,
+    /** Gyroscope (rotation rate) data measured in rad/s. */
+    ROTATION,
+    /** Magnetometer (compass direction) data measured in µT. */
+    DIRECTION
 }

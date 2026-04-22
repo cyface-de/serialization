@@ -28,12 +28,16 @@ import java.io.Serializable;
  */
 public interface DataPoint extends Comparable<DataPoint>, Serializable {
     /**
+     * Returns the time at which this data point was captured.
+     *
      * @return The Unix timestamp at which this <code>DataPoint</code> was measured in milliseconds since the first of
      *         January 1970.
      */
     long getTimestamp();
 
     /**
+     * Sets the time at which this data point was captured.
+     *
      * @param timestamp The Unix timestamp at which this <code>DataPoint</code> was measured in milliseconds since the
      *            first of January 1970.
      */

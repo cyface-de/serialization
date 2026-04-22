@@ -34,6 +34,8 @@ import de.cyface.model.osm.Way;
 public interface MatchedGeometry {
 
     /**
+     * Returns the OpenStreetMap node directly preceding this geometry.
+     *
      * @return The OSM node directly before the location
      */
     Node getPredecessor();
@@ -48,6 +50,8 @@ public interface MatchedGeometry {
     void setPredecessor(final Node predecessor);
 
     /**
+     * Returns the OpenStreetMap node directly succeeding this geometry.
+     *
      * @return The OSM node directly after the location
      */
     Node getSuccessor();

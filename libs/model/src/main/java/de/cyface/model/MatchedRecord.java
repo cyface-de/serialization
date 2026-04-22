@@ -67,6 +67,7 @@ public class MatchedRecord extends GeoLocationRecord implements MatchedGeometry 
     /**
      * Creates a new completely initialized object of this class.
      *
+     * @param measurementIdentifier The worldwide unique identifier of the measurement this record belongs to
      * @param timestamp The timestamp this location was captured on in milliseconds since 1st January 1970 (epoch)
      * @param latitude Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north)
      * @param longitude Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180°

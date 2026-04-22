@@ -53,6 +53,18 @@ public class RawRecord extends GeoLocationRecord {
         // Nothing to do here.
     }
 
+    /**
+     * Creates a new completely initialized <code>RawRecord</code> without elevation data.
+     *
+     * @param measurementIdentifier The worldwide unique identifier of the {@link Measurement} this record belongs to
+     * @param timestamp The timestamp this location was captured on in milliseconds since 1st January 1970 (epoch)
+     * @param latitude Geographical latitude in coordinates (decimal fraction) raging from -90° (south) to 90° (north)
+     * @param longitude Geographical longitude in coordinates (decimal fraction) ranging from -180° (west) to 180°
+     *            (east)
+     * @param accuracy The measurement accuracy of this location in meters
+     * @param speed The traveled speed as reported by the geographical location system in meters per second
+     * @param modality The modality type used while collecting the location or {@code null} if not available
+     */
     public RawRecord(final MeasurementIdentifier measurementIdentifier, final long timestamp,
             final double latitude, final double longitude, final double accuracy, final double speed, final Modality modality) {
         super(measurementIdentifier, timestamp, latitude, longitude, null);
@@ -89,6 +101,8 @@ public class RawRecord extends GeoLocationRecord {
     }
 
     /**
+     * Returns the location measurement accuracy.
+     *
      * @return The measurement accuracy of this location in meters. This accuracy is usually the result of imperfect
      *         measurement hardware.
      */
@@ -97,6 +111,8 @@ public class RawRecord extends GeoLocationRecord {
     }
 
     /**
+     * Sets the location measurement accuracy.
+     *
      * @param accuracy The measurement accuracy of this location in meters. This accuracy is usually the result of
      *            imperfect measurement hardware.
      */
@@ -106,6 +122,8 @@ public class RawRecord extends GeoLocationRecord {
     }
 
     /**
+     * Returns the traveled speed at the time of this recording.
+     *
      * @return The traveled speed as reported by the geographical location system (e.g. GPS, GLONASS, GALILEO) during this
      *         recording
      */
@@ -114,6 +132,8 @@ public class RawRecord extends GeoLocationRecord {
     }
 
     /**
+     * Returns the modality type active during this recording.
+     *
      * @return The modality type used while collecting this location or {@code null} if the information is not
      *         available.
      */
@@ -132,6 +152,8 @@ public class RawRecord extends GeoLocationRecord {
     }
 
     /**
+     * Sets the traveled speed at the time of this recording.
+     *
      * @param speed The traveled speed as reported by the geographical location system (e.g. GPS, GLONASS, GALILEO) during this
      *            recording
      */

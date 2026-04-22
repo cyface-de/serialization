@@ -34,6 +34,13 @@ package de.cyface.deserializer;
 public class DeOffsetter {
 
     /**
+     * Creates a new instance, ready to process the first value of a diff-encoded sequence.
+     */
+    public DeOffsetter() {
+        // Nothing to initialize — previous is lazily set on the first call to absolute()
+    }
+
+    /**
      * The previous number which is required to calculate the difference for the subsequent number.
      */
     private Long previous = null;

@@ -33,6 +33,13 @@ package de.cyface.serializer;
 public class Offsetter {
 
     /**
+     * Creates a new instance, ready to process the first value of a sequence to be encoded in offset/diff format.
+     */
+    public Offsetter() {
+        // Nothing to initialize — offset is lazily set on the first call to offset()
+    }
+
+    /**
      * The previous number which is required to calculate the difference for the subsequent number.
      */
     private Long offset = null;

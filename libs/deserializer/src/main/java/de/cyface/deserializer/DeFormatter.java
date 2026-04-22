@@ -39,6 +39,13 @@ import static de.cyface.serializer.model.Point3DType.ROTATION;
 public class DeFormatter {
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private DeFormatter() {
+        // Utility class
+    }
+
+    /**
      * Converts the number from the format expected by the Cyface ProtoBuf serializer.
      *
      * @param formatted the formatted number, e.g. 51_012345 or 13_012300

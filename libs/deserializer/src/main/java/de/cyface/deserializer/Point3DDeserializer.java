@@ -43,6 +43,13 @@ import de.cyface.serializer.model.Point3DType;
 public class Point3DDeserializer {
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private Point3DDeserializer() {
+        // Utility class
+    }
+
+    /**
      * Deserializes acceleration data from the {@link DataSerializable#TRANSFER_FILE_FORMAT_VERSION}.
      * <p>
      * Takes care of de-offsetting and converting the data to the default {@code Java} types used by

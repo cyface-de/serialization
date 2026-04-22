@@ -34,6 +34,13 @@ import de.cyface.serializer.DataSerializable;
 public class EventDeserializer {
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private EventDeserializer() {
+        // Utility class
+    }
+
+    /**
      * Deserializes event data from the {@link DataSerializable#TRANSFER_FILE_FORMAT_VERSION}.
      *
      * @param entries the data to deserialize

@@ -37,8 +37,7 @@ plugins {
   // Plugin to display the Gradle task graph
   //noinspection SpellCheckingInspection
   id 'org.barfuin.gradle.taskinfo' version '2.1.0'
-  // protobuf plugin 0.9.0-2 fail: https://github.com/google/protobuf-gradle-plugin/issues/686
-  id 'com.google.protobuf' version '0.8.19' apply false // Maybe keep in sync with `plugins` in `protos/build.gradle
+  id 'com.google.protobuf' version '0.9.4' apply false // Maybe keep in sync with `plugins` in `protos/build.gradle
 }
 
 allprojects {
@@ -102,6 +101,8 @@ subprojects {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    // Explicit declaration required since Gradle 8 to avoid auto-loading warning (removed in Gradle 9)
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
   }
 
   test {
@@ -110,10 +111,10 @@ subprojects {
       events "passed", "skipped", "failed"
 
       // Also show assert message (e.g. on the CI) when tests fail to identify cause
-      showExceptions true
-      exceptionFormat "full"
-      showCauses false // not working with vertx fail() so we disable this
-      showStackTraces false
+      showExceptions = true
+      exceptionFormat = "full"
+      showCauses = false // not working with vertx fail() so we disable this
+      showStackTraces = false
       showStandardStreams = false
     }
   }

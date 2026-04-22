@@ -38,6 +38,13 @@ import de.cyface.serializer.GeoLocation;
 public class LocationDeserializer {
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private LocationDeserializer() {
+        // Utility class
+    }
+
+    /**
      * Deserializes location data from the {@link DataSerializable#TRANSFER_FILE_FORMAT_VERSION}.
      * <p>
      * Takes care of de-offsetting and converting the data to the default {@code Java} types used by {@link GeoLocation}.

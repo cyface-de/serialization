@@ -33,6 +33,13 @@ import de.cyface.protos.model.LocationRecords;
 public final class LocationSerializer {
 
     /**
+     * Not meant to be instantiated. All methods are static.
+     */
+    private LocationSerializer() {
+        // Utility class
+    }
+
+    /**
      * Converts geo-locations to the class supported by the {@code Protobuf} generated serializer classes.
      * <p>
      * Applies lossy compression and offsetting to optimize the encoding density.
