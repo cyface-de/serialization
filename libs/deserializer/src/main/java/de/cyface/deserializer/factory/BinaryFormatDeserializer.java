@@ -18,6 +18,7 @@
  */
 package de.cyface.deserializer.factory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipException;
 
 import de.cyface.deserializer.Deserializer;
 import de.cyface.deserializer.UnsupportedFileVersion;
@@ -85,28 +87,40 @@ public class BinaryFormatDeserializer implements Deserializer {
 
     @Override
     public Measurement read() throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
-        // --- Step 1: detect compression format ---
-        // Peek at the first two compressed bytes to determine whether the stream is standard ZLIB
-        // (nowrap=false, 2-byte CMF/FLG header) or raw DEFLATE (nowrap=true, the Cyface default).
-        // A valid ZLIB stream satisfies: (CMF & 0x0F) == 8  AND  (CMF * 256 + FLG) % 31 == 0.
-        // Data uploaded by external partners may use standard ZLIB even though the Cyface SDK uses raw DEFLATE.
-        final var compressedPushback = new PushbackInputStream(compressedData, 2);
-        final var compressedHeader = new byte[2];
-        final int cBytesRead = compressedPushback.read(compressedHeader, 0, 2);
-        if (cBytesRead > 0) {
-            compressedPushback.unread(compressedHeader, 0, cBytesRead);
-        }
-        final boolean isZlibWrapped = cBytesRead == 2
-                && (compressedHeader[0] & 0x0F) == 8
-                && ((compressedHeader[0] & 0xFF) * 256 + (compressedHeader[1] & 0xFF)) % 31 == 0;
+        // Buffer the full compressed stream upfront so we can retry with the opposite decompression
+        // mode if the format detection from the first two bytes turns out to be a false positive.
+        // (A raw DEFLATE stream can accidentally satisfy the ZLIB header check and vice versa.)
+        final byte[] compressedBytes = compressedData.readAllBytes();
 
-        try (final var inflated = new InflaterInputStream(compressedPushback, new Inflater(!isZlibWrapped))) {
-            // --- Step 2: detect whether a Cyface version header is present ---
-            // The Cyface format prepends a 2-byte big-endian version short before the protobuf payload.
-            // For any supported version (< 256) the high byte is always 0x00.
-            // Protobuf field tags can never start with 0x00 (field number 0 is illegal in protobuf), so the
-            // two formats are unambiguous.
-            // External partners may omit the version header and store compressed protobuf bytes directly.
+        // Detect compression format: a valid ZLIB stream satisfies
+        // (CMF & 0x0F) == 8  AND  (CMF * 256 + FLG) % 31 == 0.
+        final boolean isZlibWrapped = compressedBytes.length >= 2
+                && (compressedBytes[0] & 0x0F) == 8
+                && ((compressedBytes[0] & 0xFF) * 256 + (compressedBytes[1] & 0xFF)) % 31 == 0;
+
+        // Try the detected mode first; fall back to the opposite on ZipException.
+        try {
+            return readDecompressed(compressedBytes, isZlibWrapped);
+        } catch (ZipException e) {
+            return readDecompressed(compressedBytes, !isZlibWrapped);
+        }
+    }
+
+    /**
+     * Decompresses <code>compressedBytes</code> and parses the resulting stream as a {@link Measurement}.
+     *
+     * @param compressedBytes the raw compressed bytes
+     * @param isZlibWrapped   <code>true</code> to use standard ZLIB (nowrap=false),
+     *                        <code>false</code> to use raw DEFLATE (nowrap=true)
+     */
+    private Measurement readDecompressed(final byte[] compressedBytes, final boolean isZlibWrapped)
+            throws IOException, InvalidLifecycleEvents, UnsupportedFileVersion, NoTracksRecorded {
+        try (final var inflated = new InflaterInputStream(
+                new ByteArrayInputStream(compressedBytes), new Inflater(!isZlibWrapped))) {
+            // Peek at the first two decompressed bytes to detect whether the Cyface 2-byte version
+            // header is present. The high byte is always 0x00 for any supported version (< 256),
+            // while protobuf field tags can never start with 0x00 (field number 0 is illegal in
+            // protobuf), so the two formats are unambiguous.
             final var decompressedPushback = new PushbackInputStream(inflated, 2);
             final var firstTwoBytes = new byte[2];
             final int dBytesRead = decompressedPushback.read(firstTwoBytes, 0, 2);
@@ -115,7 +129,7 @@ public class BinaryFormatDeserializer implements Deserializer {
             }
 
             if (dBytesRead >= 1 && firstTwoBytes[0] == 0x00) {
-                // Cyface format: the stream starts with a version header — validate and consume it.
+                // Cyface format: validate the version and consume the 2-byte header.
                 final short version = dBytesRead == 2
                         ? (short) (((firstTwoBytes[0] & 0xFF) << 8) | (firstTwoBytes[1] & 0xFF))
                         : 0;
@@ -123,7 +137,6 @@ public class BinaryFormatDeserializer implements Deserializer {
                     throw new UnsupportedFileVersion(
                             String.format("Encountered data in invalid format version (%s).", version));
                 }
-                // Discard the 2-byte version header and verify both bytes are consumed.
                 if (decompressedPushback.read() == -1 || decompressedPushback.read() == -1) {
                     throw new IOException("Unexpected end of stream while discarding version header.");
                 }
