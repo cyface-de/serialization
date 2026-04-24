@@ -155,7 +155,12 @@ public final class Event implements Serializable {
       /**
        * This event occurs if the mode of transportation changes during a measurement.
        */
-      MODALITY_TYPE_CHANGE("MODALITY_TYPE_CHANGE");
+      MODALITY_TYPE_CHANGE("MODALITY_TYPE_CHANGE"),
+      /**
+       * A free-form metadata key-value pair uploaded alongside a measurement. The {@link Event#getValue()} field
+       * contains the raw {@code key=value} string (e.g. {@code "gender=UNKNOWN"}, {@code "age=76"}).
+       */
+      METADATA("METADATA");
 
       /**
        * The event types identifier within the database.
