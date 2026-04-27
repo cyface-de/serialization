@@ -73,7 +73,7 @@ public class V3UncompressedBinaryFormatDeserializer implements Deserializer {
         final var builder = new TrackBuilder();
         final var tracks = builder.build(locations, events, accelerations, rotations, directions,
                 metaData.getIdentifier());
-        return Measurement.Companion.create(metaData, tracks);
+        return Measurement.Companion.create(metaData, tracks, events);
     }
 
     @Override

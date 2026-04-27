@@ -71,6 +71,14 @@ open class Measurement: Serializable {
         // `get() = Collections.unmodifiableList(field)` not usable as Flink then assumes a non-standard or hidden type
 
     /**
+     * The events recorded during this measurement, in chronological order. Includes lifecycle events,
+     * modality-type changes, and free-form metadata events ([Event.EventType.METADATA]).
+     *
+     * Empty for measurements deserialized before event support was added.
+     */
+    var events: MutableList<Event> = mutableListOf()
+
+    /**
      * @return an immutable version of the [tracks] list.
      */
     @Suppress("MemberVisibilityCanBePrivate")
@@ -484,6 +492,7 @@ open class Measurement: Serializable {
         return "Measurement{" +
                 "metaData=" + metaData +
                 ", tracks=" + tracks +
+                ", events=" + events +
                 '}'
     }
 
@@ -491,11 +500,11 @@ open class Measurement: Serializable {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val that = other as Measurement
-        return metaData == that.metaData && tracks == that.tracks
+        return metaData == that.metaData && tracks == that.tracks && events == that.events
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(metaData, tracks)
+        return Objects.hash(metaData, tracks, events)
     }
 
     companion object {
@@ -517,6 +526,19 @@ open class Measurement: Serializable {
         fun create(
             metaData: MetaData,
             tracks: List<Track>
+        ): Measurement = create(metaData, tracks, emptyList())
+
+        /**
+         * Factory to create a Measurement instance with tracks and events.
+         *
+         * @param events The events recorded during this measurement. Pass an empty list if events are not available.
+         */
+        @JvmStatic
+        @Throws(NoTracksRecorded::class)
+        fun create(
+            metaData: MetaData,
+            tracks: List<Track>,
+            events: List<Event>
         ): Measurement {
             if (tracks.isEmpty()) {
                 // This is a known bug, for a reproducer see `TrackBuilderTest.testTrackBuilderWithShortFinalSegment`
@@ -527,6 +549,7 @@ open class Measurement: Serializable {
             return Measurement().apply {
                 this.metaData = metaData
                 this.tracks = tracks.toMutableList()
+                this.events = events.toMutableList()
             }
         }
 

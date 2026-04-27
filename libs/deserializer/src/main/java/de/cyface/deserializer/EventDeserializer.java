@@ -68,8 +68,10 @@ public class EventDeserializer {
                 case MODALITY_TYPE_CHANGE:
                     eventType = Event.EventType.MODALITY_TYPE_CHANGE;
                     break;
-                case UNRECOGNIZED:
                 case EVENT_TYPE_UNSPECIFIED:
+                    eventType = Event.EventType.METADATA;
+                    break;
+                case UNRECOGNIZED:
                 default:
                     throw new IllegalArgumentException(String.format("Unknown event type: %s", type));
             }
