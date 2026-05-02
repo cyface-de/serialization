@@ -40,7 +40,7 @@ libs/deserializer  →  libs/serializer  →  libs/model
   2. **ZLIB** — detected by CMF/FLG header check (`nowrap=false`)
   3. **Raw DEFLATE** — same Inflater with `nowrap=true` (iOS/Android cross-platform mode)
   4. **Uncompressed protobuf** — last-resort fallback for partner iOS uploads that send raw protobuf bytes without any compression
-- **TrackBuilder**: Slices measurements into `Track` segments using LIFECYCLE events (START/PAUSE/RESUME/STOP) and annotates with `Modality` from MODALITY_TYPE_CHANGE events.
+- **TrackBuilder**: Slices measurements into `Track` segments using LIFECYCLE events (START/PAUSE/RESUME/STOP) and annotates with `Modality` from MODALITY_TYPE_CHANGE events. The event value is resolved via `Modality.forDatabaseIdentifier(...)` (not `valueOf`), so the serialized identifier may differ from the enum constant name (e.g. `EBIKE` is persisted as `EBike`).
 
 ## Tech Stack
 

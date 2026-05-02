@@ -24,6 +24,10 @@ import static de.cyface.model.Event.EventType.LIFECYCLE_START;
 import static de.cyface.model.Event.EventType.LIFECYCLE_STOP;
 import static de.cyface.model.Event.EventType.MODALITY_TYPE_CHANGE;
 import static de.cyface.model.Modality.BICYCLE;
+import static de.cyface.model.Modality.CARGO_BIKE;
+import static de.cyface.model.Modality.EBIKE;
+import static de.cyface.model.Modality.ECARGO_BIKE;
+import static de.cyface.model.Modality.UNKNOWN;
 import static de.cyface.model.Modality.WALKING;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -128,6 +132,143 @@ public class TrackBuilderTest {
         expectedTracks.add(track1);
         expectedTracks.add(track2);
         assertThat(tracks, is(equalTo(expectedTracks)));
+    }
+
+    /**
+     * Ensures the {@link TrackBuilder} resolves modalities whose {@code databaseIdentifier} differs from the enum
+     * constant name (e.g. {@link de.cyface.model.Modality#EBIKE}), which would have failed with a plain
+     * {@code Modality.valueOf(...)} lookup.
+     */
+    @Test
+    @DisplayName("TrackBuilder annotates locations with EBIKE modality")
+    void testBuild_withEBikeModality() throws InvalidLifecycleEvents {
+        // Arrange
+        final var numberOfLocations = 2;
+        final var identifier = new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER);
+        final var locationRecords = generateLocationRecords(numberOfLocations,
+                new Long[] {1000L, 1500L}, identifier);
+        final var events = new ArrayList<Event>();
+        events.add(new Event(LIFECYCLE_START, 1000L, null));
+        events.add(new Event(MODALITY_TYPE_CHANGE, 1000L, EBIKE.getDatabaseIdentifier()));
+        events.add(new Event(LIFECYCLE_STOP, 2000L, null));
+        final var empty = List.<Point3DImpl>of();
+
+        // Act
+        final var tracks = oocut.build(locationRecords, events, empty, empty, empty);
+
+        // Assert
+        assertThat(tracks.size(), is(1));
+        final var track = tracks.get(0);
+        assertThat(track.getLocationRecords().size(), is(2));
+        track.getLocationRecords().forEach(
+                location -> assertThat(location.getModality(), is(equalTo(EBIKE)))
+        );
+    }
+
+    /**
+     * Ensures the {@link TrackBuilder} resolves {@code "CargoBike"} (whose database identifier differs
+     * from the enum constant name {@code CARGO_BIKE}) via
+     * {@link de.cyface.model.Modality#forDatabaseIdentifier(String)}.
+     */
+    @Test
+    @DisplayName("TrackBuilder annotates locations with CARGO_BIKE modality")
+    void testBuild_withCargoBikeModality() throws InvalidLifecycleEvents {
+        // Arrange
+        final var identifier = new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER);
+        final var locationRecords = generateLocationRecords(2, new Long[]{1000L, 1500L}, identifier);
+        final var events = new ArrayList<Event>();
+        events.add(new Event(LIFECYCLE_START, 1000L, null));
+        events.add(new Event(MODALITY_TYPE_CHANGE, 1000L, CARGO_BIKE.getDatabaseIdentifier()));
+        events.add(new Event(LIFECYCLE_STOP, 2000L, null));
+        final var empty = List.<Point3DImpl>of();
+
+        // Act
+        final var tracks = oocut.build(locationRecords, events, empty, empty, empty);
+
+        // Assert
+        assertThat(tracks.size(), is(1));
+        tracks.get(0).getLocationRecords().forEach(
+                location -> assertThat(location.getModality(), is(equalTo(CARGO_BIKE)))
+        );
+    }
+
+    /**
+     * Ensures the {@link TrackBuilder} resolves {@code "ECargoBike"} (whose database identifier differs
+     * from the enum constant name {@code ECARGO_BIKE}) via
+     * {@link de.cyface.model.Modality#forDatabaseIdentifier(String)}.
+     */
+    @Test
+    @DisplayName("TrackBuilder annotates locations with ECARGO_BIKE modality")
+    void testBuild_withECargoBikeModality() throws InvalidLifecycleEvents {
+        // Arrange
+        final var identifier = new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER);
+        final var locationRecords = generateLocationRecords(2, new Long[]{1000L, 1500L}, identifier);
+        final var events = new ArrayList<Event>();
+        events.add(new Event(LIFECYCLE_START, 1000L, null));
+        events.add(new Event(MODALITY_TYPE_CHANGE, 1000L, ECARGO_BIKE.getDatabaseIdentifier()));
+        events.add(new Event(LIFECYCLE_STOP, 2000L, null));
+        final var empty = List.<Point3DImpl>of();
+
+        // Act
+        final var tracks = oocut.build(locationRecords, events, empty, empty, empty);
+
+        // Assert
+        assertThat(tracks.size(), is(1));
+        tracks.get(0).getLocationRecords().forEach(
+                location -> assertThat(location.getModality(), is(equalTo(ECARGO_BIKE)))
+        );
+    }
+
+    /**
+     * Ensures the legacy alias {@code "Bike"} is normalised to {@link de.cyface.model.Modality#BICYCLE}
+     * by the {@link TrackBuilder}.
+     */
+    @Test
+    @DisplayName("TrackBuilder normalises 'Bike' alias to BICYCLE")
+    void testBuild_withBikeAlias() throws InvalidLifecycleEvents {
+        // Arrange
+        final var identifier = new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER);
+        final var locationRecords = generateLocationRecords(2, new Long[]{1000L, 1500L}, identifier);
+        final var events = new ArrayList<Event>();
+        events.add(new Event(LIFECYCLE_START, 1000L, null));
+        events.add(new Event(MODALITY_TYPE_CHANGE, 1000L, "Bike"));
+        events.add(new Event(LIFECYCLE_STOP, 2000L, null));
+        final var empty = List.<Point3DImpl>of();
+
+        // Act
+        final var tracks = oocut.build(locationRecords, events, empty, empty, empty);
+
+        // Assert
+        assertThat(tracks.size(), is(1));
+        tracks.get(0).getLocationRecords().forEach(
+                location -> assertThat(location.getModality(), is(equalTo(BICYCLE)))
+        );
+    }
+
+    /**
+     * Ensures the legacy alias {@code "Other"} is normalised to {@link de.cyface.model.Modality#UNKNOWN}
+     * by the {@link TrackBuilder}.
+     */
+    @Test
+    @DisplayName("TrackBuilder normalises 'Other' alias to UNKNOWN")
+    void testBuild_withOtherAlias() throws InvalidLifecycleEvents {
+        // Arrange
+        final var identifier = new MeasurementIdentifier(DEVICE_IDENTIFIER, MEASUREMENT_IDENTIFIER);
+        final var locationRecords = generateLocationRecords(2, new Long[]{1000L, 1500L}, identifier);
+        final var events = new ArrayList<Event>();
+        events.add(new Event(LIFECYCLE_START, 1000L, null));
+        events.add(new Event(MODALITY_TYPE_CHANGE, 1000L, "Other"));
+        events.add(new Event(LIFECYCLE_STOP, 2000L, null));
+        final var empty = List.<Point3DImpl>of();
+
+        // Act
+        final var tracks = oocut.build(locationRecords, events, empty, empty, empty);
+
+        // Assert
+        assertThat(tracks.size(), is(1));
+        tracks.get(0).getLocationRecords().forEach(
+                location -> assertThat(location.getModality(), is(equalTo(UNKNOWN)))
+        );
     }
 
     /**

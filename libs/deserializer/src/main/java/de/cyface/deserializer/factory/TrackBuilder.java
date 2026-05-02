@@ -42,7 +42,7 @@ import de.cyface.model.Track;
  * This allows to analyse and visualize measurements without the need to handle {@code Event}s:
  * - {@code GeoLocation}s are collected into {@code Track}s and can be visualized by simply connecting all locations
  * - {@code GeoLocation}s are annotated with the {@code Modality} used to collect the location
- * - {@code Point3D} data is collected into {@code Track}s and can be analyzed together with the location data
+ * - {@code Point3D} data is collected into {@code Track}s and can be analysed together with the location data
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
@@ -105,7 +105,7 @@ final class TrackBuilder {
 
         // ModalityType annotation - UNKNOWN if all ModalityTypeChanges were deleted by the user
         final Modality[] modalityType = {modalityTypeChangesIterator.hasNext()
-                ? Modality.valueOf(modalityTypeChangesIterator.next().getValue())
+                ? Modality.forDatabaseIdentifier(modalityTypeChangesIterator.next().getValue())
                 : Modality.UNKNOWN};
         final Event[] nextModalityTypeChange = {
                 modalityTypeChangesIterator.hasNext() ? modalityTypeChangesIterator.next()
@@ -118,7 +118,7 @@ final class TrackBuilder {
                 final String modalityValue = nextModalityTypeChange[0].getValue();
                 Validate.notNull(modalityValue, "Value in ModalityTypeChange event is null");
                 Validate.notEmpty(modalityValue, "Empty value in ModalityTypeChange event");
-                modalityType[0] = Modality.valueOf(modalityValue);
+                modalityType[0] = Modality.forDatabaseIdentifier(modalityValue);
                 Validate.notNull(modalityType[0], "Modality is null");
                 nextModalityTypeChange[0] = modalityTypeChangesIterator.hasNext()
                         ? modalityTypeChangesIterator.next()
@@ -305,7 +305,7 @@ final class TrackBuilder {
         if (point != null && point.getTimestamp() < resumeEventTime) {
             // Move forward until we reach the event time
             while (point != null && point.getTimestamp() < resumeEventTime) {
-                // Load next location to check it's timestamp
+                // Load next location to check its timestamp
                 point = iterator.hasNext() ? iterator.next() : null;
             }
             iterator.previous();
@@ -315,7 +315,7 @@ final class TrackBuilder {
         // When the iterator's next() points to "after the event"
         // Move backward until we pass the event time
         while (point != null && point.getTimestamp() >= resumeEventTime) {
-            // Load previous location to check it's timestamp
+            // Load previous location to check its timestamp
             point = iterator.hasPrevious() ? iterator.previous() : null;
         }
         iterator.next();
