@@ -39,10 +39,10 @@ import de.cyface.model.Track;
 /**
  * Builds {@code Track}s from cyface measurement data.
  * <p>
- * This allows to analyse and visualize measurements without the need to handle {@code Event}s:
+ * This allows to analyze and visualize measurements without the need to handle {@code Event}s:
  * - {@code GeoLocation}s are collected into {@code Track}s and can be visualized by simply connecting all locations
  * - {@code GeoLocation}s are annotated with the {@code Modality} used to collect the location
- * - {@code Point3D} data is collected into {@code Track}s and can be analysed together with the location data
+ * - {@code Point3D} data is collected into {@code Track}s and can be analyzed together with the location data
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann

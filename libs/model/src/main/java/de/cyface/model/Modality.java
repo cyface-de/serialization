@@ -18,6 +18,11 @@
  */
 package de.cyface.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.Validate;
+
 /**
  * The {@link Modality} types to choose from when starting a {@link Measurement}. This class maps the database values to
  * enum values, to make sure the correct values are used within the Java code.
@@ -74,16 +79,23 @@ public enum Modality {
     UNKNOWN("UNKNOWN");
 
     /**
-     * Legacy database identifiers that are accepted as read aliases by {@link #forDatabaseIdentifier(String)}.
-     * Each entry maps an alternative identifier to the canonical {@link Modality} constant.
-     * These aliases are never written; they exist only for backwards-compatible deserialization.
+     * Lookup table mapping every accepted database identifier (canonical and legacy aliases) to its
+     * canonical {@link Modality} constant. Precomputed once to avoid the per-call allocation of
+     * {@link #values()} and a linear scan in {@link #forDatabaseIdentifier(String)}.
+     * <p>
+     * Legacy aliases ({@code "Bike"} → {@link #BICYCLE}, {@code "Other"} → {@link #UNKNOWN}) are
+     * accepted on read but never written; they exist only for backwards-compatible deserialization.
      */
-    private static final java.util.Map<String, Modality> ALIASES;
+    private static final Map<String, Modality> BY_DATABASE_IDENTIFIER;
 
     static {
-        ALIASES = new java.util.HashMap<>();
-        ALIASES.put("Bike", BICYCLE);
-        ALIASES.put("Other", UNKNOWN);
+        final Map<String, Modality> map = new HashMap<>();
+        for (final Modality modality : values()) {
+            map.put(modality.databaseIdentifier, modality);
+        }
+        map.put("Bike", BICYCLE);
+        map.put("Other", UNKNOWN);
+        BY_DATABASE_IDENTIFIER = Map.copyOf(map);
     }
 
     /**
@@ -121,18 +133,16 @@ public enum Modality {
      *
      * @param databaseIdentifier The database identifier to resolve.
      * @return The matching {@code Modality}.
-     * @throws IllegalArgumentException If no {@code Modality} with the given identifier exists.
+     * @throws NullPointerException If {@code databaseIdentifier} is {@code null}.
+     * @throws IllegalArgumentException If {@code databaseIdentifier} is empty or no {@code Modality} with the given
+     *             identifier exists.
      */
     public static Modality forDatabaseIdentifier(final String databaseIdentifier) {
-        for (final Modality modality : values()) {
-            if (modality.databaseIdentifier.equals(databaseIdentifier)) {
-                return modality;
-            }
+        Validate.notEmpty(databaseIdentifier, "databaseIdentifier must not be null or empty");
+        final Modality modality = BY_DATABASE_IDENTIFIER.get(databaseIdentifier);
+        if (modality == null) {
+            throw new IllegalArgumentException("Unknown Modality database identifier: " + databaseIdentifier);
         }
-        final Modality alias = ALIASES.get(databaseIdentifier);
-        if (alias != null) {
-            return alias;
-        }
-        throw new IllegalArgumentException("Unknown Modality database identifier: " + databaseIdentifier);
+        return modality;
     }
 }

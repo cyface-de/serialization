@@ -119,4 +119,37 @@ public class ModalityTest {
                 () -> Modality.forDatabaseIdentifier("Spaceship")
         );
     }
+
+    // ── input validation ─────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("forDatabaseIdentifier throws NullPointerException for null input")
+    void testForDatabaseIdentifier_null() {
+        assertThrows(
+                NullPointerException.class,
+                () -> Modality.forDatabaseIdentifier(null)
+        );
+    }
+
+    @Test
+    @DisplayName("forDatabaseIdentifier throws IllegalArgumentException for empty input")
+    void testForDatabaseIdentifier_empty() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Modality.forDatabaseIdentifier("")
+        );
+    }
+
+    @Test
+    @DisplayName("forDatabaseIdentifier is case-sensitive")
+    void testForDatabaseIdentifier_caseSensitive() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Modality.forDatabaseIdentifier("ebike")
+        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Modality.forDatabaseIdentifier("bicycle")
+        );
+    }
 }

@@ -85,6 +85,8 @@ representation used inside the deserialized model (`de.cyface.model.Modality`):
 |---------------|-----------------------|
 | `BICYCLE`     | `BICYCLE`             |
 | `EBIKE`       | `EBike`               |
+| `CARGO_BIKE`  | `CargoBike`           |
+| `ECARGO_BIKE` | `ECargoBike`          |
 | `CAR`         | `CAR`                 |
 | `MOTORBIKE`   | `MOTORBIKE`           |
 | `BUS`         | `BUS`                 |
@@ -92,8 +94,16 @@ representation used inside the deserialized model (`de.cyface.model.Modality`):
 | `WALKING`     | `WALKING`             |
 | `UNKNOWN`     | `UNKNOWN`             |
 
-Note that the serialized identifier is not always identical to the enum constant — `EBIKE` is
-persisted as `EBike` for compatibility with the capturing applications.
+Note that the serialized identifier is not always identical to the enum constant — for example
+`EBIKE` is persisted as `EBike` for compatibility with the capturing applications.
+
+The following legacy identifiers are accepted on read and normalized to their canonical constant
+(they are never written):
+
+| Legacy identifier | Resolved to |
+|-------------------|-------------|
+| `Bike`            | `BICYCLE`   |
+| `Other`           | `UNKNOWN`   |
 
 ### Location Records
 Location records are stored as tuples of five values.
