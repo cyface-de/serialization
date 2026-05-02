@@ -77,6 +77,34 @@ The second value is the events timestamp in epoch format.
 The third is an optional event value.
 The modality type changed event for example requires the value of the new transportation mode, if the user switches from walking to using a bus, for example.
 
+The following transportation modes are supported as the value of a modality type changed event.
+The serialized string is the identifier expected in the event value, while the enum constant is the
+representation used inside the deserialized model (`de.cyface.model.Modality`):
+
+| Enum constant | Serialized identifier |
+|---------------|-----------------------|
+| `BICYCLE`     | `BICYCLE`             |
+| `EBIKE`       | `EBike`               |
+| `CARGO_BIKE`  | `CargoBike`           |
+| `ECARGO_BIKE` | `ECargoBike`          |
+| `CAR`         | `CAR`                 |
+| `MOTORBIKE`   | `MOTORBIKE`           |
+| `BUS`         | `BUS`                 |
+| `TRAIN`       | `TRAIN`               |
+| `WALKING`     | `WALKING`             |
+| `UNKNOWN`     | `UNKNOWN`             |
+
+Note that the serialized identifier is not always identical to the enum constant — for example
+`EBIKE` is persisted as `EBike` for compatibility with the capturing applications.
+
+The following legacy identifiers are accepted on read and normalized to their canonical constant
+(they are never written):
+
+| Legacy identifier | Resolved to |
+|-------------------|-------------|
+| `Bike`            | `BICYCLE`   |
+| `Other`           | `UNKNOWN`   |
+
 ### Location Records
 Location records are stored as tuples of five values.
 The first is a timestamp in epoch format using run length encoding.
