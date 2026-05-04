@@ -21,8 +21,6 @@ package de.cyface.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.Validate;
-
 /**
  * The {@link Modality} types to choose from when starting a {@link Measurement}. This class maps the database values to
  * enum values, to make sure the correct values are used within the Java code.
@@ -33,8 +31,6 @@ import org.apache.commons.lang3.Validate;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.2.0
- * @since 1.0.0
  */
 public enum Modality {
     /**
@@ -133,15 +129,14 @@ public enum Modality {
      *
      * @param databaseIdentifier The database identifier to resolve.
      * @return The matching {@code Modality}.
-     * @throws NullPointerException If {@code databaseIdentifier} is {@code null}.
-     * @throws IllegalArgumentException If {@code databaseIdentifier} is empty or no {@code Modality} with the given
-     *             identifier exists.
      */
     public static Modality forDatabaseIdentifier(final String databaseIdentifier) {
-        Validate.notEmpty(databaseIdentifier, "databaseIdentifier must not be null or empty");
+        if (databaseIdentifier == null) {
+            return UNKNOWN;
+        }
         final Modality modality = BY_DATABASE_IDENTIFIER.get(databaseIdentifier);
         if (modality == null) {
-            throw new IllegalArgumentException("Unknown Modality database identifier: " + databaseIdentifier);
+            return UNKNOWN;
         }
         return modality;
     }
