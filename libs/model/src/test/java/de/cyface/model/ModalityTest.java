@@ -26,7 +26,6 @@ import static de.cyface.model.Modality.UNKNOWN;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -112,44 +111,29 @@ public class ModalityTest {
     // ── unknown identifier ────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("forDatabaseIdentifier throws for an unknown identifier")
+    @DisplayName("forDatabaseIdentifier is UNKNOWN an unknown identifier")
     void testForDatabaseIdentifier_unknownIdentifier() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Modality.forDatabaseIdentifier("Spaceship")
-        );
+        assertThat(Modality.forDatabaseIdentifier("Spaceship"), is(equalTo(UNKNOWN)));
     }
 
     // ── input validation ─────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("forDatabaseIdentifier throws NullPointerException for null input")
+    @DisplayName("forDatabaseIdentifier is UNKNOWN for null input")
     void testForDatabaseIdentifier_null() {
-        assertThrows(
-                NullPointerException.class,
-                () -> Modality.forDatabaseIdentifier(null)
-        );
+        assertThat(Modality.forDatabaseIdentifier(null), is(equalTo(UNKNOWN)));
     }
 
     @Test
-    @DisplayName("forDatabaseIdentifier throws IllegalArgumentException for empty input")
+    @DisplayName("forDatabaseIdentifier is UNKNOWN for empty input")
     void testForDatabaseIdentifier_empty() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Modality.forDatabaseIdentifier("")
-        );
+        assertThat(Modality.forDatabaseIdentifier(""), is(equalTo(UNKNOWN)));
     }
 
     @Test
     @DisplayName("forDatabaseIdentifier is case-sensitive")
     void testForDatabaseIdentifier_caseSensitive() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Modality.forDatabaseIdentifier("ebike")
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Modality.forDatabaseIdentifier("bicycle")
-        );
+        assertThat(Modality.forDatabaseIdentifier("ebike"), is(equalTo(UNKNOWN)));
+        assertThat(Modality.forDatabaseIdentifier("bicycle"), is(equalTo(UNKNOWN)));
     }
 }
