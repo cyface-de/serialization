@@ -1,6 +1,6 @@
-= Serialization
+Serialization
+=============
 
-![https://vertx.io](https://img.shields.io/badge/vert.x-4.1.2-purple.svg)
 ![https://github.com/cyface-de/serialization/actions/workflows/gradle_build.yml](https://github.com/cyface-de/serialization/actions/workflows/gradle_build.yml/badge.svg)
 ![https://github.com/cyface-de/serialization/actions/workflows/gradle_publish.yml](https://github.com/cyface-de/serialization/actions/workflows/gradle_publish.yml/badge.svg)
 
@@ -8,7 +8,7 @@ This application represents the [Cyface](https://cyface.de) serialization softwa
 
 It is used to de-/serialize the Cyface Binary Format which contains traffic data from Cyface measurement devices, such as our sensor box or our smartphone application.
 
-Our smartphone SDK is available as GPL application for [Android](https://github.com/cyface-de/android-backend) and [iOS](https://github.com/cyface-de/ios-backend) as well.
+Our smartphone SDK is available as GPL application for [Android](https://github.com/cyface-de/android-backend) and [iOS](https://github.com/cyface-de/ios-sensor-library) as well.
 
 If you require this software under a closed source license for you own projects, please [contact us](https://www.cyface.de/#kontakt).
 
@@ -23,6 +23,9 @@ Overview
 
 * [Model](#Model)
 * [Serializer](#Serializer)
+* [Deserializer](#Deserializer)
+* [Development](#Development)
+* [GitHub Workflows](#GitHub-Workflows)
 * [Release a new Version](#Release-A-New-Version)
 * [Publishing Artifacts to GitHub Packages manually](#Publishing-Artifacts-To-Github-Packages-Manually)
 * [Licensing](#Licensing)
@@ -121,17 +124,47 @@ All three are formatted very similar.
 Each batch contains multiple tuples of a timestamp in epoch format with run length encoding and a fixed point value for each of the three space dimensions *x*, *y* and *z*.
 The fixed point value is an integer using run length encoding with three places after the comma for accelerations and rotations and two places for directions.
 
+Deserializer
+============
+
+Decodes the Cyface Binary Format back into the model classes. It reads raw binary streams (`BinaryFormatDeserializer`), phone export zip files (`ZippedPhoneDataDeserializer`) and extracted SQLite databases of the phone (`UnzippedPhoneDataDeserializer`). `DeserializerFactory` creates the correct deserializer.
+
+Module dependencies: `deserializer -> serializer -> model`. The serializer exports the Protobuf classes with `api`.
+
+Development
+===========
+
+Java 11 (source and target), Kotlin 2.1.20, Gradle 8.13, Protobuf 3.22.2 (java-lite). The serializer downloads the `.proto` files of [cyface-de/protos](https://github.com/cyface-de/protos) (`cyfaceProtosVersion` in `build.gradle`, now 2.3.0) at build time.
+
+Copy `gradle.properties.template` to `gradle.properties` and add your GitHub credentials.
+
+```bash
+./gradlew clean build                  # build all modules and run the tests
+./gradlew :libs:model:test             # tests of one module
+./gradlew :libs:deserializer:test --tests "de.cyface.deserializer.BinaryFormatDeserializerTest"   # one test class
+```
+
+`Measurement` has setters and a constructor without arguments, because Apache Flink needs them for its serialization. Use it as an immutable object.
+
+Tests: JUnit 5 (also parameterized), Hamcrest, Mockito 5. Test names follow `testMethodName_forScenario`, and the tests use the Arrange-Act-Assert pattern. The deserializer tests use binary files and SQLite phone exports in `src/test/resources/`.
+
+GitHub Workflows
+================
+
+* `gradle_build.yml` builds and tests each push and pull request to `main` and `release-*`. Pull requests from forks are skipped.
+* `gradle_publish.yml` runs on version tags: it publishes the artifacts to GitHub Packages and creates the GitHub release.
+
+Rules of the workflows (hardening of CY-6748): do not use `${{ github.ref_name }}` or other event values directly in a `run:` script, pass them through `env:`; pass secrets through `env:` of the step that needs them; use `runs-on: ubuntu-26.04`, not `ubuntu-latest`.
+
+The organization-wide cleanup in `cyface-de/production` (`.github/workflows/registry_cleanup.yml`) deletes old package versions. A version that a build file of the organization names stays.
+
 Release a new Version
 =====================
 
-See [Cyface Collector Readme](https://github.com/cyface-de/data-collector#release-a-new-version)
-
-* `version` in root `build.gradle` is automatically set by the CI
-* Just tag the release and push the tag to Github
-* The Github package is automatically published when a new version is tagged and pushed by our
-[Github Actions](https://github.com/cyface-de/serialization/actions) to
-the [Github Registry](https://github.com/cyface-de/serialization/packages)
-* The tag is automatically marked as a 'new Release' on [Github](https://github.com/cyface-de/serialization/releases)
+* The CI sets the `version` in the root `build.gradle` from the tag. Do not change it manually.
+* Create an annotated tag with a semantic version (for example `6.0.1`) on `main` and push it. The body of the tag message becomes the release notes.
+* The workflow publishes the artifacts to the [Github Registry](https://github.com/cyface-de/serialization/packages) and creates the [GitHub release](https://github.com/cyface-de/serialization/releases).
+* A tag with a suffix (for example `6.0.1-beta1`) becomes a pre-release.
 
 
 Publishing artifacts to GitHub Packages manually
@@ -139,11 +172,11 @@ Publishing artifacts to GitHub Packages manually
 
 The artifacts produced by this project are distributed via [GitHubPackages](https://github.com/features/packages).
 Before you can publish artifacts you need to rename `gradle.properties.template` to `gradle.properties` and enter your GitHub credentials.
-How to obtain these credentials is described [here](https://help.github.com/en/github/managing-packages-with-github-packages/about-github-packages#about-tokens).
+Use a personal access token (classic) with the scope `write:packages`, as described [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages).
 
 To publish a new version of an artifact you need to:
 
-1. Increase the version number of the sub-project within the `build.gradle` file
+1. Increase the version number in the root `build.gradle` file
 2. Call `./gradlew publish`
 
 This will upload a new artifact to GitHub packages with the new version.
@@ -153,7 +186,7 @@ This project uses [semantic versioning](https://semver.org/).
 Licensing
 =========
 
-Copyright 2018-2024 Cyface GmbH
+Copyright 2018-2026 Cyface GmbH
 
 This file is part of the Cyface Serialization.
 
