@@ -80,14 +80,19 @@ subprojects {
   }
 
   kotlin {
+    // Consumers with an older Kotlin compiler (android-backend: 2.0.21, tools: 2.1.20) can read
+    // the Kotlin metadata of at most one version newer. Thus, the library is compiled for Kotlin 2.1.
+    coreLibrariesVersion = "2.1.20"
     compilerOptions {
       jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+      apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+      languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
     }
   }
 
   dependencies {
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version" // there is no stdlib-jdk11
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8" // there is no stdlib-jdk11, version from `coreLibrariesVersion`
 
     // Testing Dependencies
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
