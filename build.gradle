@@ -22,7 +22,7 @@
  * @author Armin Schnabel
  */
 buildscript {
-  ext.kotlin_version = "2.1.20"
+  ext.kotlin_version = "2.4.21"
 
   repositories {
     mavenCentral()
@@ -36,8 +36,8 @@ plugins {
   id 'idea'
   // Plugin to display the Gradle task graph
   //noinspection SpellCheckingInspection
-  id 'org.barfuin.gradle.taskinfo' version '2.1.0'
-  id 'com.google.protobuf' version '0.9.4' apply false // Maybe keep in sync with `plugins` in `protos/build.gradle
+  id 'org.barfuin.gradle.taskinfo' version '2.2.1'
+  id 'com.google.protobuf' version '0.9.6' apply false // Maybe keep in sync with `plugins` in `protos/build.gradle
 }
 
 allprojects {
@@ -62,37 +62,37 @@ subprojects {
   }
 
   ext {
-    slf4jVersion = '1.7.36' // major version available but breaks `backend.LocationMatchOperatorTest`
-    commonsLangVersion = '3.12.0'
-    sqliteDriverVersion = '3.40.1.0'
-    gradleWrapperVersion = '8.13'
-    protobufVersion = '3.22.2' // Keep in sync with protobufVersion in `protos/build.gradle`
+    slf4jVersion = '2.0.20'
+    commonsLangVersion = '3.21.0'
+    sqliteDriverVersion = '3.54.1.0'
+    gradleWrapperVersion = '8.14.6'
+    protobufVersion = '3.25.9' // Keep in sync with protobufVersion in `protos/build.gradle`
     cyfaceProtosVersion = '2.3.0'
 
     // Versions of testing dependencies
-    junitVersion = '5.9.2'
-    mockitoVersion = '5.2.0'
-    hamcrestVersion = '2.2'
+    junitVersion = '5.14.4'
+    mockitoVersion = '5.24.0'
+    hamcrestVersion = '3.0'
   }
 
   wrapper {
     gradleVersion = "$gradleWrapperVersion"
   }
 
-  compileKotlin {
-    kotlinOptions {
-      jvmTarget = "11"
-    }
-  }
-  compileTestKotlin {
-    kotlinOptions {
-      jvmTarget = "11"
+  kotlin {
+    // Consumers with an older Kotlin compiler (android-backend: 2.0.21, tools: 2.1.20) can read
+    // the Kotlin metadata of at most one version newer. Thus, the library is compiled for Kotlin 2.1.
+    coreLibrariesVersion = "2.1.20"
+    compilerOptions {
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+      apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+      languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
     }
   }
 
   dependencies {
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version" // there is no stdlib-jdk11
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8" // there is no stdlib-jdk11, version from `coreLibrariesVersion`
 
     // Testing Dependencies
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
